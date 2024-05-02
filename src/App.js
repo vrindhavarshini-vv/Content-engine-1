@@ -18,7 +18,7 @@ import UserLogOrReg from "./Routes/User/UserLogOrReg";
 function App() {
   const dispatch = useDispatch();
   // const navigate = useNavigate()
-  const { adminLoginData, adminLogged } = useSelector(
+  const { adminLoginData, adminLogged,isAdmin } = useSelector(
     (state) => state.adminLogin
   );
 

@@ -7,6 +7,9 @@ const UserLogin = () => {
             password:''
         }
     )
+    const login = () =>{
+      alert('logged')
+    }
   return (
     <div>
       <h2>User Login </h2>
@@ -24,6 +27,11 @@ const UserLogin = () => {
         </label>
         <input type='password' placeholder='Enter you email' 
         onKeyUp={(e)=>setUserLogin({...userLogin,password:e.target.value})}/>
+      </div>
+      <div>
+        <button type='button' onClick={login}>
+          Login
+        </button>
       </div>
     </div>
   )
