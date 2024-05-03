@@ -23,7 +23,7 @@ const Login = () => {
           const user = userCredential.user;
           localStorage.setItem("token", user.accessToken);
           
-          if(user.uid == 'YiOGcrvd81O7acvcu7T1qDpqPBN2'){
+          if(user.uid == 'B19MRhx5DfYaNdeFWCht7NjvmMF3'){
             dispatch(setAdminLoginData(user));
             dispatch(setAdminLogged(true));
             dispatch(setIsAdmin(true))

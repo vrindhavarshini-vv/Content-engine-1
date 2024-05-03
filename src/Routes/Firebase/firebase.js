@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app";
 import {getFirestore} from 'firebase/firestore'
 import {getAuth} from 'firebase/auth'
 const firebaseConfig = {
-  apiKey: "AIzaSyCGY2Jyt404sq8pJNG9JtPyYzdSVk3Iudg",
-  authDomain: "content-engine-8aac0.firebaseapp.com",
-  projectId: "content-engine-8aac0",
-  storageBucket: "content-engine-8aac0.appspot.com",
-  messagingSenderId: "414210017786",
-  appId: "1:414210017786:web:a9eb3b14f18a9cb5f23c43"
+  apiKey: "AIzaSyBgRvIW4YahLh1t9as_ItRsW_skdjzSw_s",
+  authDomain: "ai-generate-content-167af.firebaseapp.com",
+  projectId: "ai-generate-content-167af",
+  storageBucket: "ai-generate-content-167af.appspot.com",
+  messagingSenderId: "599434954092",
+  appId: "1:599434954092:web:9a4ef579866897f063df49"
 };
 
 // Initialize Firebase
