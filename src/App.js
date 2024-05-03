@@ -1,19 +1,16 @@
-import Login from "./Routes/Admin/Login";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./Routes";
-import RegUser from "./Routes/User/Register";
-import Admin from "./Routes/Admin/AdminPage";
-import { auth } from "./Routes/Firebase/firebase";
+import { auth } from "./Pages/Firebase/firebase";
 import {
   setAdminLoginData,
-  setAdminLogged,
-} from "./Routes/Store/Slice/adminLogin";
+  setAdminLogged
+} from "./Routes/Slices/adminLogin";
 import { onAuthStateChanged } from "firebase/auth";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
-import UserPage from "./Routes/User/UserPage";
-import UserLogin from "./Routes/User/UserLogin";
-import UserLogOrReg from "./Routes/User/UserLogOrReg";
+import Login from "./Pages/Login/Login";
+import Dashboard from "./Pages/Generate/Dashboard";
+
+
 
 function App() {
   const dispatch = useDispatch();
@@ -41,13 +38,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/Admin/login" element={<Login />} />
-        {adminLogged ? <Route path="/admin" element={<Admin />} /> : null}
-        <Route path="/user/logOrReg" element={<UserLogOrReg/>}/>
-        <Route path="/user/register" element={<RegUser />} />
-        <Route path="/user/login" element={<UserLogin/>}/>
-        <Route path="/userpage" element={<UserPage />} />
+        <Route path="/" element={<Login/>} />
+        <Route path="/dashboard" element ={<Dashboard/>}/>
         
       </Routes>
     </BrowserRouter>
