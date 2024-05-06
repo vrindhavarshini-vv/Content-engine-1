@@ -1,26 +1,48 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { auth } from "./Pages/Firebase/firebase";
+import {
+  setAdminLoginData,
+  setAdminLogged
+} from "./Routes/Slices/adminLogin";
+import { onAuthStateChanged } from "firebase/auth";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import Login from "./Pages/Login/Login";
+import Dashboard from "./Pages/Generate/Dashboard";
+
 
 
 function App() {
+  const dispatch = useDispatch();
+  // const navigate = useNavigate()
+  const { adminLoginData, adminLogged,isAdmin } = useSelector(
+    (state) => state.adminLogin
+  );
+
+  useEffect(() => {
+    if (!adminLogged) {
+      if (localStorage.getItem("token")) {
+        checkLoginAuth();
+      }
+    }
+  }, []);
+
+  const checkLoginAuth = async () => {
+    await onAuthStateChanged(auth, (currentUser) => {
+      localStorage.setItem("token", currentUser.accessToken);
+      dispatch(setAdminLoginData(currentUser));
+      dispatch(setAdminLogged(true));
+    });
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-       
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login/>} />
+        <Route path="/dashboard" element ={<Dashboard/>}/>
+        
+      </Routes>
+    </BrowserRouter>
   );
 }
 
