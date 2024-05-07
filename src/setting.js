@@ -574,165 +574,17 @@
 //   }
   
 
-// import React, { useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { db } from "./Pages/Firebase/firebase";
-// import { addDoc, collection, getDocs } from "firebase/firestore";
-// import { useSelector } from "react-redux";
-
-// export default function Categories() {
-//   const { adminLoginData } = useSelector((state) => state.adminLogin);
-//   const [categories, setCategories] = useState([]);
-//   const [types, setTypes] = useState([]);
-//   const [selectedCategory, setSelectedCategory] = useState(""); // State to store selected category
-//   const [categoryType, setCategoryType] = useState("");
-//   const [categoryName, setCategoryName] = useState(''); // State for new category name
-//   const [showModal, setShowModal] = useState(false); // State to control modal visibility
-
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     fetchCategories();
-//     fetchTypes();
-//   }, []);
-
-//   const fetchCategories = async () => {
-//     try {
-//       const categoriesSnapshot = await getDocs(collection(db, "categories"));
-//       const categoriesList = categoriesSnapshot.docs.map((doc) => ({
-//         id: doc.id,
-//         name: doc.data().name,
-//       }));
-//       setCategories(categoriesList);
-//     } catch (error) {
-//       console.error("Error fetching categories: ", error);
-//     }
-//   };
-
-//   const fetchTypes = async () => {
-//     try {
-//       const typesSnapshot = await getDocs(collection(db, "types"));
-//       const typesList = typesSnapshot.docs.map((doc) => ({
-//         id: doc.id,
-//         name: doc.data().name,
-//         categoryId: doc.data().categoryId,
-//       }));
-//       setTypes(typesList);
-//     } catch (error) {
-//       console.error("Error fetching types: ", error);
-//     }
-//   };
-
-//   const openModal = () => {
-//     setShowModal(true);
-//   };
-
-//   const closeModal = () => {
-//     setShowModal(false);
-//   };
-
-//   const handleCategorySubmit = () => {
-//     if (categoryName.trim() === '') {
-//       alert("Please enter a category name");
-//       return;
-//     }
-
-//     setCategories([...categories, { id: categoryName, name: categoryName }]);
-//     setSelectedCategory(categoryName);
-//     setCategoryName(''); // Clear category name input
-//     closeModal(); // Close the modal
-//   };
-
-//   const handleCategoryTypeChange = (e) => {
-//     setCategoryType(e.target.value);
-//   };
-
-//   const createCategory = async () => {
-//     if (!selectedCategory) {
-//       alert("Please select a category");
-//       return;
-//     }
-
-//     try {
-//       const typeData = {
-//         name: categoryType,
-//         categoryId: selectedCategory,
-//         uid: adminLoginData.uid,
-//       };
-
-//       await addDoc(collection(db, "types"), typeData);
-
-//       setCategoryType(""); // Clear category type input
-
-//       alert("Category and Type added successfully!");
-//       fetchTypes(); // Refresh types list
-//     } catch (error) {
-//       console.error("Error adding category and type: ", error);
-//       alert("Failed to add category and type. Please try again.");
-//     }
-//   };
-
-//   return (
-//     <div className="form">
-//       <h1>Create Categories</h1>
-
-//       <button onClick={openModal}>Add New Category</button>
-
-//       <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
-//         <option value="">Select a Category</option>
-//         {categories.map((category) => (
-//           <option key={category.id} value={category.id}>
-//             {category.name}
-//           </option>
-//         ))}
-//       </select>
-
-//       {/* Modal for entering new category name */}
-//       {showModal && (
-//         <div className="modal">
-//           <div className="modal-content">
-//             <span className="close" onClick={closeModal}>&times;</span>
-//             <h2>Enter Category Name</h2>
-//             <input
-//               type="text"
-//               value={categoryName}
-//               onChange={(e) => setCategoryName(e.target.value)}
-//               placeholder="Category Name"
-//             />
-//             <button onClick={handleCategorySubmit}>Submit</button>
-//           </div>
-//         </div>
-//       )}
-
-//       {/* Render category type input and button */}
-//       {selectedCategory && (
-//         <div className="category-type-container">
-//           <label htmlFor="categoryType">Category Type:</label>
-//           <input
-//             type="text"
-//             id="categoryType"
-//             value={categoryType}
-//             onChange={handleCategoryTypeChange}
-//             placeholder="Enter category type"
-//           />
-      
-//           <button onClick={createCategory}>Add Category & Type</button>
-//         </div>
-//       )}
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { setCategories,setTypes,setCategoryName,setShowModal,setSelectedCategory ,setCategoryType} from "./Routes/Slices/settingsLogin";
 import { db } from "./Pages/Firebase/firebase";
 import { addDoc, collection, getDocs } from "firebase/firestore";
-import { useSelector } from "react-redux";
 
 export default function Categories() {
+  const dispatch = useDispatch();
   const { adminLoginData } = useSelector((state) => state.adminLogin);
-  const [categories, setCategories] = useState([]);
-  const [types, setTypes] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(""); // State to store selected category
-  const [categoryType, setCategoryType] = useState("");
-  const [categoryName, setCategoryName] = useState(''); // State for new category name
-  const [showModal, setShowModal] = useState(false); // State to control modal visibility
+  const { categories, types, selectedCategory, categoryName, categoryType, showModal } = useSelector((state) => state.settings);
 
   const navigate = useNavigate();
 
@@ -743,12 +595,12 @@ export default function Categories() {
 
   const fetchCategories = async () => {
     try {
-      const categoriesSnapshot = await getDocs(collection(db, "categories"));
+      const categoriesSnapshot = await getDocs(collection(db, "category"));
       const categoriesList = categoriesSnapshot.docs.map((doc) => ({
         id: doc.id,
         name: doc.data().name,
       }));
-      setCategories(categoriesList);
+      dispatch(setCategories(categoriesList));
     } catch (error) {
       console.error("Error fetching categories: ", error);
     }
@@ -756,24 +608,24 @@ export default function Categories() {
 
   const fetchTypes = async () => {
     try {
-      const typesSnapshot = await getDocs(collection(db, "types"));
+      const typesSnapshot = await getDocs(collection(db, "type"));
       const typesList = typesSnapshot.docs.map((doc) => ({
         id: doc.id,
         name: doc.data().name,
         categoryId: doc.data().categoryId,
       }));
-      setTypes(typesList);
+      dispatch(setTypes(typesList));
     } catch (error) {
       console.error("Error fetching types: ", error);
     }
   };
 
   const openModal = () => {
-    setShowModal(true);
+    dispatch(setShowModal(true));
   };
 
   const closeModal = () => {
-    setShowModal(false);
+    dispatch(setShowModal(false));
   };
 
   const handleCategorySubmit = () => {
@@ -782,14 +634,15 @@ export default function Categories() {
       return;
     }
 
-    setCategories([...categories, { id: categoryName, name: categoryName }]);
-    setSelectedCategory(categoryName);
-    setCategoryName(''); // Clear category name input
+    // Dispatch action to update categories in Redux store
+    dispatch(setCategories([...categories, { id: categoryName, name: categoryName }]));
+    dispatch(setSelectedCategory(categoryName));
+    dispatch(setCategoryName('')); // Clear category name input
     closeModal(); // Close the modal
   };
 
   const handleCategoryTypeChange = (e) => {
-    setCategoryType(e.target.value);
+    dispatch(setCategoryType(e.target.value));
   };
 
   const createCategory = async () => {
@@ -805,9 +658,9 @@ export default function Categories() {
         uid: adminLoginData.uid,
       };
 
-      await addDoc(collection(db, "types"), typeData);
+      await addDoc(collection(db, "type"), typeData);
 
-      setCategoryType(""); // Clear category type input
+      dispatch(setCategoryType("")); // Clear category type input
 
       alert("Category and Type added successfully!");
       fetchTypes(); // Refresh types list
@@ -823,10 +676,11 @@ export default function Categories() {
 
       <button onClick={openModal}>Add New Category</button>
 
-      <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+      <select value={selectedCategory} onChange={(e) => dispatch(setSelectedCategory(e.target.value))}>
         <option value="">Select a Category</option>
         {categories.map((category) => (
           <option key={category.id} value={category.id}>
+          {console.log("cat.Id",category.id)}
             {category.name}
           </option>
         ))}
@@ -841,7 +695,7 @@ export default function Categories() {
             <input
               type="text"
               value={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
+              onChange={(e) => dispatch(setCategoryName(e.target.value))}
               placeholder="Category Name"
             />
             <button onClick={handleCategorySubmit}>Submit</button>
@@ -873,9 +727,9 @@ export default function Categories() {
       )}
 
       {/* Display types list */}
-      {types.length > 0 && selectedCategory && (
+      {types.length > 0 && (
         <div>
-          <h2>Types List for {selectedCategory}:</h2>
+          <h2>Types List:</h2>
           <table border={1}>
             <thead>
               <tr>
@@ -885,15 +739,13 @@ export default function Categories() {
               </tr>
             </thead>
             <tbody>
-              {types
-                .filter((type) => type.categoryId === selectedCategory)
-                .map((type, index) => (
-                  <tr key={type.id}>
-                    <td>{index + 1}</td>
-                    <td>{type.name}</td>
-                    <td>{type.categoryId}</td>
-                  </tr>
-                ))}
+              {types.map((type, index) => (
+                <tr key={type.id}>
+                  <td>{index + 1}</td>
+                  <td>{type.name}</td>
+                  <td>{type.categoryId}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -907,7 +759,7 @@ export default function Categories() {
             type="text"
             id="categoryType"
             value={categoryType}
-            onChange={handleCategoryTypeChange}
+            onChange={(e) => handleCategoryTypeChange(e)}
             placeholder="Enter category type"
           />
           <button onClick={createCategory}>Add Category & Type</button>
