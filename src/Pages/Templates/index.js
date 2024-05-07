@@ -91,17 +91,21 @@
 // export default Template;
 
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect} from "react";
 import { Card } from "react-bootstrap";
 import { db } from "../Firebase/firebase";
 import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { collection, getDocs } from "firebase/firestore";
 import "./index.css";
+import { useSelector,useDispatch } from "react-redux";
+import { setFbCategory,setFbType,setSelectedCategory } from "../../Routes/Slices/templateSlice";
 
 const Template = () => {
-  const [fbCategory, setFbCategory] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [fbType, setFbType] = useState([]);
+  const dispatch = useDispatch()
+  const {fbCategory,fbType,selectedCategory} = useSelector(state=>state.template)
+  // const [fbCategory, setFbCategory] = useState([]);
+  // const [selectedCategory, setSelectedCategory] = useState(null);
+  // const [fbType, setFbType] = useState([]);
   
   const fetchCategory = async () => {
     const querySnapshot = await getDocs(collection(db, "category"));
@@ -109,7 +113,7 @@ const Template = () => {
       id: doc.id,
       ...doc.data()
     }));
-    setFbCategory(categories);
+    dispatch(setFbCategory(categories));
   };
 
   useEffect(() => {
@@ -117,13 +121,13 @@ const Template = () => {
   }, []);
 
   const handleCategoryClick = async (category) => {
-    setSelectedCategory(category);
+    dispatch(setSelectedCategory(category));
     const querySnapshot = await getDocs(collection(db, "type"));
     const types = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })).filter(type => type.categoryId === category.id);
-    setFbType(types);
+    dispatch(setFbType(types));
   };
 
   return (
@@ -160,7 +164,7 @@ const Template = () => {
               data-index={i}
               style={{ width: "10rem" }}
             >
-              <Card.Body className="wid">
+              <Card.Body >
                 <Card.Subtitle className="mb-2 text-muted">
                   Select Type
                 </Card.Subtitle>
