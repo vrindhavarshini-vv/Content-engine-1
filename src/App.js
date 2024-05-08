@@ -43,6 +43,7 @@ function App() {
         <Route path="/dashboard" element ={<Dashboard/>}/>
         <Route path="/user/setting" element ={<Categories/>}/>
         
+        
       </Routes>
     </BrowserRouter>
   );
