@@ -9,7 +9,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import Login from "./Pages/Login/Login";
 import Dashboard from "./Pages/Generate/Dashboard";
-import Categories from "./setting";
+import Categories from "./Pages/Settings/setting";
 
 
 
