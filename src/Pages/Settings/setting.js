@@ -16,6 +16,7 @@ import {
   getDocs,
   updateDoc,
   doc,
+  deleteDoc
 } from "firebase/firestore";
 
 export default function Categories() {
@@ -58,6 +59,7 @@ export default function Categories() {
         id: doc.id,
         name: doc.data().type,
         categoryId: doc.data().categoryId,
+        typeId:doc.data().id
       }));
       dispatch(setTypes(typesList));
     } catch (error) {
@@ -129,9 +131,16 @@ export default function Categories() {
         type: categoryType,
         categoryId: selectedCategory,
         uid: adminLoginData.uid,
+        
       };
 
-      await addDoc(collection(db, "type"), typeData);
+      const typeRef=await addDoc(collection(db, "type"), typeData);
+      const typeId = typeRef.id;
+
+      dispatch(setTypes([
+        ...types,
+        { id: typeId, type: categoryType, categoryId: selectedCategory }
+      ]));
 
       dispatch(setCategoryType(""));
       alert("Category Type added successfully!");
@@ -159,6 +168,21 @@ export default function Categories() {
       (category) => category.id === categoryId
     );
     return selectedCategory ? selectedCategory.categoryName : "";
+  };
+  
+  const handleDeleteType = async (typeId) => {
+    try {
+      // Delete the type document from Firestore
+      await deleteDoc(doc(db, 'type', typeId));
+
+      // Update Redux state to remove the deleted type
+      dispatch(setTypes(types.filter((type) => type.id !== typeId)));
+
+      alert('Type deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting type: ', error);
+      alert('Failed to delete type. Please try again.');
+    }
   };
 
   return (
@@ -214,6 +238,9 @@ export default function Categories() {
                   <td>{i + 1}</td>
                   <td>{type.name}</td>
                   <td>{getCategoryNameById(type.categoryId)}</td>
+                  <td>
+                    <button onClick={() => handleDeleteType(type.id)}>Delete</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
