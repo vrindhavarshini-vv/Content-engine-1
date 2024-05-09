@@ -1,134 +1,65 @@
-// import React, { useEffect, useState } from "react";
-// import { Card } from "react-bootstrap";
-// import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
-// import { db } from "../Firebase/firebase";
-// import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-// import "./index.css";
-// import { Link } from "react-router-dom";
-// import { type } from "@testing-library/user-event/dist/type";
-
-// const Template = () => {
-//   const [fbCatogory, setFbCatogory] = useState([]);
-//   const [showType, setShowType] = useState(false);
-//   const [fbType, setFbType] = useState([]);
-  
-
-//   const getCategory = async () => {
-//     const querySnapShot = await getDocs(collection(db, "category"));
-//     let categoryDate = [];
-//     querySnapShot.forEach((doc) => {
-//       categoryDate.push(doc.data());
-//     });
-//     setFbCatogory(categoryDate);
-//   };
-//   const getType = async () => {
-//     const colRef = await getDocs(collection(db, "type"));
-//     let types = [];
-//     colRef.forEach((doc) => {
-//       types.push(doc.data());
-//     });
-//     setFbType(types);
-//   };
-//   const selecCategory = (selectedCategory) => {
-//     getType()
-//     const filteredTypes = fbType.filter(type => type.categoryId === selectedCategory.categoryId);
-//     setFbType(filteredTypes);
-//     setShowType(true);
-//     console.log(fbType)
-//   };
-
-//   useEffect(() => {
-//     getCategory();
-//   }, []);
-
-//   useEffect(() => {
-//     if (!showType) {
-//       // Clear fbType when a new category is selected
-//       setFbType([]);
-//     }
-//   }, [showType]);
-//   return (
-//     <>
-//       <h2>Welcome to template page</h2>
-
-//       <h5>Selece Category</h5>
-
-//       <div typeof="button">
-//         {fbCatogory.map((each, i) => (
-//           <Card
-//             className="cards"
-//             onClick={() => selecCategory(each)}
-//             key={i}
-//             style={{ width: "10rem" }}
-//           >
-//             <Card.Body>
-//               <Card.Subtitle className="mb-2 text-muted">
-//                 Category
-//               </Card.Subtitle>
-//               <Card.Title>{each.category}</Card.Title>
-//             </Card.Body>
-//           </Card>
-//         ))}
-//       </div>
-//         {showType && fbType.map((each, i) => (
-//         <Card
-//           className="cardss"
-//           key={i}
-//           data-index={i}
-//           style={{ width: "10rem" }}
-//         >
-//           <Card.Body className="wid">
-//             <Card.Subtitle className="mb-2 text-muted">
-//               Select Type
-//             </Card.Subtitle>
-//             <Card.Title>{each.type}</Card.Title>
-//           </Card.Body>
-//         </Card>
-//       ))}
-//     </>
-//   );
-// };
-// export default Template;
-
-
-import React, { useEffect} from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "react-bootstrap";
 import { db } from "../Firebase/firebase";
 import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import { collection, getDocs } from "firebase/firestore";
 import "./index.css";
-import { useSelector,useDispatch } from "react-redux";
-import { setFbCategory,setFbType,setSelectedCategory } from "../../Routes/Slices/templateSlice";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  setFbCategory,
+  setFbType,
+  setSelectedCategory,
+} from "../../Routes/Slices/templateSlice";
 
 const Template = () => {
-  const dispatch = useDispatch()
-  const {fbCategory,fbType,selectedCategory} = useSelector(state=>state.template)
-  // const [fbCategory, setFbCategory] = useState([]);
-  // const [selectedCategory, setSelectedCategory] = useState(null);
-  // const [fbType, setFbType] = useState([]);
-  
+  const dispatch = useDispatch();
+  const { fbCategory, fbType, selectedCategory } = useSelector(
+    (state) => state.template
+  );
+  const [categoryAndTypes, setCategoryAndTypes] = useState([]);
+
   const fetchCategory = async () => {
     const querySnapshot = await getDocs(collection(db, "category"));
-    const categories = querySnapshot.docs.map(doc => ({
-      id: doc.id,
+    const categories = querySnapshot.docs.map((doc) => ({
       ...doc.data()
     }));
     dispatch(setFbCategory(categories));
   };
+  // console.log(fbCategory)
+  const fetchTypes = async () => {
+    const querySnapShot = await getDocs(collection(db, "type"));
+    const types = querySnapShot.docs.map((doc) => ({
+      ...doc.data()
+    }));
+    dispatch(setFbType(types));
+  };
+
+  const fetchCategoryWithType = () => {
+    const categoryTypes = fbCategory.map((category) => {
+      const typesForCategory = fbType
+        .filter((type) => type.categoryId === category.categoryId)
+        .map((doc) => doc.type);
+      return { category, types: typesForCategory };
+    });
+    setCategoryAndTypes(categoryTypes);
+    // console.log(categoryAndTypes)
+  };
+  console.log(categoryAndTypes);
+
 
   useEffect(() => {
     fetchCategory();
-  }, []);
+    fetchTypes();
+    fetchCategoryWithType();
+  },[]);
 
-  const handleCategoryClick = async (category) => {
-    dispatch(setSelectedCategory(category));
-    const querySnapshot = await getDocs(collection(db, "type"));
-    const types = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })).filter(type => type.categoryId === category.id);
-    dispatch(setFbType(types));
+
+  const handleCategoryClick = async (eachCategory) => {
+    dispatch(setSelectedCategory(eachCategory));
+    console.log('selectedCategory:', eachCategory);
   };
+
+
 
   return (
     <>
@@ -137,7 +68,7 @@ const Template = () => {
       <h5>Select Category</h5>
 
       <div typeof="button">
-        {fbCategory.map((category, i) => (
+        {categoryAndTypes.map((category, i) => (
           <Card
             className="cards"
             onClick={() => handleCategoryClick(category)}
@@ -148,32 +79,34 @@ const Template = () => {
               <Card.Subtitle className="mb-2 text-muted">
                 Category
               </Card.Subtitle>
-              <Card.Title>{category.category}</Card.Title>
+              <Card.Title>{category.category.categoryName}</Card.Title>
             </Card.Body>
           </Card>
         ))}
       </div>
 
       {selectedCategory && (
-        <div>
-          <h5>Types for {selectedCategory.category}</h5>
-          {fbType.map((type, i) => (
-            <Card
-              className="cardss"
-              key={i}
-              data-index={i}
-              style={{ width: "10rem" }}
-            >
-              <Card.Body >
-                <Card.Subtitle className="mb-2 text-muted">
-                  Select Type
-                </Card.Subtitle>
-                <Card.Title>{type.type}</Card.Title>
-              </Card.Body>
-            </Card>
-          ))}
-        </div>
-      )}
+  <div>
+    <h5>Types for {selectedCategory.category.categoryName}</h5>
+    {selectedCategory.types.map((type, i) => (
+      <Card
+        className="cardss"
+        key={i}
+        data-index={i}
+        style={{ width: "10rem" }}
+      >
+        <Card.Body>
+          <Card.Subtitle className="mb-2 text-muted">
+            Select Type
+          </Card.Subtitle>
+          <Card.Title>{type}</Card.Title>
+        </Card.Body>
+      </Card>
+    ))}
+  </div>
+)}
+
+      {/* <h5>{JSON.stringify(categoryAndTypes)}</h5> */}
     </>
   );
 };

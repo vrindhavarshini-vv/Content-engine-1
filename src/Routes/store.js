@@ -5,6 +5,6 @@ import templateSlice from "./Slices/templateSlice";
 export default configureStore({
   reducer: {
     adminLogin: AdminLogin,
-    template : templateSlice
+    template: templateSlice,
   },
 });
