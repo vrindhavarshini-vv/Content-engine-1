@@ -33,7 +33,7 @@ const Login = () => {
             dispatch(setIsAdmin(true));
             alert("Admin login successfull!");
             navigate("/dashboard");
-          } else {
+          } else {  
             alert("Admin purpose only");
           }
         })
