@@ -143,6 +143,7 @@ const Template = () => {
       </div>
 
       {selectedCategory && (
+
         <div>
           <h5>Types for {selectedCategory.category.categoryName}</h5>
           {selectedCategory.types.map((type, i) => (
@@ -170,6 +171,7 @@ const Template = () => {
           <h6>{selectTemplate.map(doc=>doc.type.templates.map(temp=>temp.template))}</h6>
         </div>
       )}
+
     </>
   );
 };
