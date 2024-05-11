@@ -37,10 +37,13 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+
         <Route path="/" element={<Login/>} />
-        <Route path="/dashboard" element ={<Dashboard/>}/>
         <Route path="/user/setting" element ={<Categories/>}/>
-        <Route path="/template" element={<Template />} />
+       
+        {adminLogged ? <Route path="/dashboard" element={<Dashboard />} />:null}
+        {adminLogged ? <Route path="/template" element={<Template />} />:null}
+
       </Routes>
     </BrowserRouter>
   );
