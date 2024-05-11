@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { auth } from "../Firebase/firebase";
-import { useNavigate } from "react-router-dom";
+import { useNavigaate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import {
   setAdminLoginData,
@@ -14,89 +14,10 @@ const Login = () => {
   const dispatch = useDispatch();
 
   const [regLogin, setRegLogin] = useState({
-    email: "",
+    email: "", 
     password: "",
-  });
-//   const checkAdmin = async () => {
-//     if (regLogin.email === "" || regLogin.password === "") {
-//       alert("Please fill all fields");
-//     } else {
-//       await signInWithEmailAndPassword(auth, regLogin.email, regLogin.password)
-//         .then((userCredential) => {
-//           // Signed in
-//           const user = userCredential.user;
-//           localStorage.setItem("token", user.accessToken);
-
-//           if (user.uid == "B19MRhx5DfYaNdeFWCht7NjvmMF3") {
-//             dispatch(setAdminLoginData(user));
-//             dispatch(setAdminLogged(true));
-//             dispatch(setIsAdmin(true));
-//             alert("Admin login successfull!");
-//             navigate("/dashboard");
-//           } else {
-//             alert("Admin purpose only");
-//           }
-//         })
-//         .catch((error) => {
-//           const errorCode = error.code;
-//           const errorMessage = error.message;
-//           console.log(errorCode, errorMessage);
-//           alert("Admin login unsuccessfull!");
-//         });
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <h4>{JSON.stringify(regLogin)}</h4>
-//       <form>
-//         <h2>Admin Page</h2>
-//         <div>
-//           <label>Admin email:</label>
-//           <input
-//             placeholder="Enter email"
-//             type="email"
-//             onKeyUp={(e) => setRegLogin({ ...regLogin, email: e.target.value })}
-//           />
-//         </div>
-//         <div>
-//           <label>Password:</label>
-//           <input
-//             placeholder="Enter password"
-//             type="password"
-//             onKeyUp={(e) =>
-//               setRegLogin({ ...regLogin, password: e.target.value })
-//             }
-//           />
-//         </div>
-//         <div>
-//           <button type="button" onClick={checkAdmin}>
-//             Admin Login
-//           </button>
-//         </div>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default Login;
-// // 
-const checkUserRole = async () => {
-  if (regLogin.email === "" || regLogin.password === "") {
-    alert("Please fill all fields");
-  } else {
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        regLogin.email,
-        regLogin.password
-      );
-
-      const user = userCredential.user;
-      const uid = user.uid;
-
-      // Fetch user data from Firestore based on UID
-      const userDocRef = doc(db, "users", uid);
+  })
+l
       const userDocSnapshot = await getDoc(userDocRef);
 
       if (userDocSnapshot.exists()) {
@@ -108,7 +29,7 @@ const checkUserRole = async () => {
           dispatch(setAdminLogged(true));
           dispatch(setIsAdmin(true));
           alert("Admin login successful!");
-          navigate("/dashboard");
+          navigat*--63*96e("/dashboard");
         } else {
           alert("You do not have admin privileges.");
         }

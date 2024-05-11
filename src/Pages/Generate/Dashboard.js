@@ -6,7 +6,7 @@ import { setCategoryList,setTypesList,setSelectedCategory,setIsPopUp,setIsCatego
 import { useDispatch,useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import './Dashboard.css';
+ import './Dashboard.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from "axios";
 
