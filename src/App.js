@@ -6,13 +6,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import Login from "./Pages/Login/Login";
 import Dashboard from "./Pages/Generate/Dashboard";
-<<<<<<< HEAD
 import Categories from "./Pages/Settings/setting";
 
 
-=======
 import Template from "./Pages/Templates/index";
->>>>>>> 51e6957adb71e9ad740b8387a2b0b991f7fdf49f
 
 function App() {
   const dispatch = useDispatch();
@@ -40,17 +37,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-<<<<<<< HEAD
         <Route path="/" element={<Login/>} />
         <Route path="/dashboard" element ={<Dashboard/>}/>
         <Route path="/user/setting" element ={<Categories/>}/>
-        
-        
-=======
-        <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/template" element={<Template />} />
->>>>>>> 51e6957adb71e9ad740b8387a2b0b991f7fdf49f
       </Routes>
     </BrowserRouter>
   );

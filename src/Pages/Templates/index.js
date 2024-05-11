@@ -93,7 +93,7 @@ const Template = () => {
         className="cardss"
         key={i}
         data-index={i}
-        style={{ width: "10rem" }}
+        style={{ width: "20rem" }}
       >
         <Card.Body>
           <Card.Subtitle className="mb-2 text-muted">

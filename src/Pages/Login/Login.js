@@ -27,7 +27,7 @@ const Login = () => {
           const user = userCredential.user;
           localStorage.setItem("token", user.accessToken);
 
-          if (user.uid == "B19MRhx5DfYaNdeFWCht7NjvmMF3") {
+          if (regLogin.email == user.email) {
             dispatch(setAdminLoginData(user));
             dispatch(setAdminLogged(true));
             dispatch(setIsAdmin(true));
