@@ -9,7 +9,7 @@ import {
 } from "../../Routes/Slices/adminLogin";
 import { useDispatch } from "react-redux";
 
-const Login = () => {
+const Login = async() => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -29,21 +29,21 @@ l
           dispatch(setAdminLogged(true));
           dispatch(setIsAdmin(true));
           alert("Admin login successful!");
-          navigat*--63*96e("/dashboard");
+          navigate("/dashboard");
         } else {
           alert("You do not have admin privileges.");
         }
       } else {
         alert("User data not found.");
       }
-    } catch (error) {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.error(errorCode, errorMessage);
-      alert("Login unsuccessful. Please try again.");
-    }
-  }
-};
+//     } catch (error) {
+//       const errorCode = error.code;
+//       const errorMessage = error.message;
+//       console.error(errorCode, errorMessage);
+//       alert("Login unsuccessful. Please try again.");
+//     }
+//   }
+// };
 return (
       <div>
         <h4>{JSON.stringify(regLogin)}</h4>
