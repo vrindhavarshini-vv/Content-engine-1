@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card } from "react-bootstrap";
 import { db } from "../Firebase/firebase";
 import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, doc, getDocs } from "firebase/firestore";
 import "./index.css";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -18,8 +18,8 @@ const Template = () => {
   );
   const [categoryAndTypes, setCategoryAndTypes] = useState([]);
   const [fbGeneratedDatas, setFbGeneratedDatas] = useState([]);
-  const [selectTemplate, setSelectedTemplate] = useState([]);
-  const [newData,setNewData] = useState([])
+  const [selectTemplate, setSelectedTemplate] = useState();
+  const [newData, setNewData] = useState([]);
 
   const fetchCategory = async () => {
     const querySnapshot = await getDocs(collection(db, "category"));
@@ -55,23 +55,31 @@ const Template = () => {
       return { category, types: typesForCategory };
     });
     setCategoryAndTypes(categoryTypes);
-    console.log(categoryAndTypes)
+    console.log(categoryAndTypes);
   };
   // console.log(categoryAndTypes);
 
-  const templateInsideTypes = ()=>{
-    const cat = fbCategory.map(category=>{
-      const typ = fbType.find(type=>type.categoryId === category.categoryId)
-      const temp = fbGeneratedDatas.find(data=>data.typeId === typ.typeId)
-      return{
-        category,
-        types:{type: typ?.type,
-          template: temp ? temp.templates : []}
-      }
-    })
-    setNewData(cat)
-  }
-  console.log('category with type with templates',newData)
+  const templateInsideTypes = () => {
+    const cat = fbCategory.map((category) => {
+      const typesForCategory = fbType
+        .filter((type) => type.categoryId === category.categoryId)
+        .map((type) => {
+          const templatesForType = fbGeneratedDatas.filter(
+            (data) => data.typeId === type.typeId
+          );
+          return {
+            type: type.type,
+            templates: templatesForType.map((template) => ({
+              template: template.templates,
+            })),
+          };
+        });
+      return { category, types: typesForCategory };
+    });
+    setNewData(cat);
+  };
+
+  // console.log("category with type with templates", newData);
   // const output = a.map(itemA => {
   //   // Find the matching element in array 'b'
   //   const matchB = b.find(itemB => itemB.name === itemA.name);
@@ -96,6 +104,19 @@ const Template = () => {
     dispatch(setSelectedCategory(eachCategory));
     console.log("selectedCategory:", eachCategory);
   };
+  const handleTypeClick = (clickType) => {
+    const selectedTemplates = newData.flatMap((user) => {
+      return user.types
+        .filter((type) => type.type === clickType)
+        .map((type) => ({
+          type,
+        }));
+    });
+
+    setSelectedTemplate(selectedTemplates);
+  };
+  console.log(newData)
+  console.log("select template", selectTemplate);
 
   return (
     <>
@@ -128,17 +149,25 @@ const Template = () => {
             <Card
               className="cardss"
               key={i}
+              onClick={() => handleTypeClick(type)}
               data-index={i}
-              style={{ width: "20rem" }}
+              style={{ width: "20.8rem" }}
             >
               <Card.Body>
                 <Card.Subtitle className="mb-2 text-muted">
-                  Select Type
+                  <h6>Type for {selectedCategory.category.categoryName}</h6>
                 </Card.Subtitle>
                 <Card.Title>{type}</Card.Title>
               </Card.Body>
             </Card>
           ))}
+        </div>
+      )}
+
+      {selectTemplate && (
+        <div>
+          <h5>Select Template {selectTemplate.map(doc=>doc.type.type)}</h5>
+          <h6>{selectTemplate.map(doc=>doc.type.templates.map(temp=>temp.template))}</h6>
         </div>
       )}
     </>
