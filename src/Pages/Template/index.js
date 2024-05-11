@@ -9,17 +9,19 @@ import {
   setFbCategory,
   setFbType,
   setSelectedCategory,
+  setCategoryAndTypes
 } from "../../Routes/Slices/templateSlice";
+import ContentEditable from "react-contenteditable";
 
 const Template = () => {
   const dispatch = useDispatch();
-  const { fbCategory, fbType, selectedCategory } = useSelector(
+  const { fbCategory, fbType, selectedCategory,categoryAndTypes } = useSelector(
     (state) => state.template
   );
-  const [categoryAndTypes, setCategoryAndTypes] = useState([]);
   const [fbGeneratedDatas, setFbGeneratedDatas] = useState([]);
   const [selectTemplate, setSelectedTemplate] = useState();
   const [newData, setNewData] = useState([]);
+  const [content,setContent] = useState('')
 
   const fetchCategory = async () => {
     const querySnapshot = await getDocs(collection(db, "category"));
@@ -54,9 +56,9 @@ const Template = () => {
         .map((doc) => doc.type);
       return { category, types: typesForCategory };
     });
-    setCategoryAndTypes(categoryTypes);
-    console.log(categoryAndTypes);
+    dispatch(setCategoryAndTypes(categoryTypes));
   };
+  console.log(categoryAndTypes)
   // console.log(categoryAndTypes);
 
   const templateInsideTypes = () => {
@@ -78,19 +80,6 @@ const Template = () => {
     });
     setNewData(cat);
   };
-
-  // console.log("category with type with templates", newData);
-  // const output = a.map(itemA => {
-  //   // Find the matching element in array 'b'
-  //   const matchB = b.find(itemB => itemB.name === itemA.name);
-  //   // Find the matching element in array 'c'
-  //   const matchC = c.find(itemC => itemC.type === matchB.type);
-
-  //   return {
-  //     name: itemA.name,
-  //     type: { typeName: matchC.type, temp: matchC.temp }
-  //   };
-  // });
 
   useEffect(() => {
     fetchCategory();
@@ -115,8 +104,10 @@ const Template = () => {
 
     setSelectedTemplate(selectedTemplates);
   };
-  console.log(newData)
-  console.log("select template", selectTemplate);
+  const handleTemplateBlur = (e)=>{
+    setContent(e.target)
+  }
+  console.log(content)
 
   return (
     <>
@@ -165,13 +156,12 @@ const Template = () => {
         </div>
       )}
 
-      {selectTemplate && (
+      {/* {selectTemplate && (
         <div>
           <h5>Select Template {selectTemplate.map(doc=>doc.type.type)}</h5>
           <h6>{selectTemplate.map(doc=>doc.type.templates.map(temp=>temp.template))}</h6>
         </div>
-      )}
-
+      )*/}
     </>
   );
 };
