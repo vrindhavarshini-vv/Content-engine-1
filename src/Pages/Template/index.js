@@ -9,17 +9,17 @@ import {
   setFbCategory,
   setFbType,
   setSelectedCategory,
-  setCategoryAndTypes
+  setCategoryAndTypes,
+  setFbGeneratedDatas
 } from "../../Routes/Slices/templateSlice";
 import ContentEditable from "react-contenteditable";
 
 const Template = () => {
   const dispatch = useDispatch();
-  const { fbCategory, fbType, selectedCategory,categoryAndTypes } = useSelector(
+  const { fbCategory, fbType, selectedCategory,categoryAndTypes,fbGeneratedDatas } = useSelector(
     (state) => state.template
   );
-  const [fbGeneratedDatas, setFbGeneratedDatas] = useState([]);
-  const [selectTemplate, setSelectedTemplate] = useState();
+  const [selectType, setSelectType] = useState();
   const [newData, setNewData] = useState([]);
   const [content,setContent] = useState('')
 
@@ -30,7 +30,6 @@ const Template = () => {
     }));
     dispatch(setFbCategory(categories));
   };
-  // console.log(fbCategory)
   const fetchTypes = async () => {
     const querySnapShot = await getDocs(collection(db, "type"));
     const types = querySnapShot.docs.map((doc) => ({
@@ -45,9 +44,8 @@ const Template = () => {
     const template = querySnapShot.docs.map((doc) => ({
       ...doc.data(),
     }));
-    setFbGeneratedDatas(template);
+    dispatch(setFbGeneratedDatas(template));
   };
-  // console.log("generatedDatas", fbGeneratedDatas);
 
   const fetchCategoryWithType = () => {
     const categoryTypes = fbCategory.map((category) => {
@@ -56,10 +54,10 @@ const Template = () => {
         .map((doc) => doc.type);
       return { category, types: typesForCategory };
     });
-    dispatch(setCategoryAndTypes(categoryTypes));
+    const selectCat = categoryTypes.slice()
+    dispatch(setCategoryAndTypes(selectCat));
   };
-  console.log(categoryAndTypes)
-  // console.log(categoryAndTypes);
+  console.log(categoryAndTypes);
 
   const templateInsideTypes = () => {
     const cat = fbCategory.map((category) => {
@@ -94,20 +92,23 @@ const Template = () => {
     console.log("selectedCategory:", eachCategory);
   };
   const handleTypeClick = (clickType) => {
-    const selectedTemplates = newData.flatMap((user) => {
-      return user.types
-        .filter((type) => type.type === clickType)
-        .map((type) => ({
-          type,
-        }));
+    const selectedTemplates = [];
+  
+    newData.forEach((user) => {
+      user.types.forEach((type) => {
+        if (type.type === clickType) {
+          selectedTemplates.push({ type });
+        }
+      });
     });
-
-    setSelectedTemplate(selectedTemplates);
+  
+    setSelectType(selectedTemplates);
   };
+  
   const handleTemplateBlur = (e)=>{
     setContent(e.target)
   }
-  console.log(content)
+  // console.log(content)
 
   return (
     <>
@@ -134,7 +135,6 @@ const Template = () => {
       </div>
 
       {selectedCategory && (
-
         <div>
           <h5>Types for {selectedCategory.category.categoryName}</h5>
           {selectedCategory.types.map((type, i) => (
@@ -156,12 +156,55 @@ const Template = () => {
         </div>
       )}
 
-      {/* {selectTemplate && (
+      {/* {selectType && (
         <div>
-          <h5>Select Template {selectTemplate.map(doc=>doc.type.type)}</h5>
-          <h6>{selectTemplate.map(doc=>doc.type.templates.map(temp=>temp.template))}</h6>
+          <h5>Select Template for {selectType.map(doc=>doc.type.type)}</h5>
+          <Card
+              className="cardss"
+              // key={i}
+              // onClick={() => handleTypeClick(type)}
+              // data-index={i}
+              style={{ width: "30rem" }}
+            >
+              <Card.Body>
+                  {selectType.map(doc=>doc.type.templates.map(temp=>temp.template))}
+                
+              </Card.Body>
+            </Card>
+          
         </div>
-      )*/}
+      )} */}
+      {selectType && (
+  <div>
+    {/* <h5>Select Template for {selectType.map(doc => doc.type.type)}</h5> */}
+    {selectType && (
+  <div>
+    {selectType.map((doc, i) => (
+      <div key={i}>
+        <h5>Select Template for {doc.type.type}</h5>
+        {doc.type.templates.map((temp, j) => (
+          <Card
+            key={j}
+            className="cardss"
+            style={{ width: "30rem", marginBottom: "10px" }}
+          >
+            <Card.Body>
+              <ContentEditable
+                html={temp.template} // Set the initial HTML content for the ContentEditable
+                tagName="div" // Specify the HTML tag to use for the editable content
+                onBlur={(e) => handleTemplateBlur(e, i, j)} // Handle blur event to save changes
+              />
+            </Card.Body>
+          </Card>
+        ))}
+      </div>
+    ))}
+  </div>
+)}
+
+  </div>
+)}
+
     </>
   );
 };

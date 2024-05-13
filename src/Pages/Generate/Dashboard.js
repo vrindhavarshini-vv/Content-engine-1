@@ -8,6 +8,7 @@ import Modal from "react-bootstrap/Modal";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 
+
 import {
   setCategoryList,
   setTypesList,
@@ -24,21 +25,18 @@ import {
 } from "../../Routes/Slices/dashBoardSlice";
 
 function Dashboard() {
-  const dispatch = useDispatch();
-  const {
-    categoryList,
-    typesList,
-    selectedCategory,
-    isCategorySelected,
-    selectedType,
-    isTypeSelected,
-    answer,
-    selectedCategoryName,
-    selectedTypeName,
-    isPopUp
-  } = useSelector((state) => state.dashboardslice);
-
-  const [pairs, setPairs] = useState([{ key: "", value: "" }]);
+  const {categoryList,typesList,selectedCategory,isCategorySelected,selectedType,isTypeSelected,selectedOption,isPopUp,categoryAndTypes,answer,selectedCategoryName,selectedTypeName,addTemplates} = useSelector(state => state.dashboardslice)
+  const dispatch = useDispatch()
+  const [pairs,setPairs] = useState([{key:'',value:''}])
+  const [generatedData,setGeneratedData] = useState([])
+  let stringedPairs = JSON.stringify(pairs)
+  // console.log("categoryAndTypes",categoryAndTypes)
+  
+  
+  const handleOptionChange = (event) => {
+      dispatch(setSelectedOption(event.target.value));
+   };
+ 
 
   const handleKeyChange = (index, event) => {
     const newPairs = [...pairs];
@@ -116,100 +114,79 @@ function Dashboard() {
     fetchData();
   }, [dispatch]);
 
-  return (
-    <center>
-      <h1>Generate Page</h1>
-      <br />
-      <div>
-        <br />
-        <br />
-        <select
-          value={selectedCategory}
-          onChange={(e) => {
-            dispatch(setSelectedCategory(e.target.value));
-            dispatch(setIsCategorySelected(true));
-          }}
-        >
-          <option value="">Select a Category</option>
-          {categoryList.map((category) => (
-            <option key={category.categoryId} value={category.categoryId}>
-              {category.categoryName}
-            </option>
-          ))}
-        </select>
-        <br />
-        <br />
-        {isCategorySelected && (
-          <select
-            value={selectedType}
-            onChange={(e) => {
-              dispatch(setSelectedType(e.target.value));
-              dispatch(setIsTypeSelected(true));
-            }}
-          >
-            <option value="">Select a Type</option>
-            {typesList
-              .filter((type) => type.categoryId === selectedCategory)
-              .map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.type}
-                </option>
-              ))}
+    return (
+      <center>
+        <h1>Generate Page</h1>
+        <br/>
+        <div>
+          <br/>
+          <br/>
+          <select value={selectedCategory} onChange={(e) => {dispatch(setSelectedCategory(e.target.value)); dispatch(setIsCategorySelected(true))}}>
+            <option value="">Select a Category</option>
+            {categoryList.map((category) => (
+              <option key={category.categoryId} value={category.categoryId}>
+                {category.categoryName}
+              </option>
+            ))}
           </select>
-        )}
-        <br />
-        <br />
-      </div>
-
-      {isTypeSelected && (
-        <form onSubmit={handleGenerate}>
-          {pairs.map((pair, index) => (
-            <div key={index}>
-              <label> Key:</label>
-              <input
-                type="text"
-                value={pair.key}
-                onChange={(event) => handleKeyChange(index, event)}
-              />
-
-              <label>Value:</label>
-              <input
-                type="text"
-                value={pair.value}
-                onChange={(event) => handleValueChange(index, event)}
-              />
-            </div>
-          ))}
-
-          <button type="button" onClick={handleAddPair}>
-            Add
-          </button>
-          <br />
-          <br />
-          <button type="submit">Generate</button>
-        </form>
-      )}
-
-      <Modal show={isPopUp} onHide={() => dispatch(setIsPopUp(false))}>
-        <center>
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {selectedTypeName} to {selectedCategoryName}
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>{answer}</Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => dispatch(setIsPopUp(false))}>
-              Regenerate
-            </Button>
-            <Button className="btn btn-success" onClick={handleSave}>
-              Save
-            </Button>
-          </Modal.Footer>
-        </center>
-      </Modal>
-    </center>
-  );
+          <br/>
+          <br/>
+          {isCategorySelected ? 
+            <select value={selectedType} onChange={(e) => {dispatch(setSelectedType(e.target.value)); dispatch(setIsTypeSelected(true))}}>
+              <option value="">Select a Type</option>
+              {typesList.map((types) => (
+                selectedCategory === types.categoryId &&
+                  <option key={types.id} value={types.id}>
+                    {types.type}
+                  </option>
+              ))}
+            </select> : null}
+          <br/>
+          <br/>
+        </div>
+    
+        {isTypeSelected ?
+          <form onSubmit={handleGenerate}>
+            {pairs.map((pair, index) => (
+              <div key={index}>
+                <label> Key:</label>
+                <input type="text" value={pair.key} onChange={(event) => handleKeyChange(index, event)}/>
+                
+                <label>Value:</label>
+                <input type="text" value={pair.value} onChange={(event) => handleValueChange(index, event)}/>
+                
+                <button type="button" onClick={handleAddPair}>Add</button>
+              </div>
+            ))}
+            
+            <br/>
+            <br/>
+            <button type="submit" onClick={generateAnswer}>Generate</button>
+          </form> : null
+        }
+    
+        <Modal show={isPopUp} onHide={handleClose}>
+          <center>
+            <Modal.Header closeButton>
+              <Modal.Title>{selectedTypeName} to {selectedCategoryName}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {answer}
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClose}>
+                Regenerate
+              </Button>
+              <Button className='btn btn-success' onClick={handleSave}>
+                Save
+              </Button>
+            </Modal.Footer>
+          </center>
+        </Modal>
+    
+      </center>
+    );
+    
 }
 
 export default Dashboard;
