@@ -6,6 +6,7 @@ export const TemplateSlice = createSlice({
     fbCategory: [],
     selectedCategory: null,
     fbType: [],
+    fbGeneratedDatas:[],
     categoryAndTypes:[]
 
   },
@@ -19,11 +20,14 @@ export const TemplateSlice = createSlice({
     setFbType: (state, action) => {
       state.fbType = action.payload;
     },
+    setFbGeneratedDatas:(state,action)=>{
+      state.fbGeneratedDatas=action.payload
+    },
     setCategoryAndTypes:(state,action)=>{
       state.categoryAndTypes = action.payload
     }
   },
 });
-export const { setFbCategory, setSelectedCategory, setFbType,setCategoryAndTypes } =
+export const { setFbCategory, setSelectedCategory, setFbType,setCategoryAndTypes,setFbGeneratedDatas } =
   TemplateSlice.actions;
 export default TemplateSlice.reducer;

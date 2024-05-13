@@ -11,9 +11,11 @@ import axios from "axios";
 
 
 
+
 function Dashboard() {
   const {categoryList,typesList,selectedCategory,isCategorySelected,selectedType,isTypeSelected,selectedOption,isPopUp,categoryAndTypes,answer,selectedCategoryName,selectedTypeName,addTemplates} = useSelector(state => state.dashboardslice)
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const [pairs,setPairs] = useState([{key:'',value:''}])
   const [generatedData,setGeneratedData] = useState([])
   let stringedPairs = JSON.stringify(pairs)
@@ -23,6 +25,11 @@ function Dashboard() {
   const handleOptionChange = (event) => {
       dispatch(setSelectedOption(event.target.value));
    };
+   const handleNavigateToSettings =  (event) => {
+    event.preventDefault();
+    navigate("/user/setting")
+  
+  };
  
 
   const handleKeyChange = (index, event) => {
@@ -155,7 +162,8 @@ console.log("hello",genrate_data)
     }
 
 
-    return (
+    return (<>
+    <button onClick={handleNavigateToSettings}>Settings</button>
       <center>
         <h1>Generate Page</h1>
         <br/>
@@ -221,11 +229,13 @@ console.log("hello",genrate_data)
               <Button className='btn btn-success' onClick={handleSave}>
                 Save
               </Button>
+              <Link to={"/template"}>Go to templates ➡️</Link>
             </Modal.Footer>
           </center>
         </Modal>
     
       </center>
+      </>
     );
     
 }
