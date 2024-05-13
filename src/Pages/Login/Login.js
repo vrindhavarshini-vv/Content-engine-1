@@ -28,15 +28,17 @@ const Login = () => {
           localStorage.setItem("token", user.accessToken);
 
           if (regLogin.email == user.email) {
+            if(regLogin.uid==user.UID){
             dispatch(setAdminLoginData(user));
             dispatch(setAdminLogged(true));
             dispatch(setIsAdmin(true));
             alert("Admin login successfull!");
             navigate("/dashboard");
+            
           } else {  
             alert("Admin purpose only");
           }
-        })
+        }})
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
