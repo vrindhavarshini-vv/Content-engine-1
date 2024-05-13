@@ -13,6 +13,7 @@ import {
   setFbGeneratedDatas
 } from "../../Routes/Slices/templateSlice";
 import ContentEditable from "react-contenteditable";
+import { Link } from "react-router-dom";
 
 const Template = () => {
   const dispatch = useDispatch();
@@ -89,8 +90,9 @@ const Template = () => {
 
   const handleCategoryClick = async (eachCategory) => {
     dispatch(setSelectedCategory(eachCategory));
-    console.log("selectedCategory:", eachCategory);
+    console.log("selectedCategory:", selectedCategory);
   };
+  
   const handleTypeClick = (clickType) => {
     const selectedTemplates = [];
   
@@ -103,6 +105,7 @@ const Template = () => {
     });
   
     setSelectType(selectedTemplates);
+    console.log(selectType)
   };
   
   const handleTemplateBlur = (e)=>{
@@ -110,13 +113,16 @@ const Template = () => {
   }
   // console.log(content)
 
+  const handleRegenerate = () => {
+
+  }
   return (
     <>
       <h2>Welcome to the template page</h2>
 
       <h5>Select Category</h5>
-
-      <div typeof="button">
+    {categoryAndTypes.length}
+      <div>
         {categoryAndTypes.map((category, i) => (
           <Card
             className="cards"
@@ -196,10 +202,13 @@ const Template = () => {
               />
             </Card.Body>
           </Card>
-        ))}
+        ))
+        }
       </div>
-    ))}
+      
+    ))}<button onClick={handleRegenerate}><Link to={'/dashboard'}>Regenerate</Link></button>
   </div>
+  
 )}
 
   </div>
