@@ -67,4 +67,3 @@ export const DashBoardSlice = createSlice({
 
 export const { setCategoryList,setTypesList,setSelectedCategory,setIsCategorySelected,setSelectedType,setIsTypeSelected,setSelectedOption,setIsPopUp,setCategoryAndTypes,setAnswer,setSelectedCategoryName,setSelectedTypeName,addTemplates} = DashBoardSlice.actions;
 export default DashBoardSlice.reducer;
- 

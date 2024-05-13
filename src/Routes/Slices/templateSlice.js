@@ -19,6 +19,14 @@ export const TemplateSlice = createSlice({
     },
     setFbType: (state, action) => {
       state.fbType = action.payload;
+      const categoryTypes =state.fbCategory.map((category) => {
+        const typesForCategory = action.payload
+          .filter((type) => type.categoryId === category.categoryId)
+          .map((doc) => doc.type);
+        return { category, types: typesForCategory };
+      });
+      state.categoryAndTypes = categoryTypes.slice()
+
     },
     setFbGeneratedDatas:(state,action)=>{
       state.fbGeneratedDatas=action.payload

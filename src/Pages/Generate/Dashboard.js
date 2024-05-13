@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { auth, db } from "../Firebase/firebase";
-import { addDoc, collection, getDocs } from "firebase/firestore";
-import { useDispatch, useSelector } from "react-redux";
-import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
+import { auth, db } from '../Firebase/firebase';
+import { addDoc, collection,getDocs} from 'firebase/firestore';
+import { setCategoryList,setTypesList,setSelectedCategory,setIsPopUp,setIsCategorySelected,setSelectedType,setIsTypeSelected,setSelectedOption,setCategoryAndTypes,setAnswer,setSelectedCategoryName,setSelectedTypeName,addTemplates } from "../../Routes/Slices/dashBoardSlice"
+import { useDispatch,useSelector } from 'react-redux';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from "axios";
 
 
@@ -30,49 +31,52 @@ function Dashboard() {
   const [pairs,setPairs] = useState([{key:'',value:''}])
   const [generatedData,setGeneratedData] = useState([])
   let stringedPairs = JSON.stringify(pairs)
-  // console.log("categoryAndTypes",categoryAndTypes)
-  
-  
+  const navigate = useNavigate()
+ 
+
   const handleOptionChange = (event) => {
       dispatch(setSelectedOption(event.target.value));
    };
  
 
   const handleKeyChange = (index, event) => {
-    const newPairs = [...pairs];
-    newPairs[index].key = event.target.value;
-    setPairs(newPairs);
+    const newPair = [...pairs];
+    newPair[index].key = event.target.value;
+    setPairs(newPair)
   };
 
   const handleValueChange = (index, event) => {
-    const newPairs = [...pairs];
-    newPairs[index].value = event.target.value;
-    setPairs(newPairs);
+    const newPair = [...pairs];
+    newPair[index].value = event.target.value;
+    setPairs(newPair)
   };
 
   const handleAddPair = () => {
-    setPairs([...pairs, { key: "", value: "" }]);
+    setPairs([...pairs, { key: '', value: '' }])
   };
 
-  const handleGenerate = (event) => {
+  const handleGenerate =  (event) => {
     event.preventDefault();
-    generateAnswer();
-    dispatch(setIsPopUp(true));
+    dispatch(setIsPopUp(true))
   };
 
-  const handleSave = async (event) => {
+  const handleNavigateToSettings =  (event) => {
     event.preventDefault();
-    const stringifyData = JSON.stringify(pairs);
-    try {
-      await addDoc(collection(db, "generatedDatas"), {
-        datas: stringifyData,
-        category: selectedCategory,
-        typeId: selectedType,
-        templates: answer
-      });
-    } catch (error) {
-      console.error("Error saving data:", error);
-    }
+    navigate("/user/setting")
+  };
+
+  const handleNavigateToTemplates =  (event) => {
+    event.preventDefault();
+    navigate("/template")
+  
+  };
+
+
+
+  const handleSave = (event) =>{
+     let stringifyData = JSON.stringify(pairs)
+     console.log("stringifyData",stringifyData)
+    const docRef=addDoc(collection(db,"generatedDatas"),{datas:stringifyData,category:selectedCategory,typeId:selectedType,templates:answer});
     dispatch(setIsPopUp(false));
   };
 
