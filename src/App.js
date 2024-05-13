@@ -40,8 +40,7 @@ function App() {
       <Routes>
 
         <Route path="/" element={<Login/>} />
-        <Route path="/user/setting" element ={<Categories/>}/>
-       
+        <Route path="/user/setting" element ={<Categories/>}/> 
         {adminLogged ? <Route path="/dashboard" element={<Dashboard />} />:null}
         {adminLogged ? <Route path="/template" element={<Template />} />:null}
 
