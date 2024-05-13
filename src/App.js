@@ -6,7 +6,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import Login from "./Pages/Login/Login";
 import Dashboard from "./Pages/Generate/Dashboard";
-import Template from "./Pages/Templates/index";
+import Categories from './Pages/Settings/setting'
+
+
+
+import Template from "./Pages/Template/index";
 
 function App() {
   const dispatch = useDispatch();
@@ -34,9 +38,13 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/template" element={<Template />} />
+
+        <Route path="/" element={<Login/>} />
+        <Route path="/user/setting" element ={<Categories/>}/>
+       
+        {adminLogged ? <Route path="/dashboard" element={<Dashboard />} />:null}
+        {adminLogged ? <Route path="/template" element={<Template />} />:null}
+
       </Routes>
     </BrowserRouter>
   );

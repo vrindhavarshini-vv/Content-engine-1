@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import { auth } from "../Firebase/firebase";
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { setAdminLoginData, setAdminLogged,setIsAdmin } from "../../Routes/Slices/adminLogin";
+import {
+  setAdminLoginData,
+  setAdminLogged,
+  setIsAdmin,
+} from "../../Routes/Slices/adminLogin";
 import { useDispatch } from "react-redux";
 
 const Login = () => {
@@ -22,15 +26,15 @@ const Login = () => {
           // Signed in
           const user = userCredential.user;
           localStorage.setItem("token", user.accessToken);
-          
-          if(user.uid == 'B19MRhx5DfYaNdeFWCht7NjvmMF3'){
+
+          if (regLogin.email == user.email) {
             dispatch(setAdminLoginData(user));
             dispatch(setAdminLogged(true));
-            dispatch(setIsAdmin(true))
+            dispatch(setIsAdmin(true));
             alert("Admin login successfull!");
-            navigate('/dashboard')
-          }else{
-            alert('Admin purpose only')
+            navigate("/dashboard");
+          } else {  
+            alert("Admin purpose only");
           }
         })
         .catch((error) => {
