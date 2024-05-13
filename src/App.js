@@ -6,7 +6,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import Login from "./Pages/Login/Login";
 import Dashboard from "./Pages/Generate/Dashboard";
+
 import Categories from "./Pages/Settings/setting";
+
 
 
 
@@ -36,9 +38,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login/>} />
-        <Route path="/dashboard" element ={<Dashboard/>}/>
-        <Route path="/user/setting" element ={<Categories/>}/>
+       
         
         
       </Routes>

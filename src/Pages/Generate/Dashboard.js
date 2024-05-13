@@ -1,215 +1,243 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { auth, db } from "../Firebase/firebase";
-import { addDoc, collection, getDocs } from "firebase/firestore";
-import { useDispatch, useSelector } from "react-redux";
-import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
+import { auth, db } from '../Firebase/firebase';
+import { addDoc, collection,getDocs} from 'firebase/firestore';
+import { setCategoryList,setTypesList,setSelectedCategory,setIsPopUp,setIsCategorySelected,setSelectedType,setIsTypeSelected,setSelectedOption,setCategoryAndTypes,setAnswer,setSelectedCategoryName,setSelectedTypeName,addTemplates } from "../../Routes/Slices/dashBoardSlice"
+import { useDispatch,useSelector } from 'react-redux';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import "./Dashboard.css"
 import axios from "axios";
 
-import {
-  setCategoryList,
-  setTypesList,
-  setSelectedCategory,
-  setIsPopUp,
-  setIsCategorySelected,
-  setSelectedType,
-  setIsTypeSelected,
-  setSelectedOption,
-  setCategoryAndTypes,
-  setAnswer,
-  setSelectedCategoryName,
-  setSelectedTypeName
-} from "../../Routes/Slices/dashBoardSlice";
+
+
 
 function Dashboard() {
-  const dispatch = useDispatch();
-  const {
-    categoryList,
-    typesList,
-    selectedCategory,
-    isCategorySelected,
-    selectedType,
-    isTypeSelected,
-    answer,
-    selectedCategoryName,
-    selectedTypeName,
-    isPopUp
-  } = useSelector((state) => state.dashboardslice);
+  const {categoryList,typesList,selectedCategory,isCategorySelected,selectedType,isTypeSelected,selectedOption,isPopUp,categoryAndTypes,answer,selectedCategoryName,selectedTypeName,addTemplates} = useSelector(state => state.dashboardslice)
+  const dispatch = useDispatch()
+  const [pairs,setPairs] = useState([{key:'',value:''}])
+  const [generatedData,setGeneratedData] = useState([])
+  let stringedPairs = JSON.stringify(pairs)
+  const navigate = useNavigate()
+ 
 
-  const [pairs, setPairs] = useState([{ key: "", value: "" }]);
+  const handleOptionChange = (event) => {
+      dispatch(setSelectedOption(event.target.value));
+   };
+ 
 
   const handleKeyChange = (index, event) => {
-    const newPairs = [...pairs];
-    newPairs[index].key = event.target.value;
-    setPairs(newPairs);
+    const newPair = [...pairs];
+    newPair[index].key = event.target.value;
+    setPairs(newPair)
   };
 
   const handleValueChange = (index, event) => {
-    const newPairs = [...pairs];
-    newPairs[index].value = event.target.value;
-    setPairs(newPairs);
+    const newPair = [...pairs];
+    newPair[index].value = event.target.value;
+    setPairs(newPair)
   };
 
   const handleAddPair = () => {
-    setPairs([...pairs, { key: "", value: "" }]);
+    setPairs([...pairs, { key: '', value: '' }])
   };
 
-  const handleGenerate = (event) => {
+  const handleGenerate =  (event) => {
     event.preventDefault();
-    generateAnswer();
-    dispatch(setIsPopUp(true));
+    dispatch(setIsPopUp(true))
   };
 
-  const handleSave = async (event) => {
+  const handleNavigateToSettings =  (event) => {
     event.preventDefault();
-    const stringifyData = JSON.stringify(pairs);
-    try {
-      await addDoc(collection(db, "generatedDatas"), {
-        datas: stringifyData,
-        category: selectedCategory,
-        typeId: selectedType,
-        templates: answer
-      });
-    } catch (error) {
-      console.error("Error saving data:", error);
-    }
+    navigate("/user/setting")
+  };
+
+  const handleNavigateToTemplates =  (event) => {
+    event.preventDefault();
+    navigate("/template")
+  
+  };
+
+
+
+  const handleSave = (event) =>{
+     let stringifyData = JSON.stringify(pairs)
+     console.log("stringifyData",stringifyData)
+    const docRef=addDoc(collection(db,"generatedDatas"),{datas:stringifyData,category:selectedCategory,typeId:selectedType,templates:answer});
     dispatch(setIsPopUp(false));
   };
-
-  const generateAnswer = async () => {
-    dispatch(setAnswer("Loading..."));
-    try {
-      const response = await axios.post(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=YOUR_API_KEY",
-        {
-          contents: [
-            {
-              parts: [{ text: `write a "${selectedTypeName}" for ${JSON.stringify(pairs)}` }]
-            }
-          ]
-        }
-      );
-      dispatch(setAnswer(response.data.candidates[0].content.parts[0].text));
-    } catch (error) {
-      console.error("Error generating answer:", error);
-      dispatch(setAnswer("Error generating content"));
-    }
+  
+       
+  const handleClose = ()=>{
+    dispatch(setIsPopUp(false))
+  };
+       
+  const getCategory = async () => {
+      const querySnapshot = await getDocs(collection(db, 'category'));
+      const category = [];
+      querySnapshot.forEach((doc) => {
+          category.push(doc.data());
+        });
+        dispatch(setCategoryList(category))
   };
 
+
+  const getTypes = async () => {
+      const querySnapshot = await getDocs(collection(db, 'type'));
+      const type = [];
+      const typeId = querySnapshot.docs.map((doc) => (
+        type.push(doc.data()),
+        {
+            id : doc.id,
+            ...doc.data()
+        }
+       ))
+      dispatch(setTypesList(typeId))
+  };
+
+  const fetchCategoryWithType = () => {
+    const categoryTypes = categoryList.map((category) => {
+      const typesForCategory = typesList.filter((type) => type.categoryId === category.categoryId).map((doc) => doc.type);
+      return { category, types: typesForCategory };
+    });
+    dispatch(setCategoryAndTypes(categoryTypes))
+  };
+ console.log("catWithTypesingenerate",categoryAndTypes);
+//  console.log("categoryList",categoryList);
+//  console.log("typesList",typesList);
+
+
+
+  const getGenerateDatas = async () => {
+    const querySnapshot = await getDocs(collection(db, 'generatedDatas'));
+    const generatedDatas = [];
+    querySnapshot.forEach((doc) => {
+        generatedDatas.push(doc.data());
+      });
+      setGeneratedData(generatedDatas)
+    
+  };
+
+
+let genrate_data = generatedData.filter((data)=>{
+  if (data.typeId == selectedType ){
+          //console.log("dataTemplates",data.templates)
+          return true;
+         } })
+useEffect(() => {
+        getCategory();
+        getTypes();
+        fetchCategoryWithType();
+        getGenerateDatas();
+    }, []);   
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const categorySnapshot = await getDocs(collection(db, "category"));
-        const categories = categorySnapshot.docs.map((doc) => doc.data());
-        dispatch(setCategoryList(categories));
-
-        const typeSnapshot = await getDocs(collection(db, "type"));
-        const types = typeSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        dispatch(setTypesList(types));
-      } catch (error) {
-        console.error("Error fetching data:", error);
+    for (let each of categoryList){
+      if (each.categoryId == selectedCategory){
+        dispatch(setSelectedCategoryName(each.categoryName))
       }
-    };
+    }
+  }, [isCategorySelected]); 
+  
+  useEffect(() => {
+    for (let each of typesList){
+      if (each.id == selectedType){
+        dispatch(setSelectedTypeName(each.type))
+      }
+    }
+  }, [isTypeSelected]); 
 
-    fetchData();
-  }, [dispatch]);
+  
+  async function generateAnswer(){
+      dispatch(setAnswer("Loading..."))
+      const response = await axios({
+        url:"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCdGe2K1tWu6hUcBGr5L-RbJ65Rd3L0iS0",
+        method: "post",
+        data: {contents:[{parts:[{text: write a "${selectedTypeName}" for ${stringedPairs}} }]}]}
+      })
+      dispatch(setAnswer(response["data"]["candidates"][0]["content"]["parts"][0]["text"]))
+    }
 
-  return (
+
+    return (
+      <>
+     <button onClick={handleNavigateToSettings}>Setting</button>
+     <button onClick={handleNavigateToTemplates}>Template</button>
     <center>
-      <h1>Generate Page</h1>
-      <br />
-      <div>
-        <br />
-        <br />
-        <select
-          value={selectedCategory}
-          onChange={(e) => {
-            dispatch(setSelectedCategory(e.target.value));
-            dispatch(setIsCategorySelected(true));
-          }}
-        >
-          <option value="">Select a Category</option>
-          {categoryList.map((category) => (
-            <option key={category.categoryId} value={category.categoryId}>
-              {category.categoryName}
-            </option>
-          ))}
-        </select>
-        <br />
-        <br />
-        {isCategorySelected && (
-          <select
-            value={selectedType}
-            onChange={(e) => {
-              dispatch(setSelectedType(e.target.value));
-              dispatch(setIsTypeSelected(true));
-            }}
-          >
-            <option value="">Select a Type</option>
-            {typesList
-              .filter((type) => type.categoryId === selectedCategory)
-              .map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.type}
-                </option>
-              ))}
+        <h1>Generate Page</h1>
+        <br/>
+        <div>
+          <br/>
+          <br/>
+          <select value={selectedCategory} onChange={(e) => {dispatch(setSelectedCategory(e.target.value)); dispatch(setIsCategorySelected(true))}}>
+            <option value="">Select a Category</option>
+            {categoryList.map((category) => (
+              <option key={category.categoryId} value={category.categoryId}>
+                {category.categoryName}
+              </option>
+            ))}
           </select>
-        )}
-        <br />
-        <br />
-      </div>
-
-      {isTypeSelected && (
-        <form onSubmit={handleGenerate}>
-          {pairs.map((pair, index) => (
-            <div key={index}>
-              <label> Key:</label>
-              <input
-                type="text"
-                value={pair.key}
-                onChange={(event) => handleKeyChange(index, event)}
-              />
-
-              <label>Value:</label>
-              <input
-                type="text"
-                value={pair.value}
-                onChange={(event) => handleValueChange(index, event)}
-              />
-            </div>
-          ))}
-
-          <button type="button" onClick={handleAddPair}>
-            Add
-          </button>
-          <br />
-          <br />
-          <button type="submit">Generate</button>
-        </form>
-      )}
-
-      <Modal show={isPopUp} onHide={() => dispatch(setIsPopUp(false))}>
-        <center>
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {selectedTypeName} to {selectedCategoryName}
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>{answer}</Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => dispatch(setIsPopUp(false))}>
-              Regenerate
-            </Button>
-            <Button className="btn btn-success" onClick={handleSave}>
-              Save
-            </Button>
-          </Modal.Footer>
-        </center>
-      </Modal>
-    </center>
-  );
+          <br/>
+          <br/>
+          {isCategorySelected ? 
+            <select value={selectedType} onChange={(e) => {dispatch(setSelectedType(e.target.value)); dispatch(setIsTypeSelected(true))}}>
+              <option value="">Select a Type</option>
+              {typesList.map((types) => (
+                selectedCategory === types.categoryId &&
+                  <option key={types.id} value={types.id}>
+                    {types.type}
+                  </option>
+              ))}
+            </select> : null}
+          <br/>
+          <br/>
+        </div>
+    
+        {isTypeSelected ?
+          <form onSubmit={handleGenerate}>
+            {pairs.map((pair, index) => (
+              <div key={index}>
+                <label> Key:</label>
+                <input type="text" value={pair.key} onChange={(event) => handleKeyChange(index, event)}/>
+                
+                <label>Value:</label>
+                <input type="text" value={pair.value} onChange={(event) => handleValueChange(index, event)}/>
+                
+                <button type="button" onClick={handleAddPair}>Add</button>
+              </div>
+            ))}
+            
+            <br/>
+            <br/>
+            <button type="submit" onClick={generateAnswer}>Generate</button>
+          </form> : null
+        }
+    
+        <Modal show={isPopUp} onHide={handleClose}>
+          <center>
+            <Modal.Header closeButton>
+              <Modal.Title>{selectedTypeName} to {selectedCategoryName}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {answer}
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary"  onClick={handleClose}>
+                Regenerate
+              </Button>
+              <Button  className='saveButton' onClick={handleSave}>
+                Save
+              </Button>
+              <Link to={"/template"}>Go to templates ➡️</Link>
+             
+            </Modal.Footer>
+          </center>
+        </Modal>
+    
+      </center>
+      </>
+    );
+    
 }
-
 export default Dashboard;
