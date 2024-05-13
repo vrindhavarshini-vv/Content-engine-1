@@ -7,10 +7,6 @@ import { useEffect } from "react";
 import Login from "./Pages/Login/Login";
 import Dashboard from "./Pages/Generate/Dashboard";
 
-import Categories from "./Pages/Settings/setting";
-import Template from "./Pages/Template";
-
-
 
 
 function App() {
