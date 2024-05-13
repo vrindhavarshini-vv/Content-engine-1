@@ -1,5 +1,7 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { Modal } from "react-bootstrap";
+import Button from "react-bootstrap";
 import {
   setCategories,
   setTypes,
@@ -106,8 +108,8 @@ export default function Categories() {
       );
 
       dispatch(setSelectedCategory(categoryId));
-      dispatch(setCategoryName(""));
-      closeModal();
+       dispatch(setCategoryName(""));
+       closeModal();
 
       alert("Category added successfully!");
     } catch (error) {
@@ -189,7 +191,7 @@ export default function Categories() {
     <div className="form">
       <h1>Create Categories</h1>
 
-      <button onClick={openModal}>Add New Category</button>
+      <button type="button" onClick={openModal}>Add New Category</button>
 
       <select
         value={selectedCategory}
@@ -203,6 +205,27 @@ export default function Categories() {
         ))}
       </select>
 
+      <Modal show={showModal} onHide={closeModal}>
+          <center>
+            <Modal.Header closeButton>
+              <Modal.Title> <h2>Enter Category Name</h2></Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+           
+            <input
+              type="text"
+              value={categoryName}
+              onChange={(e) => dispatch(setCategoryName(e.target.value))}
+              placeholder="Category Name"
+            />
+            </Modal.Body>
+            <Modal.Footer>
+            <button onClick={handleCategorySubmit}>Submit</button>
+             
+            </Modal.Footer>
+          </center>
+        </Modal>
+{/* 
       {showModal && (
         <div className="modal">
           <div className="modal-content">
@@ -219,7 +242,7 @@ export default function Categories() {
             <button onClick={handleCategorySubmit}>Submit</button>
           </div>
         </div>
-      )}
+      )} */}
 
       {types.length > 0 && (
         <div>
@@ -272,3 +295,4 @@ export default function Categories() {
     </div>
   );
 }
+
