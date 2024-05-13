@@ -90,8 +90,9 @@ const Template = () => {
 
   const handleCategoryClick = async (eachCategory) => {
     dispatch(setSelectedCategory(eachCategory));
-    console.log("selectedCategory:", eachCategory);
+    console.log("selectedCategory:", selectedCategory);
   };
+  
   const handleTypeClick = (clickType) => {
     const selectedTemplates = [];
   
@@ -104,6 +105,7 @@ const Template = () => {
     });
   
     setSelectType(selectedTemplates);
+    console.log(selectType)
   };
   
   const handleTemplateBlur = (e)=>{
