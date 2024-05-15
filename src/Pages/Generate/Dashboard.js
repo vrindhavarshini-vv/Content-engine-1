@@ -7,23 +7,11 @@ import { useDispatch,useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
+// import "./Dashboard.css"
 import axios from "axios";
 
 
-import {
-  setCategoryList,
-  setTypesList,
-  setSelectedCategory,
-  setIsPopUp,
-  setIsCategorySelected,
-  setSelectedType,
-  setIsTypeSelected,
-  setSelectedOption,
-  setCategoryAndTypes,
-  setAnswer,
-  setSelectedCategoryName,
-  setSelectedTypeName
-} from "../../Routes/Slices/dashBoardSlice";
+
 
 function Dashboard() {
   const {categoryList,typesList,selectedCategory,isCategorySelected,selectedType,isTypeSelected,selectedOption,isPopUp,categoryAndTypes,answer,selectedCategoryName,selectedTypeName,addTemplates} = useSelector(state => state.dashboardslice)
@@ -79,47 +67,108 @@ function Dashboard() {
     const docRef=addDoc(collection(db,"generatedDatas"),{datas:stringifyData,category:selectedCategory,typeId:selectedType,templates:answer});
     dispatch(setIsPopUp(false));
   };
-
-  const generateAnswer = async () => {
-    dispatch(setAnswer("Loading..."));
-    try {
-      const response = await axios.post(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=YOUR_API_KEY",
-        {
-          contents: [
-            {
-              parts: [{ text: `write a "${selectedTypeName}" for ${JSON.stringify(pairs)}` }]
-            }
-          ]
-        }
-      );
-      dispatch(setAnswer(response.data.candidates[0].content.parts[0].text));
-    } catch (error) {
-      console.error("Error generating answer:", error);
-      dispatch(setAnswer("Error generating content"));
-    }
+  
+       
+  const handleClose = ()=>{
+    dispatch(setIsPopUp(false))
+  };
+       
+  const getCategory = async () => {
+      const querySnapshot = await getDocs(collection(db, 'category'));
+      const category = [];
+      querySnapshot.forEach((doc) => {
+          category.push(doc.data());
+        });
+        dispatch(setCategoryList(category))
   };
 
+
+  const getTypes = async () => {
+      const querySnapshot = await getDocs(collection(db, 'type'));
+      const type = [];
+      const typeId = querySnapshot.docs.map((doc) => (
+        type.push(doc.data()),
+        {
+            id : doc.id,
+            ...doc.data()
+        }
+       ))
+      dispatch(setTypesList(typeId))
+  };
+
+  const fetchCategoryWithType = () => {
+    const categoryTypes = categoryList.map((category) => {
+      const typesForCategory = typesList.filter((type) => type.categoryId === category.categoryId).map((doc) => doc.type);
+      return { category, types: typesForCategory };
+    });
+    dispatch(setCategoryAndTypes(categoryTypes))
+  };
+ console.log("catWithTypesingenerate",categoryAndTypes);
+//  console.log("categoryList",categoryList);
+//  console.log("typesList",typesList);
+
+
+
+  const getGenerateDatas = async () => {
+    const querySnapshot = await getDocs(collection(db, 'generatedDatas'));
+    const generatedDatas = [];
+    querySnapshot.forEach((doc) => {
+        generatedDatas.push(doc.data());
+      });
+      setGeneratedData(generatedDatas)
+    
+  };
+
+
+let genrate_data = generatedData.filter((data)=>{
+  if (data.typeId == selectedType ){
+          //console.log("dataTemplates",data.templates)
+          return true;
+         } })
+
+
+
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const categorySnapshot = await getDocs(collection(db, "category"));
-        const categories = categorySnapshot.docs.map((doc) => doc.data());
-        dispatch(setCategoryList(categories));
+        getCategory();
+        getTypes();
+        fetchCategoryWithType();
+        getGenerateDatas();
+    }, []);   
 
-        const typeSnapshot = await getDocs(collection(db, "type"));
-        const types = typeSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        dispatch(setTypesList(types));
-      } catch (error) {
-        console.error("Error fetching data:", error);
+  useEffect(() => {
+    for (let each of categoryList){
+      if (each.categoryId == selectedCategory){
+        dispatch(setSelectedCategoryName(each.categoryName))
       }
-    };
+    }
+  }, [isCategorySelected]); 
+  
+  useEffect(() => {
+    for (let each of typesList){
+      if (each.id == selectedType){
+        dispatch(setSelectedTypeName(each.type))
+      }
+    }
+  }, [isTypeSelected]); 
 
-    fetchData();
-  }, [dispatch]);
+  
+  async function generateAnswer(){
+      dispatch(setAnswer("Loading..."))
+      const response = await axios({
+        url:"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCdGe2K1tWu6hUcBGr5L-RbJ65Rd3L0iS0",
+        method: "post",
+        data: {contents:[{parts:[{text: `write a "${selectedTypeName}" for ${stringedPairs}}` }]}]}
+      })
+      dispatch(setAnswer(response["data"]["candidates"][0]["content"]["parts"][0]["text"]))
+    }
+
 
     return (
-      <center>
+      <>
+     <button onClick={handleNavigateToSettings}>Setting</button>
+     <button onClick={handleNavigateToTemplates}>Template</button>
+    <center>
         <h1>Generate Page</h1>
         <br/>
         <div>
@@ -178,19 +227,44 @@ function Dashboard() {
               {answer}
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={handleClose}>
+              <Button variant="secondary"  onClick={handleClose}>
                 Regenerate
               </Button>
-              <Button className='btn btn-success' onClick={handleSave}>
+              <Button  className='saveButton' onClick={handleSave}>
                 Save
               </Button>
+              <Link to={"/template"}>Go to templates ➡️</Link>
+             
             </Modal.Footer>
           </center>
         </Modal>
     
       </center>
+      </>
     );
     
 }
-
 export default Dashboard;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

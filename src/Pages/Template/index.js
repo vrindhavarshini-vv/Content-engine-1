@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card } from "react-bootstrap";
 import { db } from "../Firebase/firebase";
 import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
-import { collection, doc, getDocs } from "firebase/firestore";
+import { collection, doc, documentId, getDocs ,updateDoc} from "firebase/firestore";
 import "./index.css";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -23,6 +23,8 @@ const Template = () => {
   const [selectType, setSelectType] = useState();
   const [newData, setNewData] = useState([]);
   const [content,setContent] = useState('')
+  const [editableContent,seteditableContent] = useState({})
+  
 
   const fetchCategory = async () => {
     const querySnapshot = await getDocs(collection(db, "category"));
@@ -105,23 +107,49 @@ const Template = () => {
     });
   
     setSelectType(selectedTemplates);
-    console.log(selectType)
+    console.log('Selected Template',selectType)
   };
   
-  const handleTemplateBlur = (e)=>{
+  const handleTemplateBlur = (e) => {
     setContent(e.target)
   }
   // console.log(content)
 
-  const handleRegenerate = () => {
 
-  }
+  // const handleUpdate = async () => {
+  //   const update = await updateDoc(doc(db, "generatedDatas"),
+  // 
+  // const handleUpdate = async (typeIndex, templateIndex, templateId) => {
+  //   const newContent = editableContent[`${typeIndex}-${templateIndex}`];
+  //   if (newContent) {
+  //     const templateDoc = doc(db, "generatedDatas", templateId);
+  //     await updateDoc(templateDoc, {
+  //       templates: newContent,
+  //     });
+  //     alert("Template updated successfully");
+  //   }
+  // };
+   
+  // const handleUpdate = async (typeIndex, templateIndex, templateId) => {
+  //   const newContent = editableContent[`${typeIndex}-${templateIndex}`];
+  //   if (newContent) {
+  //     const templateDoc = doc(db, "generatedDatas", templateId);
+  //     await updateDoc(templateDoc, {
+  //       templates: newContent,
+  //     });
+  //     dispatch()
+  //     alert("Template updated successfully");
+  //   }
+  // };
+
+  
+
   return (
     <>
       <h2>Welcome to the template page</h2>
 
       <h5>Select Category</h5>
-    {categoryAndTypes.length}
+    {/* categoryAndTypes.length */}
       <div>
         {categoryAndTypes.map((category, i) => (
           <Card
@@ -192,7 +220,7 @@ const Template = () => {
           <Card
             key={j}
             className="cardss"
-            style={{ width: "30rem", marginBottom: "10px" }}
+            style={{width: "30rem", marginBottom: "10px" }}
           >
             <Card.Body>
               <ContentEditable
@@ -201,12 +229,13 @@ const Template = () => {
                 onBlur={(e) => handleTemplateBlur(e, i, j)} // Handle blur event to save changes
               />
             </Card.Body>
+            
           </Card>
         ))
         }
       </div>
       
-    ))}<button onClick={handleRegenerate}><Link to={'/dashboard'}>Regenerate</Link></button>
+    ))}<button ><Link to={'/dashboard'}>Regenerate</Link></button>
   </div>
   
 )}
@@ -219,3 +248,6 @@ const Template = () => {
 };
 
 export default Template;
+
+
+
