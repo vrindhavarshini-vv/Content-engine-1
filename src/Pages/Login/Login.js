@@ -32,6 +32,7 @@ const Login = () => {
 
           if (regLogin.email == user.email) {
             if(regLogin.uid==user.UID){
+            
             dispatch(setAdminLoginData(user));
             dispatch(setAdminLogged(true));
             dispatch(setIsAdmin(true));

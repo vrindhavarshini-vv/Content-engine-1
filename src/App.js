@@ -6,8 +6,13 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import Login from "./Pages/Login/Login";
 import Dashboard from "./Pages/Generate/Dashboard";
-import Categories from "./Pages/Settings/setting";
+<<<<<<<<< Temporary merge branch 1
+import Categories from './Pages/Settings/setting'
 import Template from "./Pages/Template/index";
+=========
+import Categories from "./Pages/Settings/setting";
+import Template from "./Pages/Template/index"
+>>>>>>>>> Temporary merge branch 2
 
 
 
