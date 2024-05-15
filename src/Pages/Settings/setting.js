@@ -63,7 +63,8 @@ export default function Categories() {
         id: doc.id,
         name: doc.data().type,
         categoryId: doc.data().categoryId,
-        typeId:doc.data().id
+        typeId:doc.data().id,
+        uid:doc.data().uid
       }));
       dispatch(setTypes(typesList));
     } catch (error) {
@@ -143,9 +144,9 @@ export default function Categories() {
 
       dispatch(setTypes([
         ...types,
-        { id: typeId, type: categoryType, categoryId: selectedCategory }
+        { id: typeId,...typeData }
       ]));
-
+      console.log("uid:", adminLoginData.uid)
       dispatch(setCategoryType(""));
       alert("Category Type added successfully!");
 
@@ -162,9 +163,9 @@ export default function Categories() {
       return;
     }
 
-    const createEmail = `Dear "${getCategoryNameById(
+    const createEmail = `please give a "${getCategoryNameById(
       selectedCategory
-    )}",\n\nWe are pleased to welcome you as our new" ${categoryType}"!`;
+    )}",related "${categoryType}" Email!`;
     dispatch(setPreviewContent(createEmail));
   };
   const getCategoryNameById = (categoryId) => {
@@ -191,6 +192,8 @@ export default function Categories() {
   const handleNavigateGeneratePage = () =>{
     navigate('/dashboard')
   }
+ let uid= localStorage.getItem("uid")
+ console.log(uid)
 
   return (
     <>
@@ -250,7 +253,7 @@ export default function Categories() {
           </div>
         </div>
       )} */}
-
+{console.log("types",types)}
       {types.length > 0 && (
         <div>
           <h2>Types List:</h2>
@@ -263,7 +266,7 @@ export default function Categories() {
               </tr>
             </thead>
             <tbody>
-              {types.map((type, i) => (
+              {types.filter((e)=>e.uid==uid).map((type, i) => (
                 <tr key={type.id}>
                   <td>{i + 1}</td>
                   <td>{type.name}</td>

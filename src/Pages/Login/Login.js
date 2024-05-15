@@ -6,6 +6,7 @@ import {
   setAdminLoginData,
   setAdminLogged,
   setIsAdmin,
+  
 } from "../../Routes/Slices/adminLogin";
 import { useDispatch } from "react-redux";
 
@@ -26,6 +27,8 @@ const Login = () => {
           // Signed in
           const user = userCredential.user;
           localStorage.setItem("token", user.accessToken);
+           localStorage.setItem("uid",user.uid)
+          
 
           if (regLogin.email == user.email) {
             if(regLogin.uid==user.UID){
