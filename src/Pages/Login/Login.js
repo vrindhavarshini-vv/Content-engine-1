@@ -26,20 +26,18 @@ const Login = () => {
           // Signed in
           const user = userCredential.user;
           localStorage.setItem("token", user.accessToken);
+          localStorage.setItem("uid", user.uid);
 
           if (regLogin.email == user.email) {
-            if(regLogin.uid==user.UID){
-            if (regLogin.uid == user.UID){
             dispatch(setAdminLoginData(user));
             dispatch(setAdminLogged(true));
             dispatch(setIsAdmin(true));
             alert("Admin login successfull!");
             navigate("/dashboard");
-            
-          } else {  
+          } else {
             alert("Admin purpose only");
           }
-        }})
+        })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
@@ -82,4 +80,4 @@ const Login = () => {
   );
 };
 
-export default Login
+export default Login;

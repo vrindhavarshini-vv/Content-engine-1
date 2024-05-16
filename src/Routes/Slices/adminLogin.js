@@ -5,7 +5,7 @@ export const AdminLogin = createSlice({
   initialState: {
     adminLoginData: {},
     adminLogged: false,
-    isAdmin: false,
+    isAdmin: false
   },
   reducers: {
     setAdminLoginData: (state, action) => {
