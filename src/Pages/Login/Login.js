@@ -8,6 +8,13 @@ import {
   setIsAdmin,
 } from "../../Routes/Slices/adminLogin";
 import { useDispatch } from "react-redux";
+import { GoogleAuthProvider ,signInWithPopup} from "firebase/auth";
+import GoogleButton from 'react-google-button'
+
+
+
+
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,25 +24,29 @@ const Login = () => {
     email: "",
     password: "",
   });
+
+
+ 
+
   const checkAdmin = async () => {
     if (regLogin.email === "" || regLogin.password === "") {
       alert("Please fill all fields");
     } else {
       await signInWithEmailAndPassword(auth, regLogin.email, regLogin.password)
-      .then((userCredential) => {
-          // console.log('uC',userCredential)
+        .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
           localStorage.setItem("token", user.accessToken);
           localStorage.setItem("uid", user.uid);
+          
 
           if (regLogin.email == user.email) {
             dispatch(setAdminLoginData(user));
             dispatch(setAdminLogged(true));
-            // dispatch(setIsAdmin(true));
+            dispatch(setIsAdmin(true));
             alert("Admin login successfull!");
             navigate("/dashboard");
-          } else {
+          } else {  
             alert("Admin purpose only");
           }
         })
@@ -48,7 +59,19 @@ const Login = () => {
     }
   };
 
+  const handleGoogleAuth = async (e) =>{
+    const provider = await new GoogleAuthProvider();
+    return signInWithPopup(auth, provider).then((userCredential) => {
+      const user = userCredential.user;
+      console.log("user",user)
+      localStorage.setItem("token", user.accessToken);
+      localStorage.setItem("uid", user.uid);
+        navigate("/dashboard")
+  })}
+  
+
   return (
+    <center>
     <div>
       <h4>{JSON.stringify(regLogin)}</h4>
       <form>
@@ -77,7 +100,12 @@ const Login = () => {
           </button>
         </div>
       </form>
-    </div>
+      <br/>
+      <GoogleButton
+        onClick={handleGoogleAuth}
+      />
+      </div>
+    </center>
   );
 };
 

@@ -12,10 +12,12 @@ import {
   setFbGeneratedDatas,
 } from "../../Routes/Slices/templateSlice";
 import './index.css'
+import { useNavigate } from "react-router-dom";
 
 
 
 const Template = () => {
+  const navigate = useNavigate
   const dispatch = useDispatch();
   const {
     fbCategory,
@@ -120,6 +122,8 @@ const Template = () => {
     setSelectTemplate(temp);
     setRegen(true);
   };
+  
+const handleRegenerateToDashboard = () => navigate("/dashboard");
 
   return (
     <div>
@@ -226,6 +230,7 @@ const Template = () => {
           </Modal.Footer>
         {/* </center> */}
       </Modal>
+      <button type="button" className="btn btn-info" onClick={handleRegenerateToDashboard}>re-Generate</button>
     </div>
   );
 };

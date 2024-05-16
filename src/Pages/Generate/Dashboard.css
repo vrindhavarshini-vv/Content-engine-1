@@ -1,0 +1,24 @@
+.saveButton{
+    color: black;
+    background-color: green;
+}
+.saveButton:hover{
+    background-color: yellowgreen;
+}
+.menu{
+    width: 3%;
+    height: 3%;
+}
+.sideNav{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap:10px;
+}
+.buttonInsideNav{
+    outline: none;
+    border-width: 100%;
+}
+.buttonInsideNav:hover{
+    background-color: gray;
+}
