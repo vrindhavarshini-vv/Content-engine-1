@@ -204,7 +204,7 @@ export default function Categories() {
         >
           {console.log("selcat", selectedCategory)}
           <option value="">Select a Category</option>
-          {categories.map((category) => (
+          {categories.filter((e)=>e.uid==uid).map((category) => (
             <option key={category.id} value={category.id}>
               {category.categoryName}
             </option>
