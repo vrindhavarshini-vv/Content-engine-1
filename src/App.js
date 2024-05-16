@@ -6,9 +6,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import Login from "./Pages/Login/Login";
 import Dashboard from "./Pages/Generate/Dashboard";
-import Categories from "./Pages/Settings/setting";
-import Template from "./Pages/Template";
-
+import Categories from './Pages/Settings/setting'
+import Template from "./Pages/Template/index";
 
 
 
@@ -41,8 +40,9 @@ function App() {
       <Routes>
 
         <Route path="/" element={<Login/>} />
+
         {adminLogged ?<Route path="/user/setting" element ={<Categories/>}/>:null}
-       
+
         {adminLogged ? <Route path="/dashboard" element={<Dashboard />} />:null}
         {adminLogged ? <Route path="/template" element={<Template />} />:null}
 
