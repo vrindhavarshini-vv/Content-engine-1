@@ -10,10 +10,11 @@ import Categories from './Pages/Settings/setting'
 import Template from "./Pages/Template/index";
 
 
+
 function App() {
   const dispatch = useDispatch();
   // const navigate = useNavigate()
-  const { adminLoginData, adminLogged, isAdmin } = useSelector(
+  const {adminLogged } = useSelector(
     (state) => state.adminLogin
   );
 
@@ -26,9 +27,10 @@ function App() {
   }, []);
 
   const checkLoginAuth = async () => {
-    await onAuthStateChanged(auth, (currentUser) => {
-      localStorage.setItem("token", currentUser.accessToken);
-      dispatch(setAdminLoginData(currentUser));
+    await onAuthStateChanged(auth, (user) => {
+      console.log('User',user)
+      localStorage.setItem("token", user.accessToken);
+      dispatch(setAdminLoginData(user));
       dispatch(setAdminLogged(true));
     });
   };
@@ -38,7 +40,9 @@ function App() {
       <Routes>
 
         <Route path="/" element={<Login/>} />
-        <Route path="/user/setting" element ={<Categories/>}/> 
+
+        {adminLogged ?<Route path="/user/setting" element ={<Categories/>}/>:null}
+
         {adminLogged ? <Route path="/dashboard" element={<Dashboard />} />:null}
         {adminLogged ? <Route path="/template" element={<Template />} />:null}
 

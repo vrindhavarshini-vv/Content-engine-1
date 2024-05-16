@@ -22,7 +22,8 @@ const Login = () => {
       alert("Please fill all fields");
     } else {
       await signInWithEmailAndPassword(auth, regLogin.email, regLogin.password)
-        .then((userCredential) => {
+      .then((userCredential) => {
+          // console.log('uC',userCredential)
           // Signed in
           const user = userCredential.user;
           localStorage.setItem("token", user.accessToken);
@@ -31,7 +32,7 @@ const Login = () => {
           if (regLogin.email == user.email) {
             dispatch(setAdminLoginData(user));
             dispatch(setAdminLogged(true));
-            dispatch(setIsAdmin(true));
+            // dispatch(setIsAdmin(true));
             alert("Admin login successfull!");
             navigate("/dashboard");
           } else {

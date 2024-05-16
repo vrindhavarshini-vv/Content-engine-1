@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Card, Modal } from "react-bootstrap";
 import { db } from "../Firebase/firebase";
 import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
-import { collection, doc, getDocs, updateDoc } from "firebase/firestore";
-import "./index.css";
+import { collection, getDocs } from "firebase/firestore";
 import { useSelector, useDispatch } from "react-redux";
 import {
   setFbCategory,
@@ -12,8 +11,9 @@ import {
   setCategoryAndTypes,
   setFbGeneratedDatas,
 } from "../../Routes/Slices/templateSlice";
-import Dashboard from "../Generate/Dashboard";
-import axios from "axios";
+import './index.css'
+
+
 
 const Template = () => {
   const dispatch = useDispatch();
@@ -24,11 +24,13 @@ const Template = () => {
     categoryAndTypes,
     fbGeneratedDatas,
   } = useSelector((state) => state.template);
-  const [selectType, setSelectType] = useState();
+  const [selectType, setSelectType] = useState([]);
   const [newData, setNewData] = useState([]);
   const [content, setContent] = useState("");
-  const [selectTemplate, setSelectTemplate] = useState([]);
+  const [selectTemplate, setSelectTemplate] = useState("");
   const [regen, setRegen] = useState(false);
+
+  console.log("selectTemplate",selectTemplate);
 
   const fetchCategory = async () => {
     const querySnapshot = await getDocs(collection(db, "category"));
@@ -37,6 +39,7 @@ const Template = () => {
     }));
     dispatch(setFbCategory(categories));
   };
+
   const fetchTypes = async () => {
     const querySnapShot = await getDocs(collection(db, "type"));
     const types = querySnapShot.docs.map((doc) => ({
@@ -54,7 +57,6 @@ const Template = () => {
     }));
     dispatch(setFbGeneratedDatas(template));
   };
-  // console.log(fbGeneratedDatas)
 
   const fetchCategoryWithType = () => {
     const categoryTypes = fbCategory.map((category) => {
@@ -66,7 +68,6 @@ const Template = () => {
     const selectCat = categoryTypes.slice();
     dispatch(setCategoryAndTypes(selectCat));
   };
-  console.log(categoryAndTypes);
 
   const templateInsideTypes = () => {
     const cat = fbCategory.map((category) => {
@@ -99,7 +100,6 @@ const Template = () => {
 
   const handleCategoryClick = async (eachCategory) => {
     dispatch(setSelectedCategory(eachCategory));
-    console.log("selectedCategory:", selectedCategory);
   };
 
   const handleTypeClick = (clickType) => {
@@ -115,20 +115,12 @@ const Template = () => {
 
     setSelectType(selectedTemplates);
   };
-  console.log(selectType);
 
-  const handleTemplateBlur = (e) => {
-    setContent(e.target);
-  };
-
-  const updateTemplate = async (temp) => {
+  const handleTemplateSelected = (temp) => {
     setSelectTemplate(temp);
-    console.log(temp);
-  };
-  const reGenerate = () => {
     setRegen(true);
   };
-  console.log(selectType);
+
   return (
     <div>
       <h2>Welcome to the template page</h2>
@@ -150,7 +142,6 @@ const Template = () => {
           </Card>
         ))}
       </div>
-
       {selectedCategory && (
         <div>
           <h5>Types for {selectedCategory.category.categoryName}</h5>
@@ -172,8 +163,7 @@ const Template = () => {
           ))}
         </div>
       )}
-
-      {selectType && (
+      {selectType.length > 0 && (
         <div>
           {selectType.map((doc, i) => (
             <div key={i}>
@@ -183,65 +173,58 @@ const Template = () => {
                   key={j}
                   className="cardss"
                   style={{ width: "30rem", marginBottom: "10px" }}
+                  onClick={() => handleTemplateSelected(temp.template)}
                 >
                   <Card.Body>
-                    <div>
-                      <div
-                        contentEditable
-                        onBlur={(e) => handleTemplateBlur(e, i, j)}
-                      >
-                        {temp.template}
-                      </div>
-                      <div>
-                        <Button
-                          variant="success"
-                          onClick={() => updateTemplate(temp)}
-                        >
-                          Save
-                        </Button>
-                      </div>
-                    </div>
+                    <div>{temp.template}</div>
                   </Card.Body>
                 </Card>
               ))}
             </div>
           ))}
-          <button type="button" onClick={reGenerate}>
-            Re-generate
-          </button>
         </div>
       )}
 
-      <Modal show={regen} onHide={() => setRegen(false)}>
-        <center>
+      <Modal 
+      show={regen} 
+      onHide={() => setRegen(false)}
+      size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+        dialogClassName="modal-90w">
+        {/* <center> */}
           <Modal.Header closeButton>
-            <Modal.Title>You can Regenerate your template!</Modal.Title>
+            <Modal.Title>Email Preview! You can edit your email!</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Dashboard />
-            {selectedCategory && (
-              <select>
-                <option selected>
-                  {selectedCategory.category.categoryName}
-                </option>
-              </select>
-            )}
-            {selectType && (
-              <select>
-                {selectType.map((doc, i) => (
-                  <option key={i} selected>
-                    {doc.type.type}
-                  </option>
-                ))}
-              </select>
-            )}
+          <div
+            contentEditable
+            onInput={(e) => setSelectTemplate(e.target.innerHTML)}
+            style={{
+              width: "100%",
+              height: "100%",
+              border: "none",
+              padding: "10px",
+              fontFamily: "Arial, sans-serif",
+              fontSize: "16px",
+              backgroundColor: "#f9f9f9",
+              resize: "none",
+              // overflow: "hidden",
+              whiteSpace: "pre-wrap",
+              // wordWrap: "break-word",
+            }}
+            dangerouslySetInnerHTML={{ __html: selectTemplate }}
+          />
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setRegen(false)}>
               Close
             </Button>
+            <Button variant="success" onClick={() => setRegen(false)}>
+              Save
+            </Button>
           </Modal.Footer>
-        </center>
+        {/* </center> */}
       </Modal>
     </div>
   );

@@ -20,13 +20,13 @@ export const TemplateSlice = createSlice({
     },
     setFbType: (state, action) => {
       state.fbType = action.payload;
+      // console.log('acPay',state.fbType)
       const categoryTypes =state.fbCategory.map((category) => {
-        const typesForCategory = action.payload
-          .filter((type) => type.categoryId === category.categoryId)
-          .map((doc) => doc.type);
+        const typesForCategory = state.fbType.filter((type) => type.categoryId === category.categoryId).map((doc) => doc.type);
+        console.log('tyCat',typesForCategory)
         return { category, types: typesForCategory };
       });
-      state.categoryAndTypes = categoryTypes.slice()
+      state.categoryAndTypes = categoryTypes
 
     },
     setFbGeneratedDatas:(state,action)=>{
