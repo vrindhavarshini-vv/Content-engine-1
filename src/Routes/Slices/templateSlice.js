@@ -7,7 +7,8 @@ export const TemplateSlice = createSlice({
     selectedCategory: null,
     fbType: [],
     fbGeneratedDatas:[],
-    categoryAndTypes:[]
+    categoryAndTypes:[],
+    
 
   },
   reducers: {

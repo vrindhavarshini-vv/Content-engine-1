@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Card } from "react-bootstrap";
+import { Button, Card, Modal } from "react-bootstrap";
 import { db } from "../Firebase/firebase";
 import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
-import { collection, doc, documentId, getDocs ,updateDoc} from "firebase/firestore";
+import { collection, doc, getDocs} from "firebase/firestore";
 import "./index.css";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -10,21 +10,25 @@ import {
   setFbType,
   setSelectedCategory,
   setCategoryAndTypes,
-  setFbGeneratedDatas
+  setFbGeneratedDatas,
 } from "../../Routes/Slices/templateSlice";
-import ContentEditable from "react-contenteditable";
-import { Link } from "react-router-dom";
+import Dashboard from "../Generate/Dashboard";
+import axios from "axios";
 
 const Template = () => {
   const dispatch = useDispatch();
-  const { fbCategory, fbType, selectedCategory,categoryAndTypes,fbGeneratedDatas } = useSelector(
-    (state) => state.template
-  );
+  const {
+    fbCategory,
+    fbType,
+    selectedCategory,
+    categoryAndTypes,
+    fbGeneratedDatas,
+  } = useSelector((state) => state.template);
   const [selectType, setSelectType] = useState();
   const [newData, setNewData] = useState([]);
-  const [content,setContent] = useState('')
-  const [editableContent,seteditableContent] = useState({})
-  
+  const [content, setContent] = useState("");
+  const [selectTemplate, setSelectTemplate] = useState([]);
+  const [regen, setRegen] = useState(false);
 
   const fetchCategory = async () => {
     const querySnapshot = await getDocs(collection(db, "category"));
@@ -45,10 +49,12 @@ const Template = () => {
   const fetchTemplate = async () => {
     const querySnapShot = await getDocs(collection(db, "generatedDatas"));
     const template = querySnapShot.docs.map((doc) => ({
+      id: doc.id,
       ...doc.data(),
     }));
     dispatch(setFbGeneratedDatas(template));
   };
+  // console.log(fbGeneratedDatas)
 
   const fetchCategoryWithType = () => {
     const categoryTypes = fbCategory.map((category) => {
@@ -57,7 +63,7 @@ const Template = () => {
         .map((doc) => doc.type);
       return { category, types: typesForCategory };
     });
-    const selectCat = categoryTypes.slice()
+    const selectCat = categoryTypes.slice();
     dispatch(setCategoryAndTypes(selectCat));
   };
   console.log(categoryAndTypes);
@@ -73,6 +79,7 @@ const Template = () => {
           return {
             type: type.type,
             templates: templatesForType.map((template) => ({
+              id: template.id,
               template: template.templates,
             })),
           };
@@ -94,10 +101,10 @@ const Template = () => {
     dispatch(setSelectedCategory(eachCategory));
     console.log("selectedCategory:", selectedCategory);
   };
-  
+
   const handleTypeClick = (clickType) => {
     const selectedTemplates = [];
-  
+
     newData.forEach((user) => {
       user.types.forEach((type) => {
         if (type.type === clickType) {
@@ -105,7 +112,7 @@ const Template = () => {
         }
       });
     });
-  
+
     setSelectType(selectedTemplates);
     console.log('Selected Template',selectType)
   };
@@ -113,41 +120,18 @@ const Template = () => {
   const handleTemplateBlur = (e) => {
     setContent(e.target)
   }
-  // console.log(content)
-
-
-  // const handleUpdate = async () => {
-  //   const update = await updateDoc(doc(db, "generatedDatas"),
-  // 
-  // const handleUpdate = async (typeIndex, templateIndex, templateId) => {
-  //   const newContent = editableContent[`${typeIndex}-${templateIndex}`];
-  //   if (newContent) {
-  //     const templateDoc = doc(db, "generatedDatas", templateId);
-  //     await updateDoc(templateDoc, {
-  //       templates: newContent,
-  //     });
-  //     alert("Template updated successfully");
-  //   }
-  // };
-   
-  // const handleUpdate = async (typeIndex, templateIndex, templateId) => {
-  //   const newContent = editableContent[`${typeIndex}-${templateIndex}`];
-  //   if (newContent) {
-  //     const templateDoc = doc(db, "generatedDatas", templateId);
-  //     await updateDoc(templateDoc, {
-  //       templates: newContent,
-  //     });
-  //     dispatch()
-  //     alert("Template updated successfully");
-  //   }
-  // };
-
   
-
+  const updateTemplate = async (temp) => {
+    setSelectTemplate(temp);
+    console.log(temp);
+  };
+  const reGenerate = () => {
+    setRegen(true);
+  };
+  console.log(selectType);
   return (
-    <>
+    <div>
       <h2>Welcome to the template page</h2>
-
       <h5>Select Category</h5>
     {/* categoryAndTypes.length */}
       <div>
@@ -190,60 +174,77 @@ const Template = () => {
         </div>
       )}
 
-      {/* {selectType && (
-        <div>
-          <h5>Select Template for {selectType.map(doc=>doc.type.type)}</h5>
-          <Card
-              className="cardss"
-              // key={i}
-              // onClick={() => handleTypeClick(type)}
-              // data-index={i}
-              style={{ width: "30rem" }}
-            >
-              <Card.Body>
-                  {selectType.map(doc=>doc.type.templates.map(temp=>temp.template))}
-                
-              </Card.Body>
-            </Card>
-          
-        </div>
-      )} */}
       {selectType && (
-  <div>
-    {/* <h5>Select Template for {selectType.map(doc => doc.type.type)}</h5> */}
-    {selectType && (
-  <div>
-    {selectType.map((doc, i) => (
-      <div key={i}>
-        <h5>Select Template for {doc.type.type}</h5>
-        {doc.type.templates.map((temp, j) => (
-          <Card
-            key={j}
-            className="cardss"
-            style={{width: "30rem", marginBottom: "10px" }}
-          >
-            <Card.Body>
-              <ContentEditable
-                html={temp.template} // Set the initial HTML content for the ContentEditable
-                tagName="div" // Specify the HTML tag to use for the editable content
-                onBlur={(e) => handleTemplateBlur(e, i, j)} // Handle blur event to save changes
-              />
-            </Card.Body>
-            
-          </Card>
-        ))
-        }
-      </div>
-      
-    ))}<button ><Link to={'/dashboard'}>Regenerate</Link></button>
-  </div>
-  
-)}
+        <div>
+          {selectType.map((doc, i) => (
+            <div key={i}>
+              <h5>Select Template for {doc.type.type}</h5>
+              {doc.type.templates.map((temp, j) => (
+                <Card
+                  key={j}
+                  className="cardss"
+                  style={{ width: "30rem", marginBottom: "10px" }}
+                >
+                  <Card.Body>
+                    <div>
+                      <div
+                        contentEditable
+                        onBlur={(e) => handleTemplateBlur(e, i, j)}
+                      >
+                        {temp.template}
+                      </div>
+                      <div>
+                        <Button
+                          variant="success"
+                          onClick={() => updateTemplate(temp)}
+                        >
+                          Save
+                        </Button>
+                      </div>
+                    </div>
+                  </Card.Body>
+                </Card>
+              ))}
+            </div>
+          ))}
+          <button type="button" onClick={reGenerate}>
+            Re-generate
+          </button>
+        </div>
+      )}
 
-  </div>
-)}
-
-    </>
+      <Modal show={regen} onHide={() => setRegen(false)}>
+        <center>
+          <Modal.Header closeButton>
+            <Modal.Title>You can Regenerate your template!</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Dashboard />
+            {selectedCategory && (
+              <select>
+                <option selected>
+                  {selectedCategory.category.categoryName}
+                </option>
+              </select>
+            )}
+            {selectType && (
+              <select>
+                {selectType.map((doc, i) => (
+                  <option key={i} selected>
+                    {doc.type.type}
+                  </option>
+                ))}
+              </select>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setRegen(false)}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </center>
+      </Modal>
+    </div>
   );
 };
 
