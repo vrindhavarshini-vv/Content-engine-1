@@ -9,13 +9,14 @@ export const DashBoardSlice = createSlice({
    isCategorySelected:false,
    selectedType:"",
    isTypeSelected:false,
-   selectedOption:"",
    isPopUp:false,
    categoryAndTypes:([]),
    answer:[],
    selectedCategoryName:"",
    selectedTypeName:"",
-   templates:[]
+   show:false,
+   isApiResponseReceived: false,
+   
 
    
    
@@ -27,7 +28,6 @@ export const DashBoardSlice = createSlice({
     setTypesList: (state, action) => {
         state.typesList = action.payload;
       },
-     
       setSelectedCategory: (state, action) => {
         state.selectedCategory = action.payload;
       },
@@ -40,9 +40,7 @@ export const DashBoardSlice = createSlice({
       setIsTypeSelected: (state, action) => {
         state.isTypeSelected = action.payload;
       },
-      setSelectedOption: (state, action) => {
-        state.selectedOption = action.payload;
-      },
+     
       setIsPopUp: (state, action) => {
         state.isPopUp = action.payload;
       },
@@ -58,12 +56,16 @@ export const DashBoardSlice = createSlice({
       setSelectedTypeName:  (state, action) => {
         state.selectedTypeName = action.payload;
       },
-      addTemplates:  (state, action) => {
-        state.templates = action.payload;
+      setShow:  (state, action) => {
+        state.show = action.payload;
+      },
+      setIsApiResponseReceived:  (state, action) => {
+        state.isApiResponseReceived = action.payload;
       },
     
   },
 });
 
-export const { setCategoryList,setTypesList,setSelectedCategory,setIsCategorySelected,setSelectedType,setIsTypeSelected,setSelectedOption,setIsPopUp,setCategoryAndTypes,setAnswer,setSelectedCategoryName,setSelectedTypeName,addTemplates} = DashBoardSlice.actions;
+export const { setCategoryList,setTypesList,setSelectedCategory,setIsCategorySelected,setSelectedType,setIsTypeSelected,setIsPopUp,setCategoryAndTypes,setAnswer,setSelectedCategoryName,setSelectedTypeName,setShow,setIsApiResponseReceived} = DashBoardSlice.actions;
 export default DashBoardSlice.reducer;
+ 
