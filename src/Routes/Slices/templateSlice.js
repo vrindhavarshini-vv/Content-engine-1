@@ -6,10 +6,10 @@ export const TemplateSlice = createSlice({
     fbCategory: [],
     selectedCategory: null,
     fbType: [],
-    fbGeneratedDatas:[],
-    categoryAndTypes:[],
-    
-
+    fbGeneratedDatas: [],
+    categoryAndTypes: [],
+    categoryWithTypesWithTemplates:[],
+    selectTemplate:'',
   },
   reducers: {
     setFbCategory: (state, action) => {
@@ -21,22 +21,53 @@ export const TemplateSlice = createSlice({
     setFbType: (state, action) => {
       state.fbType = action.payload;
       // console.log('acPay',state.fbType)
-      const categoryTypes =state.fbCategory.map((category) => {
-        const typesForCategory = state.fbType.filter((type) => type.categoryId === category.categoryId).map((doc) => doc.type);
-        console.log('tyCat',typesForCategory)
+      const categoryTypes = state.fbCategory.map((category) => {
+        const typesForCategory = state.fbType
+          .filter((type) => type.categoryId === category.categoryId)
+          .map((doc) => doc.type);
         return { category, types: typesForCategory };
       });
-      state.categoryAndTypes = categoryTypes
-
+      state.categoryAndTypes = categoryTypes;
     },
-    setFbGeneratedDatas:(state,action)=>{
-      state.fbGeneratedDatas=action.payload
+    setFbGeneratedDatas: (state, action) => {
+      state.fbGeneratedDatas = action.payload;
     },
-    setCategoryAndTypes:(state,action)=>{
-      state.categoryAndTypes = action.payload
-    }
+    setCategoryAndTypes: (state, action) => {
+      state.categoryAndTypes = action.payload;
+        const cat = state.fbCategory.map((category) => {
+          const typesForCategory = state.fbType
+            .filter((type) => type.categoryId === category.categoryId)
+            .map((type) => {
+              const templatesForType = state.fbGeneratedDatas.filter(
+                (data) => data.typeId === type.typeId
+              );
+              return {
+                type: type.type,
+                templates: templatesForType.map((template) => ({
+                  id: template.id,
+                  template: template.templates,
+                })),
+              };
+            });
+          return { category, types: typesForCategory };
+        });
+        state.categoryWithTypesWithTemplates = cat
+      },
+      setCategoryWithTypesWithTemplates:(state,action)=>{
+        state.categoryWithTypesWithTemplates = action.payload
+      },
+      setSelectTemplate:(state,action)=>{
+        state.selectTemplate = action.payload
+      }
   },
 });
-export const { setFbCategory, setSelectedCategory, setFbType,setCategoryAndTypes,setFbGeneratedDatas } =
-  TemplateSlice.actions;
+export const {
+  setFbCategory,
+  setSelectedCategory,
+  setFbType,
+  setCategoryAndTypes,
+  setFbGeneratedDatas,
+  setCategoryWithTypesWithTemplates,
+  setSelectTemplate
+} = TemplateSlice.actions;
 export default TemplateSlice.reducer;
