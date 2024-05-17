@@ -8,8 +8,9 @@ import Login from "./Pages/Login/Login";
 import Dashboard from "./Pages/Generate/Dashboard";
 import Categories from './Pages/Settings/setting'
 import Template from "./Pages/Template/index";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import ContactUs  from "./Pages/SendingPage/sendingPage";
 import EmailForm from "./Pages/Emailform/emailform";
+
 
 
 
@@ -30,7 +31,7 @@ function App() {
 
   const checkLoginAuth = async () => {
     await onAuthStateChanged(auth, (user) => {
-      console.log('User',user)
+      // console.log('User',user)
       localStorage.setItem("token", user.accessToken);
       dispatch(setAdminLoginData(user));
       dispatch(setAdminLogged(true));
@@ -46,6 +47,7 @@ function App() {
         {adminLogged ?<Route path="/user/setting" element ={<Categories/>}/>:null}
         {adminLogged ? <Route path="/dashboard" element={<Dashboard />} />:null}
         {adminLogged ? <Route path="/template" element={<Template />} />:null}
+        {adminLogged ? <Route path="/sendingPage" element={<ContactUs /> }/>:null}
 
         
       </Routes>
