@@ -131,7 +131,7 @@ const Template = () => {
   };
 
   
-const handleRegenerateToDashboard = () => navigate("/dashboard");
+
 const handleToSend = () => navigate("/emailform")
 
 
