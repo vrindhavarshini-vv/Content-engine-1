@@ -10,6 +10,7 @@ import {
 import { useDispatch } from "react-redux";
 import { GoogleAuthProvider ,signInWithPopup} from "firebase/auth";
 import GoogleButton from 'react-google-button'
+import { Button,Form } from "react-bootstrap";
 
 
 
@@ -75,39 +76,32 @@ const Login = () => {
     <center>
     <div>
       <h4>{JSON.stringify(regLogin)}</h4>
-      <form>
-        <h2>Admin Page</h2>
-        <div>
-          <label>Admin email:</label>
-          <input
-            placeholder="Enter email"
-            type="email"
-            onKeyUp={(e) => setRegLogin({ ...regLogin, email: e.target.value })}
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            placeholder="Enter password"
-            type="password"
-            onKeyUp={(e) =>
-              setRegLogin({ ...regLogin, password: e.target.value })
-            }
-          />
-        </div>
-        <div>
-          <button type="button" onClick={checkAdmin}>
+      <Form>
+          <Form.Group className="mb-3" controlId="formGroupEmail">
+            <Form.Label><h1>Admin Email:</h1></Form.Label>
+            <Form.Control type="email" placeholder="Enter  the email" onKeyUp={(e) => setRegLogin({ ...regLogin, email: e.target.value })}/>
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="formGroupPassword">
+            <Form.Label><h1>Password:</h1></Form.Label>
+            <Form.Control type="password" placeholder="Enter the Password"  onKeyUp={(e) =>setRegLogin({ ...regLogin, password: e.target.value })} />
+          </Form.Group>
+          <Button type="button" variant="primary" onClick={checkAdmin}>
             Admin Login
-          </button>
-        </div>
-      </form>
+          </Button>
+      </Form>
       <br/>
-      <GoogleButton
-        onClick={handleGoogleAuth}
-      />
+      <GoogleButton onClick={handleGoogleAuth} />
       </div>
     </center>
   );
 };
 
 export default Login;
+
+
+ 
+  
+
+
+

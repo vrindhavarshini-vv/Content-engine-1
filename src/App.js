@@ -41,10 +41,11 @@ function App() {
       <Routes>
 
         <Route path="/" element={<Login/>} />
-        <Route path="/emailform" element={<EmailForm/>} />
+        
         {adminLogged ?<Route path="/user/setting" element ={<Categories/>}/>:null}
         {adminLogged ? <Route path="/dashboard" element={<Dashboard />} />:null}
         {adminLogged ? <Route path="/template" element={<Template />} />:null}
+        { adminLogged ? <Route path="/emailform" element={<EmailForm/>} />: null }
 
         
       </Routes>
