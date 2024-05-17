@@ -1,28 +1,38 @@
 import React, { useEffect, useState } from "react";
-import { Card } from "react-bootstrap";
+import { Button, Card, Modal } from "react-bootstrap";
 import { db } from "../Firebase/firebase";
 import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
-import { collection, doc, getDocs } from "firebase/firestore";
-import "./index.css";
+import { collection, getDocs } from "firebase/firestore";
 import { useSelector, useDispatch } from "react-redux";
 import {
   setFbCategory,
   setFbType,
   setSelectedCategory,
   setCategoryAndTypes,
-  setFbGeneratedDatas
+  setFbGeneratedDatas,
 } from "../../Routes/Slices/templateSlice";
-import ContentEditable from "react-contenteditable";
-import { Link } from "react-router-dom";
+import './index.css'
+import { useNavigate } from "react-router-dom";
+
+
 
 const Template = () => {
+  const navigate = useNavigate
   const dispatch = useDispatch();
-  const { fbCategory, fbType, selectedCategory,categoryAndTypes,fbGeneratedDatas } = useSelector(
-    (state) => state.template
-  );
-  const [selectType, setSelectType] = useState();
+  const {
+    fbCategory,
+    fbType,
+    selectedCategory,
+    categoryAndTypes,
+    fbGeneratedDatas,
+  } = useSelector((state) => state.template);
+  const [selectType, setSelectType] = useState([]);
   const [newData, setNewData] = useState([]);
-  const [content,setContent] = useState('')
+  const [content, setContent] = useState("");
+  const [selectTemplate, setSelectTemplate] = useState("");
+  const [regen, setRegen] = useState(false);
+
+  console.log("selectTemplate",selectTemplate);
 
   const fetchCategory = async () => {
     const querySnapshot = await getDocs(collection(db, "category"));
@@ -31,6 +41,7 @@ const Template = () => {
     }));
     dispatch(setFbCategory(categories));
   };
+
   const fetchTypes = async () => {
     const querySnapShot = await getDocs(collection(db, "type"));
     const types = querySnapShot.docs.map((doc) => ({
@@ -43,6 +54,7 @@ const Template = () => {
   const fetchTemplate = async () => {
     const querySnapShot = await getDocs(collection(db, "generatedDatas"));
     const template = querySnapShot.docs.map((doc) => ({
+      id: doc.id,
       ...doc.data(),
     }));
     dispatch(setFbGeneratedDatas(template));
@@ -55,10 +67,9 @@ const Template = () => {
         .map((doc) => doc.type);
       return { category, types: typesForCategory };
     });
-    const selectCat = categoryTypes.slice()
+    const selectCat = categoryTypes.slice();
     dispatch(setCategoryAndTypes(selectCat));
   };
-  console.log(categoryAndTypes);
 
   const templateInsideTypes = () => {
     const cat = fbCategory.map((category) => {
@@ -71,6 +82,7 @@ const Template = () => {
           return {
             type: type.type,
             templates: templatesForType.map((template) => ({
+              id: template.id,
               template: template.templates,
             })),
           };
@@ -90,12 +102,11 @@ const Template = () => {
 
   const handleCategoryClick = async (eachCategory) => {
     dispatch(setSelectedCategory(eachCategory));
-    console.log("selectedCategory:", selectedCategory);
   };
-  
+
   const handleTypeClick = (clickType) => {
     const selectedTemplates = [];
-  
+
     newData.forEach((user) => {
       user.types.forEach((type) => {
         if (type.type === clickType) {
@@ -103,25 +114,21 @@ const Template = () => {
         }
       });
     });
-  
+
     setSelectType(selectedTemplates);
-    console.log(selectType)
+  };
+
+  const handleTemplateSelected = (temp) => {
+    setSelectTemplate(temp);
+    setRegen(true);
   };
   
-  const handleTemplateBlur = (e)=>{
-    setContent(e.target)
-  }
-  // console.log(content)
+const handleRegenerateToDashboard = () => navigate("/dashboard");
 
-  const handleRegenerate = () => {
-
-  }
   return (
-    <>
+    <div>
       <h2>Welcome to the template page</h2>
-
       <h5>Select Category</h5>
-    {categoryAndTypes.length}
       <div>
         {categoryAndTypes.map((category, i) => (
           <Card
@@ -139,7 +146,6 @@ const Template = () => {
           </Card>
         ))}
       </div>
-
       {selectedCategory && (
         <div>
           <h5>Types for {selectedCategory.category.categoryName}</h5>
@@ -161,60 +167,71 @@ const Template = () => {
           ))}
         </div>
       )}
-
-      {/* {selectType && (
+      {selectType.length > 0 && (
         <div>
-          <h5>Select Template for {selectType.map(doc=>doc.type.type)}</h5>
-          <Card
-              className="cardss"
-              // key={i}
-              // onClick={() => handleTypeClick(type)}
-              // data-index={i}
-              style={{ width: "30rem" }}
-            >
-              <Card.Body>
-                  {selectType.map(doc=>doc.type.templates.map(temp=>temp.template))}
-                
-              </Card.Body>
-            </Card>
-          
+          {selectType.map((doc, i) => (
+            <div key={i}>
+              <h5>Select Template for {doc.type.type}</h5>
+              {doc.type.templates.map((temp, j) => (
+                <Card
+                  key={j}
+                  className="cardss"
+                  style={{ width: "30rem", marginBottom: "10px" }}
+                  onClick={() => handleTemplateSelected(temp.template)}
+                >
+                  <Card.Body>
+                    <div>{temp.template}</div>
+                  </Card.Body>
+                </Card>
+              ))}
+            </div>
+          ))}
         </div>
-      )} */}
-      {selectType && (
-  <div>
-    {/* <h5>Select Template for {selectType.map(doc => doc.type.type)}</h5> */}
-    {selectType && (
-  <div>
-    {selectType.map((doc, i) => (
-      <div key={i}>
-        <h5>Select Template for {doc.type.type}</h5>
-        {doc.type.templates.map((temp, j) => (
-          <Card
-            key={j}
-            className="cardss"
-            style={{ width: "30rem", marginBottom: "10px" }}
-          >
-            <Card.Body>
-              <ContentEditable
-                html={temp.template} // Set the initial HTML content for the ContentEditable
-                tagName="div" // Specify the HTML tag to use for the editable content
-                onBlur={(e) => handleTemplateBlur(e, i, j)} // Handle blur event to save changes
-              />
-            </Card.Body>
-          </Card>
-        ))
-        }
-      </div>
-      
-    ))}<button onClick={handleRegenerate}><Link to={'/dashboard'}>Regenerate</Link></button>
-  </div>
-  
-)}
+      )}
 
-  </div>
-)}
-
-    </>
+      <Modal 
+      show={regen} 
+      onHide={() => setRegen(false)}
+      size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+        dialogClassName="modal-90w">
+        {/* <center> */}
+          <Modal.Header closeButton>
+            <Modal.Title>Email Preview! You can edit your email!</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+          <div
+            contentEditable
+            onInput={(e) => setSelectTemplate(e.target.innerHTML)}
+            style={{
+              width: "100%",
+              height: "100%",
+              border: "none",
+              padding: "10px",
+              fontFamily: "Arial, sans-serif",
+              fontSize: "16px",
+              backgroundColor: "#f9f9f9",
+              resize: "none",
+              // overflow: "hidden",
+              whiteSpace: "pre-wrap",
+              // wordWrap: "break-word",
+            }}
+            dangerouslySetInnerHTML={{ __html: selectTemplate }}
+          />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setRegen(false)}>
+              Close
+            </Button>
+            <Button variant="success" onClick={() => setRegen(false)}>
+              Save
+            </Button>
+          </Modal.Footer>
+        {/* </center> */}
+      </Modal>
+      <button type="button" className="btn btn-info" onClick={handleRegenerateToDashboard}>re-Generate</button>
+    </div>
   );
 };
 
