@@ -116,6 +116,7 @@ const Template = () => {
     });
 
     setSelectType(selectedTemplates);
+    console.log('Selected Template',selectType)
   };
 
   const handleTemplateSelected = (temp) => {
@@ -124,11 +125,13 @@ const Template = () => {
   };
   
 const handleRegenerateToDashboard = () => navigate("/dashboard");
+const handleToSend = () => navigate("/emailform")
 
   return (
     <div>
       <h2>Welcome to the template page</h2>
       <h5>Select Category</h5>
+    {/* categoryAndTypes.length */}
       <div>
         {categoryAndTypes.map((category, i) => (
           <Card
@@ -224,9 +227,10 @@ const handleRegenerateToDashboard = () => navigate("/dashboard");
             <Button variant="secondary" onClick={() => setRegen(false)}>
               Close
             </Button>
-            <Button variant="success" onClick={() => setRegen(false)}>
-              Save
+            <Button variant="primary" onClick={() => setRegen(false)}>
+             Save
             </Button>
+            <button type="button" onClick={handleToSend }> Send </button>
           </Modal.Footer>
         {/* </center> */}
       </Modal>
