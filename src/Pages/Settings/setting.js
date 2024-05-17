@@ -87,7 +87,10 @@ export default function Categories() {
       alert("Please enter a category name");
       return;
     }
-    const existingCategory =categories.filter((category)=>category.categoryName==categoryName)
+
+    const existingCategory =categories.find((category)=>category.categoryName.toLowerCase()===categoryName.toLowerCase())
+     console.log("existingCategory",existingCategory)
+
     if(existingCategory){
       alert("please enter different category name");
       return;
