@@ -120,6 +120,7 @@ const Template = () => {
     });
 
     setSelectType(selectedTemplates);
+    console.log('Selected Template',selectType)
   };
 
   const handleTemplateSelected = (temp) => {
@@ -128,9 +129,11 @@ const Template = () => {
     dispatch(setSelectTemplate(temp));
     setRegen(true);
   };
-  // useEffect(()=>{
-  //   handleTemplateSelected();
-  // },[])
+
+  
+const handleRegenerateToDashboard = () => navigate("/dashboard");
+const handleToSend = () => navigate("/emailform")
+
 
   const handleRegenerateToDashboard = () => navigate("/dashboard");
   const handleBlur = (e)=>{
@@ -146,6 +149,7 @@ const Template = () => {
     <div>
       <h2>Welcome to the template page</h2>
       <h5>Select Category</h5>
+    {/* categoryAndTypes.length */}
       <div>
         {categoryAndTypes.filter((e)=> e.category.uid === parsedUid).map((category, i) => (
           <Card
@@ -236,9 +240,7 @@ const Template = () => {
               wordWrap: "break-word",
             }}
           />
-          
-        
-        </Modal.Body>
+       </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setRegen(false)}>
             Close
@@ -247,6 +249,7 @@ const Template = () => {
             Save
           </Button>
         </Modal.Footer>
+
         {/* </center> */}
       </Modal>
       <button

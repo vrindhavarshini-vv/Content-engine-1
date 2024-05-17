@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Modal,Button } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import {
   setCategories,
   setTypes,
@@ -87,12 +87,23 @@ export default function Categories() {
       alert("Please enter a category name");
       return;
     }
+
+    const existingCategory =categories.find((category)=>category.categoryName.toLowerCase()===categoryName.toLowerCase())
+     console.log("existingCategory",existingCategory)
+
+    if(existingCategory){
+      alert("please enter different category name");
+      return;
+    }
     try {
       const categoryData = {
         categoryName: categoryName,
         uid: adminLoginData.uid,
       };
-  const categoryRef = await addDoc(collection(db, "category"),categoryData);
+      const categoryRef = await addDoc(
+        collection(db, "category"),
+        categoryData
+      );
       const categoryId = categoryRef.id;
       await updateDoc(doc(db, "category", categoryId), {
         categoryId: categoryId,
@@ -114,7 +125,7 @@ export default function Categories() {
       console.error("Error adding category: ", error);
       alert("Failed to add category. Please try again.");
     }
-  };  
+  };
   const handleCategoryTypeChange = (e) => {
     dispatch(setCategoryType(e.target.value));
   };
@@ -204,11 +215,13 @@ export default function Categories() {
         >
           {console.log("selcat", selectedCategory)}
           <option value="">Select a Category</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.categoryName}
-            </option>
-          ))}
+          {categories
+            .filter((e) => e.uid == uid)
+            .map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.categoryName}
+              </option>
+            ))}
         </select>
 
         <Modal show={showModal} onHide={closeModal}>
