@@ -48,10 +48,7 @@ function App() {
           </>
           : null
         }
-
-
-        
-      </Routes>
+     </Routes>
     </BrowserRouter>
   );
 }
