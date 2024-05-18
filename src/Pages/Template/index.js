@@ -11,12 +11,12 @@ import {
   setCategoryAndTypes,
   setFbGeneratedDatas,
   setCategoryWithTypesWithTemplates,
-  setSelectTemplate
+  setSelectTemplate,
 } from "../../Routes/Slices/templateSlice";
 import "./index.css";
 import { useNavigate } from "react-router-dom";
-import ContentEditable from "react-contenteditable";
-import SendingPage from "../SendingPage/sendingPage";
+import ListExample from '../Navbar/index'
+
 
 const Template = () => {
   const navigate = useNavigate();
@@ -28,14 +28,14 @@ const Template = () => {
     categoryAndTypes,
     fbGeneratedDatas,
     categoryWithTypesWithTemplates,
-    selectTemplate
+    selectTemplate,
   } = useSelector((state) => state.template);
   const [selectType, setSelectType] = useState([]);
-  const [newData, setNewData] = useState([]);
-  const [content, setContent] = useState("");
+  // const [newData, setNewData] = useState([]);
+  // const [content, setContent] = useState("");
   // const [selectTemplate, setSelectTemplate] = useState("");
   const [regen, setRegen] = useState(false);
-  let parsedUid = localStorage.getItem("uid")
+  let parsedUid = localStorage.getItem("uid");
 
   const fetchCategory = async () => {
     const querySnapshot = await getDocs(collection(db, "category"));
@@ -120,52 +120,60 @@ const Template = () => {
     });
 
     setSelectType(selectedTemplates);
-    console.log('Selected Template',selectType)
+    console.log("Selected Template", selectType);
   };
 
   const handleTemplateSelected = (temp) => {
-    console.log('temp',temp)
+    console.log("temp", temp);
     // temp.preventDefault()
     dispatch(setSelectTemplate(temp));
     setRegen(true);
   };
 
-  
-
-const handleToSend = () => navigate("/emailform")
-
 
   const handleRegenerateToDashboard = () => navigate("/dashboard");
-  const handleBlur = (e)=>{
-    dispatch(setSelectTemplate(e.target.innerHTML))
-  }
-  
-  const handleSave = ()=> {
-    navigate('/sendingPage')
-    // alert(1)
-  }
-  console.log('ss',selectTemplate)
+  const handleContentEdit = (e) => {
+    dispatch(setSelectTemplate(e.target.value));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setRegen(false)
+    const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=''&body=${encodeURIComponent(
+      selectTemplate
+    )}`;
+    window.open(gmailLink, "_blank");
+    navigate('/dashboard')
+  };
+  console.log("ss", selectTemplate);
   return (
+    <>
+    
+    <header>
+          <ListExample/>
+      </header>
     <div>
       <h2>Welcome to the template page</h2>
       <h5>Select Category</h5>
-    {/* categoryAndTypes.length */}
+      {/* categoryAndTypes.length */}
       <div>
-        {categoryAndTypes.filter((e)=> e.category.uid === parsedUid).map((category, i) => (
-          <Card
-            className="cards"
-            onClick={() => handleCategoryClick(category)}
-            key={i}
-            style={{ width: "10rem", cursor: "pointer" }}
-          >
-            <Card.Body>
-              <Card.Subtitle className="mb-2 text-muted">
-                Category
-              </Card.Subtitle>
-              <Card.Title>{category.category.categoryName}</Card.Title>
-            </Card.Body>
-          </Card>
-        ))}
+        {categoryAndTypes
+          .filter((e) => e.category.uid === parsedUid)
+          .map((category, i) => (
+            <Card
+              className="cards"
+              onClick={() => handleCategoryClick(category)}
+              key={i}
+              style={{ width: "10rem", cursor: "pointer" }}
+            >
+              <Card.Body>
+                <Card.Subtitle className="mb-2 text-muted">
+                  Category
+                </Card.Subtitle>
+                <Card.Title>{category.category.categoryName}</Card.Title>
+              </Card.Body>
+            </Card>
+          ))}
       </div>
       {selectedCategory && (
         <div>
@@ -223,13 +231,12 @@ const handleToSend = () => navigate("/emailform")
           <Modal.Title>Email Preview! You can edit your email!</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <ContentEditable
-            html={selectTemplate}
-            tagName="div"
-            onBlur={handleBlur}
+          <textarea
+            value={selectTemplate}
+            onChange={handleContentEdit}
             style={{
               width: "100%",
-              height: "100%",
+              height: "100vh",
               border: "none",
               padding: "10px",
               fontFamily: "Arial, sans-serif",
@@ -238,29 +245,28 @@ const handleToSend = () => navigate("/emailform")
               resize: "none",
               whiteSpace: "pre-wrap",
               wordWrap: "break-word",
+              boxSizing: "border-box",
             }}
           />
-       </Modal.Body>
+        </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setRegen(false)}>
+          <Button variant="danger" onClick={() => setRegen(false)}>
             Close
           </Button>
-          <Button type="button" variant="success" onClick={handleSave}>
-            Save
+          <Button variant="info" onClick={handleRegenerateToDashboard}>
+            Re-Generate
+          </Button>
+          <Button type="button" variant="primary" onClick={handleSubmit}>
+            Send
           </Button>
         </Modal.Footer>
 
         {/* </center> */}
       </Modal>
-      <button
-        type="button"
-        className="btn btn-info"
-        onClick={handleRegenerateToDashboard}
-      >
-        re-Generate
-      </button>
     </div>
+    </>
   );
+  
 };
 
 export default Template;
