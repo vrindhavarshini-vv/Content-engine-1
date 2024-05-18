@@ -5,11 +5,10 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import Login from "./Pages/Login";
-import Dashboard from "./Pages/Generate";
-import Categories from './Pages/Settings/setting'
 import Template from "./Pages/Template/index";
-
-
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Categories from "./Pages/Settings";
+import Dashboard from "./Pages/Generate";
 
 function App() {
   const dispatch = useDispatch();
@@ -48,10 +47,7 @@ function App() {
           </>
           : null
         }
-
-
-        
-      </Routes>
+     </Routes>
     </BrowserRouter>
   );
 }
