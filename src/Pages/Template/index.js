@@ -130,6 +130,7 @@ const Template = () => {
     setRegen(true);
   };
 
+
   const handleRegenerateToDashboard = () => navigate("/dashboard");
   const handleContentEdit = (e) => {
     dispatch(setSelectTemplate(e.target.value));
