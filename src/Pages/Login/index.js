@@ -1,21 +1,13 @@
 import React, { useState } from "react";
 import { auth } from "../Firebase/firebase";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import {
-  setAdminLoginData,
-  setAdminLogged,
-  setIsAdmin,
-} from "../../Routes/Slices/adminLogin";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useDispatch } from "react-redux";
-import { GoogleAuthProvider ,signInWithPopup} from "firebase/auth";
-import "bootstrap/dist/css/bootstrap.min.css"
-import "./login.css"
-
-
+import { setAdminLoginData, setAdminLogged, setIsAdmin } from "../../Routes/Slices/adminLogin";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./login.css";
 
 const Login = () => {
-  
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -24,115 +16,61 @@ const Login = () => {
     password: "",
   });
 
-
- 
-
   const checkAdmin = async () => {
-    if (regLogin.email === "" || regLogin.password === "") {
-      alert("Please fill all fields");
-    } else {
-      await signInWithEmailAndPassword(auth, regLogin.email, regLogin.password)
-        .then((userCredential) => {
-          // Signed in
-          const user = userCredential.user;
-          localStorage.setItem("token", user.accessToken);
-          localStorage.setItem("uid", user.uid)
-            dispatch(setAdminLoginData(user));
-            dispatch(setAdminLogged(true));
-            dispatch(setIsAdmin(true));
-            alert("Admin login successfull!");
-            navigate("/dashboard");
-          })
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          console.log(errorCode, errorMessage);
-          alert("Admin login unsuccessfull!");
-        });
+    try {
+      if (regLogin.email === "" || regLogin.password === "") {
+        alert("Please fill all fields");
+      } else {
+        const userCredential = await signInWithEmailAndPassword(auth, regLogin.email, regLogin.password);
+        const user = userCredential.user;
+        localStorage.setItem("token", user.accessToken);
+        localStorage.setItem("uid", user.uid);
+        dispatch(setAdminLoginData(user));
+        dispatch(setAdminLogged(true));
+        dispatch(setIsAdmin(true));
+        alert("Admin login successful!");
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error("Admin login unsuccessful:", error.message);
+      alert("Admin login unsuccessful!");
     }
   };
 
-  const handleGoogleAuth = async (e) =>{
-    const provider = await new GoogleAuthProvider();
-    return signInWithPopup(auth, provider).then((userCredential) => {
+  const handleGoogleAuth = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
       const user = userCredential.user;
-      console.log("user",user)
       localStorage.setItem("token", user.accessToken);
       localStorage.setItem("uid", user.uid);
-        navigate("/dashboard")
-  })}
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Google sign-in unsuccessful:", error.message);
+      alert("Google sign-in unsuccessful!");
+    }
+  };
 
+  const [registerMode, setRegisterMode] = useState("signin");
 
-  let [registerMode, setRegisterMode] = useState("signin")
-
-  const changesetRegisterMode = () => {
-    setRegisterMode(registerMode === "signin" ? "signup" : "signin")
-  }
-
-  if (registerMode === "signin") {
-    return (
-      <div className="form-container">
-        <form className="form">
-          <div className="form-content">
-            {/* <h4>{JSON.stringify(regLogin)}</h4> */}
-            <center><h2>SIGN UP</h2></center> 
-            <div className="form-group mt-3">
-              <label>Email address</label>
-              <input
-                type="email"
-                className="form-control mt-1"
-                placeholder="Enter email"
-                
-              />
-            </div>
-            <div className="form-group mt-3">
-              <label>Password</label>
-              <input
-                type="password"
-                className="form-control mt-1"
-                placeholder="Enter password"
-               
-              />
-            </div>
-            <div className="d-grid gap-2 mt-3">
-              <button type="submit" className="btn btn-primary"   >
-                Submit
-              </button>
-            </div>
-            <div className="text-center">
-              Already registered?{" "}
-              <span className="link-primary" onClick={changesetRegisterMode}>
-                Sign In
-              </span>
-            </div>  
-          </div>
-        </form>
-        
-      </div>
-    )
-  }
+  const changeRegisterMode = () => {
+    setRegisterMode(registerMode === "signin" ? "signup" : "signin");
+  };
 
   return (
     <div className="form-container">
       <form className="form">
         <div className="form-content">
-          {/* <div className="form-group mt-3">
-            <label>Full Name</label>
-            <input
-              type="email"
-              className="form-control mt-1"
-              placeholder="e.g Jane Doe"
-            />
-          </div> */}
-           {/* <h4>{JSON.stringify(regLogin)}</h4> */}
-          <center><h2>SIGN IN</h2></center> 
+          <center>
+            <h2>{registerMode === "signin" ? "SIGN IN" : "SIGN UP"}</h2>
+          </center>
           <div className="form-group mt-3">
             <label>Email address</label>
             <input
               type="email"
               className="form-control mt-1"
-              placeholder="Email Address"
-              onKeyUp={(e) => setRegLogin({ ...regLogin, email: e.target.value })}
+              placeholder="Enter email"
+              onChange={(e) => setRegLogin({ ...regLogin, email: e.target.value })}
             />
           </div>
           <div className="form-group mt-3">
@@ -140,31 +78,36 @@ const Login = () => {
             <input
               type="password"
               className="form-control mt-1"
-              placeholder="Password"
-              onKeyUp={(e) =>setRegLogin({ ...regLogin, password: e.target.value })}
+              placeholder="Enter password"
+              onChange={(e) => setRegLogin({ ...regLogin, password: e.target.value })}
             />
           </div>
           <div className="d-grid gap-2 mt-3">
-            <button type="submit" className="btn btn-primary" onClick={checkAdmin}>
-              Submit
+            <button type="button" className="btn btn-primary" onClick={registerMode === "signin" ? checkAdmin : null}>
+              {registerMode === "signin" ? "Sign In" : "Sign Up"}
             </button>
           </div>
-          <div className="text-center">
-              Or Login With ?
-          </div>
-        <div  className="d-grid gap-2 mt-3">
-            <button  className="google-btn" onClick={handleGoogleAuth}><img className="google-img" src="google.svg"/>signin with google</button>
-        </div>
-        <div className="text-center">
-            Not registered yet?{" "}
-            <span className="link-primary" onClick={changesetRegisterMode}>
-              Sign Up
-            </span>
-          </div>
+          {registerMode === "signin" && (
+            <div>
+              <div className="text-center">Or Login With:</div>
+              <div className="d-grid gap-2 mt-3">
+                <button className="google-btn" onClick={handleGoogleAuth}>
+                  <img className="google-img" src="google.svg" alt="Google Logo" />
+                  Sign in with Google
+                </button>
+              </div>
+              <div className="text-center">
+                Not registered yet?{" "}
+                <span className="link-primary" onClick={changeRegisterMode}>
+                  Sign Up
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </form>
     </div>
-  )
+  );
 };
 
 export default Login;
