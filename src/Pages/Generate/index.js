@@ -4,15 +4,11 @@ import { auth, db } from '../Firebase/firebase';
 import { addDoc, collection,getDocs,query, where } from 'firebase/firestore';
 import { setCategoryList,setTypesList,setSelectedCategory,setIsPopUp,setIsCategorySelected,setSelectedType,setIsTypeSelected,setAnswer,setSelectedCategoryName,setSelectedTypeName,setShow,setIsApiResponseReceived} from "../../Routes/Slices/dashBoardSlice"
 import { useDispatch,useSelector } from 'react-redux';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import "../Navbar/index.css"
+import "./index.css"
 import axios from "axios";
+import { Button, Modal } from 'react-bootstrap';
 import ListExample from '../Navbar';
-
-
-
 function Dashboard() {
   const slice = useSelector(state => state.dashboardslice)
   
@@ -166,11 +162,11 @@ async function generateAnswer(){
 
 return (
      <>
-      <center>
-      <header>
-          <ListExample/>
-      </header>
-      <h1>Generate Page</h1>
+    <header>
+      <ListExample/>
+    </header>
+    <center>
+        <h1>Generate Page</h1>
         <br/>
         <div>
           <br/>
@@ -247,26 +243,3 @@ return (
     
 }
 export default Dashboard;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
