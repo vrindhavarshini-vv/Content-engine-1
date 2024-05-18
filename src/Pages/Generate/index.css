@@ -1,7 +1,11 @@
-.saveButton{
-    color: black;
-    background-color: green;
+.buttonInNav{
+    outline: none;
+    border-width: 100%;
+    border: none;
+    font-size: large;
+    color: blue;
+    gap: 20px;
 }
-.saveButton:hover{
-    background-color: yellowgreen;
+.buttonInNav:hover{
+    color: gray;
 }
