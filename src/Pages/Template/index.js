@@ -263,7 +263,6 @@ const Template = () => {
 
         {/* </center> */}
       </Modal>
-      <button type="button" className="btn btn-info" onClick={handleRegenerateToDashboard}>re-Generate</button>
     </div>
     </>
   );

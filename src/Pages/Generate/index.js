@@ -5,11 +5,10 @@ import { addDoc, collection,getDocs,query, where } from 'firebase/firestore';
 import { setCategoryList,setTypesList,setSelectedCategory,setIsPopUp,setIsCategorySelected,setSelectedType,setIsTypeSelected,setAnswer,setSelectedCategoryName,setSelectedTypeName,setShow,setIsApiResponseReceived} from "../../Routes/Slices/dashBoardSlice"
 import { useDispatch,useSelector } from 'react-redux';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import "./Dashboard.css"
+import "./index.css"
 import axios from "axios";
-import { Modal } from 'react-bootstrap';
-
-
+import { Button, Modal } from 'react-bootstrap';
+import ListExample from '../Navbar';
 function Dashboard() {
   const slice = useSelector(state => state.dashboardslice)
   
@@ -163,20 +162,9 @@ async function generateAnswer(){
 
 return (
      <>
-    
-          <div className='sideNav'>
-          <div>
-            <button className='buttonInsideNav'   onClick={handleNavigateToSettings}>Settings</button>
-          </div>
-          <div>
-            <button className='buttonInsideNav'  onClick={handleNavigateToTemplates}>Template</button>
-          </div>
-          <div>
-            <button className='buttonInsideNav'  onClick={handleLogout}>Logout</button>
-          </div>
-          </div>
-       
-    
+    <header>
+      <ListExample/>
+    </header>
     <center>
         <h1>Generate Page</h1>
         <br/>

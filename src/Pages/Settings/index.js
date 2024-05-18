@@ -1,8 +1,7 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Modal, Button } from "react-bootstrap";
-import Table from "react-bootstrap/Table";
+import { Modal, Button, Table } from "react-bootstrap";
 import {
   setCategories,
   setTypes,
@@ -22,6 +21,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import ListExample from "../Navbar";
 
 export default function Categories() {
   const dispatch = useDispatch();
@@ -29,6 +29,9 @@ export default function Categories() {
 
   const { adminLoginData } = useSelector((state) => state.adminLogin);
   const settingstate = useSelector((state) => state.settings);
+
+  const [showTypeModal, setShowTypeModal] = useState(false);
+  const [currentCategoryId, setCurrentCategoryId] = useState(null);
 
   useEffect(() => {
     fetchCategories();
@@ -76,30 +79,27 @@ export default function Categories() {
     dispatch(setShowModal(false));
   };
 
+  const openTypeModal = (categoryId) => {
+    setCurrentCategoryId(categoryId);
+    setShowTypeModal(true);
+  };
+
+  const closeTypeModal = () => {
+    setShowTypeModal(false);
+  };
+
   const handleCategorySubmit = async () => {
     if (!settingstate.categoryName) {
       alert("Please enter a category name");
       return;
     }
-    const existingCategory = settingstate.categories.find(
-      (category) =>
-        category.categoryName.toLowerCase() == settingstate.categoryName.toLowerCase()
-    );
-    console.log("existingCategory", existingCategory);
-    if (existingCategory) {
-      alert("please enter different category name");
-      return;
-    }
-
+   
     try {
       const categoryData = {
         categoryName: settingstate.categoryName,
         uid: adminLoginData.uid,
       };
-      const categoryRef = await addDoc(
-        collection(db, "category"),
-        categoryData
-      );
+      const categoryRef = await addDoc(collection(db, "category"), categoryData);
       const categoryId = categoryRef.id;
       await updateDoc(doc(db, "category", categoryId), {
         categoryId: categoryId,
@@ -108,7 +108,7 @@ export default function Categories() {
       dispatch(
         setCategories([
           ...settingstate.categories,
-          { categoryId: categoryId, categoryName: settingstate.categoryName },
+          { id: categoryId, categoryName: settingstate.categoryName, uid: adminLoginData.uid },
         ])
       );
 
@@ -122,12 +122,13 @@ export default function Categories() {
       alert("Failed to add category. Please try again.");
     }
   };
+
   const handleCategoryTypeChange = (e) => {
     dispatch(setCategoryType(e.target.value));
   };
 
   const handleAddCategoryType = async () => {
-    if (!settingstate.selectedCategory || !settingstate.categoryType) {
+    if (!currentCategoryId || !settingstate.categoryType) {
       alert("Please select a category and enter a category type");
       return;
     }
@@ -135,7 +136,7 @@ export default function Categories() {
     try {
       const typeData = {
         type: settingstate.categoryType,
-        categoryId: settingstate.selectedCategory,
+        categoryId: currentCategoryId,
         uid: adminLoginData.uid,
       };
 
@@ -143,8 +144,8 @@ export default function Categories() {
       const typeId = typeRef.id;
 
       dispatch(setTypes([...settingstate.types, { id: typeId, ...typeData }]));
-      console.log("uid:", adminLoginData.uid);
       dispatch(setCategoryType(""));
+      closeTypeModal();
       alert("Category Type added successfully!");
       fetchTypes(); // Refresh types list after adding a new type
     } catch (error) {
@@ -163,7 +164,6 @@ export default function Categories() {
       settingstate.selectedCategory
     )}",related "${settingstate.categoryType}" Email!`;
     dispatch(setPreviewContent(createEmail));
-    // console.log("createmail",createEmail)
   };
 
   const getCategoryNameById = (categoryId) => {
@@ -175,59 +175,51 @@ export default function Categories() {
 
   const handleDeleteType = async (typeId) => {
     try {
-      // Delete the type document from Firestore
       await deleteDoc(doc(db, "type", typeId));
-
-      // Update Redux state to remove the deleted type
       dispatch(setTypes(settingstate.types.filter((type) => type.id !== typeId)));
-
       alert("Type deleted successfully!");
     } catch (error) {
       console.error("Error deleting type: ", error);
       alert("Failed to delete type. Please try again.");
     }
   };
+
   const handleNavigateGeneratePage = () => {
     navigate("/dashboard");
   };
+
   let uid = localStorage.getItem("uid");
   console.log(uid);
 
   return (
     <>
-    {/* <header>
-          <ListExample/>
-      </header> */}
-      <button type="button" onClick={handleNavigateGeneratePage}>
-        Generate Page
-      </button>
+     <header>
+      <ListExample/>
+     </header>
       <div className="form">
-      <center> <h1>Create Categories</h1>
-
-        <button type="button" onClick={openModal}>
-          Add New Category
-        </button>
-        
-        <select
-          value={settingstate.selectedCategory}
-          onChange={(e) => dispatch(setSelectedCategory(e.target.value))}
-        >
-          {console.log("selcat",settingstate. selectedCategory)}
-          <option value="">Select a Category</option>
-          {settingstate.categories
-            .filter((e) => e.uid == uid)
-            .map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.categoryName}
-              </option>
-            ))}
-        </select>
+        <center>
+          <h1>Create Categories</h1>
+          <button type="button" onClick={openModal}>
+            Add New Category
+          </button>
+          {/* <select
+            value={settingstate.selectedCategory}
+            onChange={(e) => dispatch(setSelectedCategory(e.target.value))}
+          >
+            <option value="">Select a Category</option>
+            {settingstate.categories
+              .filter((e) => e.uid === uid)
+              .map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.categoryName}
+                </option>
+              ))}
+          </select> */}
         </center>
         <Modal show={settingstate.showModal} onHide={closeModal}>
           <center>
             <Modal.Header closeButton>
               <Modal.Title>
-                {" "}
                 <h2>Enter Category Name</h2>
               </Modal.Title>
             </Modal.Header>
@@ -244,69 +236,91 @@ export default function Categories() {
             </Modal.Footer>
           </center>
         </Modal>
+      </div>
+      {settingstate.categories.length > 0 && (
+        <div className="table-responsive-sm">
+          <div className="container-sm">
+            <h2>Categories List:</h2>
+            <Table bordered>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Category Name</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {settingstate.categories
+                  .filter((e) => e.uid === uid)
+                  .map((category, i) => (
+                    <tr key={category.id}>
+                      <td>{i + 1}</td>
+                      <td>{category.categoryName}</td>
+                      <td>
+                        <button onClick={() => openTypeModal(category.id)}>
+                          Add Type
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </Table>
+          </div>
+        </div>
+      )}
+      <Modal show={showTypeModal} onHide={closeTypeModal}>
         <center>
-        {settingstate.selectedCategory && (
-          <div className="category-type-container">
-            <label htmlFor="categoryType">Category Type:</label>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              <h2>Enter Category Type</h2>
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
             <input
               type="text"
-              id="categoryType"
               value={settingstate.categoryType}
-              onChange={(e) => handleCategoryTypeChange(e)}
-              onKeyUp={generatePreview}
-              placeholder="Enter category type"
+              onChange={(e) => dispatch(setCategoryType(e.target.value))}
+              placeholder="Category Type"
             />
-            {console.log("handletychg", settingstate.categoryType)}
-            <button onClick={handleAddCategoryType}>Add Category & Type</button>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={handleAddCategoryType}>Submit</Button>
+          </Modal.Footer>
+        </center>
+      </Modal>
+      {settingstate.types.length > 0 && (
+        <div className="table-responsive-sm">
+          <div className="container-sm">
+            <h2>Types List:</h2>
+            <Table striped bordered hover variant="dark">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Type Name</th>
+                  <th>Category Name</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {settingstate.types
+                  .filter((e) => e.uid === uid)
+                  .map((type, i) => (
+                    <tr key={type.id}>
+                      <td>{i + 1}</td>
+                      <td>{type.name}</td>
+                      <td>{getCategoryNameById(type.categoryId)}</td>
+                      <td>
+                        <button onClick={() => handleDeleteType(type.id)}>
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </Table>
           </div>
-        )}
-         {settingstate.previewContent && (
-          <div className="preview-container">
-            <h2>Email Preview:</h2>
-            <p>{settingstate.previewContent}</p>
-          </div>
-        )}
-        </center> 
-      </div>
-      
-
-        {console.log("types",settingstate. types)}
-        {settingstate.types.length > 0 && (
-          <div className="table-responsive-sm" >
-            <div className="container-sm">
-              <h2>Types List:</h2>
-              <Table bordered>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Type Name</th>
-                    <th>Category Name</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {settingstate.types
-                    .filter((e) => e.uid == uid)
-                    .map((type, i) => (
-                      <tr key={type.id}>
-                        <td>{i + 1}</td>
-                        <td>{type.name}</td>
-                        <td>{getCategoryNameById(type.categoryId)}</td>
-                        <td>
-                          <button onClick={() => handleDeleteType(type.id)}>
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </Table>
-            </div>
-          </div>
-        )}
-
-
-       
+        </div>
+      )}
     </>
   );
 }

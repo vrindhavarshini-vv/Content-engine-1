@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import Login from "./Pages/Login";
 import Dashboard from "./Pages/Generate";
-import Categories from './Pages/Settings/setting'
+import Categories from './Pages/Settings/index'
 import Template from "./Pages/Template/index";
 
 
