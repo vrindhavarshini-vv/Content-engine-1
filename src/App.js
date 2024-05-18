@@ -4,12 +4,10 @@ import { setAdminLoginData, setAdminLogged } from "./Routes/Slices/adminLogin";
 import { onAuthStateChanged } from "firebase/auth";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
-import Login from "./Pages/Login/Login";
-import Dashboard from "./Pages/Generate/Dashboard";
+import Login from "./Pages/Login";
+import Dashboard from "./Pages/Generate";
 import Categories from './Pages/Settings/setting'
 import Template from "./Pages/Template/index";
-import ContactUs  from "./Pages/SendingPage/sendingPage";
-import EmailForm from "./Pages/Emailform/emailform";
 
 
 
@@ -43,11 +41,14 @@ function App() {
       <Routes>
 
         <Route path="/" element={<Login/>} />
-        <Route path="/emailform" element={<EmailForm/>} />
-        {adminLogged ?<Route path="/user/setting" element ={<Categories/>}/>:null}
-        {adminLogged ? <Route path="/dashboard" element={<Dashboard />} />:null}
-        {adminLogged ? <Route path="/template" element={<Template />} />:null}
-        {adminLogged ? <Route path="/sendingPage" element={<ContactUs /> }/>:null}
+        
+        {adminLogged ? 
+          <>
+            <Route path="/user/setting" element ={<Categories/>}/>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/template" element={<Template />} />
+          </>:null
+        }
 
         
       </Routes>

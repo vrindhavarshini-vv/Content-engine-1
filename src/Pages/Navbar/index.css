@@ -1,0 +1,12 @@
+
+.buttonInNav{
+    outline: none;
+    border-width: 100%;
+    border: none;
+    font-size: large;
+    color: blue;
+    gap: 20px;
+}
+.buttonInNav:hover{
+    color: gray;
+}
