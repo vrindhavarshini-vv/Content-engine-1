@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Modal, Button } from "react-bootstrap";
@@ -27,15 +28,7 @@ export default function Categories() {
   const navigate = useNavigate();
 
   const { adminLoginData } = useSelector((state) => state.adminLogin);
-  const {
-    categories,
-    types,
-    categoryName,
-    categoryType,
-    selectedCategory,
-    showModal,
-    previewContent,
-  } = useSelector((state) => state.settings);
+  const settingstate = useSelector((state) => state.settings);
 
   useEffect(() => {
     fetchCategories();
@@ -84,13 +77,13 @@ export default function Categories() {
   };
 
   const handleCategorySubmit = async () => {
-    if (!categoryName) {
+    if (!settingstate.categoryName) {
       alert("Please enter a category name");
       return;
     }
-    const existingCategory = categories.find(
+    const existingCategory = settingstate.categories.find(
       (category) =>
-        category.categoryName.toLowerCase() == categoryName.toLowerCase()
+        category.categoryName.toLowerCase() == settingstate.categoryName.toLowerCase()
     );
     console.log("existingCategory", existingCategory);
     if (existingCategory) {
@@ -100,7 +93,7 @@ export default function Categories() {
 
     try {
       const categoryData = {
-        categoryName: categoryName,
+        categoryName: settingstate.categoryName,
         uid: adminLoginData.uid,
       };
       const categoryRef = await addDoc(
@@ -114,8 +107,8 @@ export default function Categories() {
 
       dispatch(
         setCategories([
-          ...categories,
-          { categoryId: categoryId, categoryName: categoryName },
+          ...settingstate.categories,
+          { categoryId: categoryId, categoryName: settingstate.categoryName },
         ])
       );
 
@@ -134,22 +127,22 @@ export default function Categories() {
   };
 
   const handleAddCategoryType = async () => {
-    if (!selectedCategory || !categoryType) {
+    if (!settingstate.selectedCategory || !settingstate.categoryType) {
       alert("Please select a category and enter a category type");
       return;
     }
 
     try {
       const typeData = {
-        type: categoryType,
-        categoryId: selectedCategory,
+        type: settingstate.categoryType,
+        categoryId: settingstate.selectedCategory,
         uid: adminLoginData.uid,
       };
 
       const typeRef = await addDoc(collection(db, "type"), typeData);
       const typeId = typeRef.id;
 
-      dispatch(setTypes([...types, { id: typeId, ...typeData }]));
+      dispatch(setTypes([...settingstate.types, { id: typeId, ...typeData }]));
       console.log("uid:", adminLoginData.uid);
       dispatch(setCategoryType(""));
       alert("Category Type added successfully!");
@@ -161,20 +154,20 @@ export default function Categories() {
   };
 
   const generatePreview = () => {
-    if (!selectedCategory || !categoryType) {
+    if (!settingstate.selectedCategory || !settingstate.categoryType) {
       alert("Please select a category and enter a category type");
       return;
     }
 
     const createEmail = `please give a "${getCategoryNameById(
-      selectedCategory
-    )}",related "${categoryType}" Email!`;
+      settingstate.selectedCategory
+    )}",related "${settingstate.categoryType}" Email!`;
     dispatch(setPreviewContent(createEmail));
     // console.log("createmail",createEmail)
   };
 
   const getCategoryNameById = (categoryId) => {
-    const selectedCategory = categories.find(
+    const selectedCategory = settingstate.categories.find(
       (category) => category.id === categoryId
     );
     return selectedCategory ? selectedCategory.categoryName : "";
@@ -186,7 +179,7 @@ export default function Categories() {
       await deleteDoc(doc(db, "type", typeId));
 
       // Update Redux state to remove the deleted type
-      dispatch(setTypes(types.filter((type) => type.id !== typeId)));
+      dispatch(setTypes(settingstate.types.filter((type) => type.id !== typeId)));
 
       alert("Type deleted successfully!");
     } catch (error) {
@@ -202,6 +195,9 @@ export default function Categories() {
 
   return (
     <>
+    {/* <header>
+          <ListExample/>
+      </header> */}
       <button type="button" onClick={handleNavigateGeneratePage}>
         Generate Page
       </button>
@@ -213,12 +209,12 @@ export default function Categories() {
         </button>
         
         <select
-          value={selectedCategory}
+          value={settingstate.selectedCategory}
           onChange={(e) => dispatch(setSelectedCategory(e.target.value))}
         >
-          {console.log("selcat", selectedCategory)}
+          {console.log("selcat",settingstate. selectedCategory)}
           <option value="">Select a Category</option>
-          {categories
+          {settingstate.categories
             .filter((e) => e.uid == uid)
             .map((category) => (
               <option key={category.id} value={category.id}>
@@ -227,7 +223,7 @@ export default function Categories() {
             ))}
         </select>
         </center>
-        <Modal show={showModal} onHide={closeModal}>
+        <Modal show={settingstate.showModal} onHide={closeModal}>
           <center>
             <Modal.Header closeButton>
               <Modal.Title>
@@ -238,7 +234,7 @@ export default function Categories() {
             <Modal.Body>
               <input
                 type="text"
-                value={categoryName}
+                value={settingstate.categoryName}
                 onChange={(e) => dispatch(setCategoryName(e.target.value))}
                 placeholder="Category Name"
               />
@@ -249,33 +245,33 @@ export default function Categories() {
           </center>
         </Modal>
         <center>
-        {selectedCategory && (
+        {settingstate.selectedCategory && (
           <div className="category-type-container">
             <label htmlFor="categoryType">Category Type:</label>
             <input
               type="text"
               id="categoryType"
-              value={categoryType}
+              value={settingstate.categoryType}
               onChange={(e) => handleCategoryTypeChange(e)}
               onKeyUp={generatePreview}
               placeholder="Enter category type"
             />
-            {console.log("handletychg", categoryType)}
+            {console.log("handletychg", settingstate.categoryType)}
             <button onClick={handleAddCategoryType}>Add Category & Type</button>
           </div>
         )}
-         {previewContent && (
+         {settingstate.previewContent && (
           <div className="preview-container">
             <h2>Email Preview:</h2>
-            <p>{previewContent}</p>
+            <p>{settingstate.previewContent}</p>
           </div>
         )}
         </center> 
       </div>
       
 
-        {console.log("types", types)}
-        {types.length > 0 && (
+        {console.log("types",settingstate. types)}
+        {settingstate.types.length > 0 && (
           <div className="table-responsive-sm" >
             <div className="container-sm">
               <h2>Types List:</h2>
@@ -289,7 +285,7 @@ export default function Categories() {
                   </tr>
                 </thead>
                 <tbody>
-                  {types
+                  {settingstate.types
                     .filter((e) => e.uid == uid)
                     .map((type, i) => (
                       <tr key={type.id}>

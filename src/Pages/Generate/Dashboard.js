@@ -4,13 +4,10 @@ import { auth, db } from '../Firebase/firebase';
 import { addDoc, collection,getDocs} from 'firebase/firestore';
 import { setCategoryList,setTypesList,setSelectedCategory,setIsPopUp,setIsCategorySelected,setSelectedType,setIsTypeSelected,setCategoryAndTypes,setAnswer,setSelectedCategoryName,setSelectedTypeName,setShow,setIsApiResponseReceived} from "../../Routes/Slices/dashBoardSlice"
 import { useDispatch,useSelector } from 'react-redux';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Offcanvas from 'react-bootstrap/Offcanvas';
-import { IoMdMenu } from "react-icons/io";
 import "./Dashboard.css"
 import axios from "axios";
+import { Modal } from 'react-bootstrap';
 
 
 function Dashboard() {
@@ -152,12 +149,7 @@ async function generateAnswer(){
 
 return (
      <>
-      <IoMdMenu className='menu'   onClick={handleNavShow}/>
-      <Offcanvas show={show} className="" onHide={handleNavClose} >
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title></Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body>
+    
           <div className='sideNav'>
           <div>
             <button className='buttonInsideNav'   onClick={handleNavigateToSettings}>Settings</button>
@@ -169,8 +161,7 @@ return (
             <button className='buttonInsideNav'  onClick={handleLogout}>Logout</button>
           </div>
           </div>
-        </Offcanvas.Body>
-      </Offcanvas>
+       
     
     <center>
         <h1>Generate Page</h1>
