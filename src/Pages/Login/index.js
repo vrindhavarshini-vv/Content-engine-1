@@ -25,9 +25,6 @@ const Login = () => {
     password: "",
   });
 
-
- 
-
   const checkAdmin = async () => {
     if (regLogin.email === "" || regLogin.password === "") {
       alert("Please fill all fields");
@@ -38,19 +35,12 @@ const Login = () => {
           const user = userCredential.user;
           localStorage.setItem("token", user.accessToken);
           localStorage.setItem("uid", user.uid);
-          
-
-          if (regLogin.email == user.email) {
-            if(regLogin.uid==user.UID){
-            dispatch(setAdminLoginData(user));
-            dispatch(setAdminLogged(true));
-            dispatch(setIsAdmin(true));
-            alert("Admin login successfull!");
-            navigate("/dashboard");
-          } else {  
-            alert("Admin purpose only");
-          }
-        }})
+          dispatch(setAdminLoginData(user));
+          dispatch(setAdminLogged(true));
+          dispatch(setIsAdmin(true));
+          alert("Admin login successfull!");
+          navigate("/dashboard");
+        })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
@@ -60,51 +50,55 @@ const Login = () => {
     }
   };
 
-  const handleGoogleAuth = async (e) =>{
+  const handleGoogleAuth = async (e) => {
     const provider = await new GoogleAuthProvider();
     return signInWithPopup(auth, provider).then((userCredential) => {
       const user = userCredential.user;
-      console.log("user",user)
+      console.log("user", user);
       localStorage.setItem("token", user.accessToken);
       localStorage.setItem("uid", user.uid);
-        navigate("/dashboard")
-  })}
-  
+      navigate("/dashboard");
+    });
+  };
 
   return (
     <center>
-    <div>
-      <h4>{JSON.stringify(regLogin)}</h4>
-      <form>
-        <h2>Admin Page</h2>
-        <div>
-          <label>Admin email:</label>
-          <input
-            placeholder="Enter email"
-            type="email"
-            onKeyUp={(e) => setRegLogin({ ...regLogin, email: e.target.value })}
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            placeholder="Enter password"
-            type="password"
-            onKeyUp={(e) =>
-              setRegLogin({ ...regLogin, password: e.target.value })
-            }
-          />
-        </div>
-        <div>
-          <button type="button" onClick={checkAdmin}>
-            Admin Login
-          </button>
-        </div>
-      </form>
-      <br/>
-      <GoogleButton
-        onClick={handleGoogleAuth}
-      />
+      <div>
+        <h4>{JSON.stringify(regLogin)}</h4>
+        <form>
+          <h2>Admin Page</h2>
+          <div>
+            <label>Admin email:</label>
+            <input
+              placeholder="Enter email"
+              type="email"
+              onKeyUp={(e) =>
+                setRegLogin({ ...regLogin, email: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            <label>Password:</label>
+            <input
+              placeholder="Enter password"
+              type="password"
+              onKeyUp={(e) =>
+                setRegLogin({ ...regLogin, password: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            <button type="button" onClick={checkAdmin}>
+              Admin Login
+            </button>
+          </div>
+        </form>
+        <br />
+
+        <button onClick={handleGoogleAuth}>
+          <img src="icons8-google.svg" />
+          continue with google
+        </button>
       </div>
     </center>
   );

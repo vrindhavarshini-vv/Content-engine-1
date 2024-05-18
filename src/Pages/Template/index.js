@@ -10,14 +10,16 @@ import {
   setSelectedCategory,
   setCategoryAndTypes,
   setFbGeneratedDatas,
+  setCategoryWithTypesWithTemplates,
+  setSelectTemplate,
 } from "../../Routes/Slices/templateSlice";
-import './index.css'
+import "./index.css";
 import { useNavigate } from "react-router-dom";
-
+import ListExample from '../Navbar/index'
 
 
 const Template = () => {
-  const navigate = useNavigate
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
     fbCategory,
@@ -25,14 +27,15 @@ const Template = () => {
     selectedCategory,
     categoryAndTypes,
     fbGeneratedDatas,
+    categoryWithTypesWithTemplates,
+    selectTemplate,
   } = useSelector((state) => state.template);
   const [selectType, setSelectType] = useState([]);
-  const [newData, setNewData] = useState([]);
-  const [content, setContent] = useState("");
-  const [selectTemplate, setSelectTemplate] = useState("");
+  // const [newData, setNewData] = useState([]);
+  // const [content, setContent] = useState("");
+  // const [selectTemplate, setSelectTemplate] = useState("");
   const [regen, setRegen] = useState(false);
-
-  console.log("selectTemplate",selectTemplate);
+  let parsedUid = localStorage.getItem("uid");
 
   const fetchCategory = async () => {
     const querySnapshot = await getDocs(collection(db, "category"));
@@ -67,7 +70,7 @@ const Template = () => {
         .map((doc) => doc.type);
       return { category, types: typesForCategory };
     });
-    const selectCat = categoryTypes.slice();
+    const selectCat = categoryTypes;
     dispatch(setCategoryAndTypes(selectCat));
   };
 
@@ -89,7 +92,8 @@ const Template = () => {
         });
       return { category, types: typesForCategory };
     });
-    setNewData(cat);
+    const newCat = cat;
+    dispatch(setCategoryWithTypesWithTemplates(newCat));
   };
 
   useEffect(() => {
@@ -107,7 +111,7 @@ const Template = () => {
   const handleTypeClick = (clickType) => {
     const selectedTemplates = [];
 
-    newData.forEach((user) => {
+    categoryWithTypesWithTemplates.forEach((user) => {
       user.types.forEach((type) => {
         if (type.type === clickType) {
           selectedTemplates.push({ type });
@@ -116,38 +120,60 @@ const Template = () => {
     });
 
     setSelectType(selectedTemplates);
-    console.log('Selected Template',selectType)
+    console.log("Selected Template", selectType);
   };
 
   const handleTemplateSelected = (temp) => {
-    setSelectTemplate(temp);
+    console.log("temp", temp);
+    // temp.preventDefault()
+    dispatch(setSelectTemplate(temp));
     setRegen(true);
   };
-  
-const handleRegenerateToDashboard = () => navigate("/dashboard");
-const handleToSend = () => navigate("/emailform")
 
+
+  const handleRegenerateToDashboard = () => navigate("/dashboard");
+  const handleContentEdit = (e) => {
+    dispatch(setSelectTemplate(e.target.value));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setRegen(false)
+    const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=''&body=${encodeURIComponent(
+      selectTemplate
+    )}`;
+    window.open(gmailLink, "_blank");
+    navigate('/dashboard')
+  };
+  console.log("ss", selectTemplate);
   return (
+    <>
+    
+    <header>
+          <ListExample/>
+      </header>
     <div>
       <h2>Welcome to the template page</h2>
       <h5>Select Category</h5>
-    {/* categoryAndTypes.length */}
+      {/* categoryAndTypes.length */}
       <div>
-        {categoryAndTypes.map((category, i) => (
-          <Card
-            className="cards"
-            onClick={() => handleCategoryClick(category)}
-            key={i}
-            style={{ width: "10rem", cursor: "pointer" }}
-          >
-            <Card.Body>
-              <Card.Subtitle className="mb-2 text-muted">
-                Category
-              </Card.Subtitle>
-              <Card.Title>{category.category.categoryName}</Card.Title>
-            </Card.Body>
-          </Card>
-        ))}
+        {categoryAndTypes
+          .filter((e) => e.category.uid === parsedUid)
+          .map((category, i) => (
+            <Card
+              className="cards"
+              onClick={() => handleCategoryClick(category)}
+              key={i}
+              style={{ width: "10rem", cursor: "pointer" }}
+            >
+              <Card.Body>
+                <Card.Subtitle className="mb-2 text-muted">
+                  Category
+                </Card.Subtitle>
+                <Card.Title>{category.category.categoryName}</Card.Title>
+              </Card.Body>
+            </Card>
+          ))}
       </div>
       {selectedCategory && (
         <div>
@@ -172,6 +198,7 @@ const handleToSend = () => navigate("/emailform")
       )}
       {selectType.length > 0 && (
         <div>
+          {categoryWithTypesWithTemplates.length}
           {selectType.map((doc, i) => (
             <div key={i}>
               <h5>Select Template for {doc.type.type}</h5>
@@ -192,51 +219,54 @@ const handleToSend = () => navigate("/emailform")
         </div>
       )}
 
-      <Modal 
-      show={regen} 
-      onHide={() => setRegen(false)}
-      size="lg"
+      <Modal
+        show={regen}
+        onHide={() => setRegen(false)}
+        size="lg"
         aria-labelledby="contained-modal-title-vcenter"
         centered
-        dialogClassName="modal-90w">
-        {/* <center> */}
-          <Modal.Header closeButton>
-            <Modal.Title>Email Preview! You can edit your email!</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-          <div
-            contentEditable
-            onInput={(e) => setSelectTemplate(e.target.innerHTML)}
+        dialogClassName="modal-90w"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Email Preview! You can edit your email!</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <textarea
+            value={selectTemplate}
+            onChange={handleContentEdit}
             style={{
               width: "100%",
-              height: "100%",
+              height: "100vh",
               border: "none",
               padding: "10px",
               fontFamily: "Arial, sans-serif",
               fontSize: "16px",
               backgroundColor: "#f9f9f9",
               resize: "none",
-              // overflow: "hidden",
               whiteSpace: "pre-wrap",
-              // wordWrap: "break-word",
+              wordWrap: "break-word",
+              boxSizing: "border-box",
             }}
-            dangerouslySetInnerHTML={{ __html: selectTemplate }}
           />
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setRegen(false)}>
-              Close
-            </Button>
-            <Button variant="primary" onClick={() => setRegen(false)}>
-             Save
-            </Button>
-            <button type="button" onClick={handleToSend }> Send </button>
-          </Modal.Footer>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="danger" onClick={() => setRegen(false)}>
+            Close
+          </Button>
+          <Button variant="info" onClick={handleRegenerateToDashboard}>
+            Re-Generate
+          </Button>
+          <Button type="button" variant="primary" onClick={handleSubmit}>
+            Send
+          </Button>
+        </Modal.Footer>
+
         {/* </center> */}
       </Modal>
-      <button type="button" className="btn btn-info" onClick={handleRegenerateToDashboard}>re-Generate</button>
     </div>
+    </>
   );
+  
 };
 
 export default Template;
