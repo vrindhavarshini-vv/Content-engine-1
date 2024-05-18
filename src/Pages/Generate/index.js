@@ -4,10 +4,13 @@ import { auth, db } from '../Firebase/firebase';
 import { addDoc, collection,getDocs,query, where } from 'firebase/firestore';
 import { setCategoryList,setTypesList,setSelectedCategory,setIsPopUp,setIsCategorySelected,setSelectedType,setIsTypeSelected,setAnswer,setSelectedCategoryName,setSelectedTypeName,setShow,setIsApiResponseReceived} from "../../Routes/Slices/dashBoardSlice"
 import { useDispatch,useSelector } from 'react-redux';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import "./Dashboard.css"
+import "../Navbar/index.css"
 import axios from "axios";
-import { Modal } from 'react-bootstrap';
+import ListExample from '../Navbar';
+
 
 
 function Dashboard() {
@@ -163,22 +166,11 @@ async function generateAnswer(){
 
 return (
      <>
-    
-          <div className='sideNav'>
-          <div>
-            <button className='buttonInsideNav'   onClick={handleNavigateToSettings}>Settings</button>
-          </div>
-          <div>
-            <button className='buttonInsideNav'  onClick={handleNavigateToTemplates}>Template</button>
-          </div>
-          <div>
-            <button className='buttonInsideNav'  onClick={handleLogout}>Logout</button>
-          </div>
-          </div>
-       
-    
-    <center>
-        <h1>Generate Page</h1>
+      <center>
+      <header>
+          <ListExample/>
+      </header>
+      <h1>Generate Page</h1>
         <br/>
         <div>
           <br/>
@@ -255,3 +247,26 @@ return (
     
 }
 export default Dashboard;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
