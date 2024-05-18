@@ -5,10 +5,11 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 import Login from "./Pages/Login";
-import Template from "./Pages/Template/index";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Categories from "./Pages/Settings";
 import Dashboard from "./Pages/Generate";
+import Categories from './Pages/Settings/index'
+import Template from "./Pages/Template/index";
+
+
 
 function App() {
   const dispatch = useDispatch();
