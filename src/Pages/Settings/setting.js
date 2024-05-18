@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Modal, Button } from "react-bootstrap";
+import Table from "react-bootstrap/Table";
 import {
   setCategories,
   setTypes,
@@ -87,14 +88,16 @@ export default function Categories() {
       alert("Please enter a category name");
       return;
     }
-
-    const existingCategory =categories.find((category)=>category.categoryName.toLowerCase()===categoryName.toLowerCase())
-     console.log("existingCategory",existingCategory)
-
-    if(existingCategory){
+    const existingCategory = categories.find(
+      (category) =>
+        category.categoryName.toLowerCase() == categoryName.toLowerCase()
+    );
+    console.log("existingCategory", existingCategory);
+    if (existingCategory) {
       alert("please enter different category name");
       return;
     }
+
     try {
       const categoryData = {
         categoryName: categoryName,
@@ -203,12 +206,12 @@ export default function Categories() {
         Generate Page
       </button>
       <div className="form">
-        <h1>Create Categories</h1>
+      <center> <h1>Create Categories</h1>
 
         <button type="button" onClick={openModal}>
           Add New Category
         </button>
-
+        
         <select
           value={selectedCategory}
           onChange={(e) => dispatch(setSelectedCategory(e.target.value))}
@@ -223,7 +226,7 @@ export default function Categories() {
               </option>
             ))}
         </select>
-
+        </center>
         <Modal show={showModal} onHide={closeModal}>
           <center>
             <Modal.Header closeButton>
@@ -245,39 +248,7 @@ export default function Categories() {
             </Modal.Footer>
           </center>
         </Modal>
-
-        {console.log("types", types)}
-        {types.length > 0 && (
-          <div>
-            <h2>Types List:</h2>
-            <table border={1}>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Type Name</th>
-                  <th>Category Name</th>
-                </tr>
-              </thead>
-              <tbody>
-                {types
-                  .filter((e) => e.uid == uid)
-                  .map((type, i) => (
-                    <tr key={type.id}>
-                      <td>{i + 1}</td>
-                      <td>{type.name}</td>
-                      <td>{getCategoryNameById(type.categoryId)}</td>
-                      <td>
-                        <button onClick={() => handleDeleteType(type.id)}>
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
+        <center>
         {selectedCategory && (
           <div className="category-type-container">
             <label htmlFor="categoryType">Category Type:</label>
@@ -293,14 +264,53 @@ export default function Categories() {
             <button onClick={handleAddCategoryType}>Add Category & Type</button>
           </div>
         )}
-
-        {previewContent && (
+         {previewContent && (
           <div className="preview-container">
             <h2>Email Preview:</h2>
             <p>{previewContent}</p>
           </div>
         )}
+        </center> 
       </div>
+      
+
+        {console.log("types", types)}
+        {types.length > 0 && (
+          <div className="table-responsive-sm" >
+            <div className="container-sm">
+              <h2>Types List:</h2>
+              <Table bordered>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Type Name</th>
+                    <th>Category Name</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {types
+                    .filter((e) => e.uid == uid)
+                    .map((type, i) => (
+                      <tr key={type.id}>
+                        <td>{i + 1}</td>
+                        <td>{type.name}</td>
+                        <td>{getCategoryNameById(type.categoryId)}</td>
+                        <td>
+                          <button onClick={() => handleDeleteType(type.id)}>
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </Table>
+            </div>
+          </div>
+        )}
+
+
+       
     </>
   );
 }

@@ -5,12 +5,10 @@ import { addDoc, collection,getDocs} from 'firebase/firestore';
 import { setCategoryList,setTypesList,setSelectedCategory,setIsPopUp,setIsCategorySelected,setSelectedType,setIsTypeSelected,setCategoryAndTypes,setAnswer,setSelectedCategoryName,setSelectedTypeName,setShow,setIsApiResponseReceived} from "../../Routes/Slices/dashBoardSlice"
 import { useDispatch,useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Offcanvas from 'react-bootstrap/Offcanvas';
-import { IoMdMenu } from "react-icons/io";
 import "./Dashboard.css"
 import axios from "axios";
+import { Modal } from 'react-bootstrap';
 
 
 function Dashboard() {
@@ -18,16 +16,24 @@ function Dashboard() {
   const dispatch = useDispatch()
   const [pairs,setPairs] = useState([{key:'',value:''}])
   const [generatedData,setGeneratedData] = useState([])
-  let stringedPairs = JSON.stringify(pairs)
-
- 
-  
   const navigate = useNavigate()
   let parsedUid = localStorage.getItem("uid")
-  
-
  
-  const handleNavClose = () => dispatch(setShow(false));
+  
+  //Key Value Pairs************************
+  let keyValuePair = []
+  for (let each of pairs){
+    keyValuePair.push(each.key +":"+ each.value)
+  }
+  let stringedPairs = JSON.stringify(keyValuePair)
+  // const GeneratedDatas = generatedData.map((e) => e.datas)
+  // let getGeneratedDatas = []
+  // for (let each of GeneratedDatas){
+  //   getGeneratedDatas.push(JSON.parse(each))
+  // }
+  //  console.log("getGenratedDatas",getGeneratedDatas);
+  
+   const handleNavClose = () => dispatch(setShow(false));
   const handleNavShow = () => dispatch(setShow(true));
 
   const handleNavigateToSettings = () => navigate("/user/setting");
@@ -40,17 +46,22 @@ function Dashboard() {
 
   };
 
-  const handleKeyChange = (index, event) => {
-    console.log("event",event.target.value)
+  const handleKeyChange = (i, event) => {
     const newPair = [...pairs];
-    newPair[index].key = event.target.value;
+    newPair[i].key = event.target.value;
     setPairs(newPair)
   };
+
+  const handleRemoveInputBox = (i) => {
+      const newArray = [...pairs];
+      newArray.splice(i, 1);
+      setPairs(newArray);
+    };
   
 
-  const handleValueChange = (index, event) => {
+  const handleValueChange = (i, event) => {
     const newPair = [...pairs];
-    newPair[index].value = event.target.value;
+    newPair[i].value = event.target.value;
     setPairs(newPair)
   };
 
@@ -64,10 +75,13 @@ function Dashboard() {
     dispatch(setIsPopUp(true))
   };
 
-  const handleSave = (event) =>{
-     let stringifyData = JSON.stringify(pairs)
-    const docRef=addDoc(collection(db,"generatedDatas"),{datas:stringifyData,category:selectedCategory,typeId:selectedType,templates:answer});
-    dispatch(setIsPopUp(false));
+  
+  const handleSave = () =>{
+     {isApiResponseReceived && 
+        addDoc(collection(db,"generatedDatas"),{datas:stringedPairs,category:selectedCategory,typeId:selectedType,templates:answer})
+        dispatch(setIsPopUp(false));
+     }
+    
   };
   
   const handleClose = ()=>{
@@ -76,7 +90,6 @@ function Dashboard() {
        
   const getCategory = async () => {
       const querySnapshot = await getDocs(collection(db, 'category'));
-      console.log("query",querySnapshot)
       const category = [];
       querySnapshot.forEach((doc) => {
           category.push(doc.data());
@@ -105,7 +118,7 @@ function Dashboard() {
     });
     dispatch(setCategoryAndTypes(categoryTypes))
   };
-//  console.log("catWithTypesingenerate",categoryAndTypes);
+//console.log("catWithTypesingenerate",categoryAndTypes);
 
 const getGenerateDatas = async () => {
     const querySnapshot = await getDocs(collection(db, 'generatedDatas'));
@@ -144,33 +157,16 @@ async function generateAnswer(){
       const response = await axios({
         url:"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCdGe2K1tWu6hUcBGr5L-RbJ65Rd3L0iS0",
         method: "post",
-        data: {contents:[{parts:[{text: `Please give a "${selectedCategoryName}" related "${selectedTypeName}" for these datas ${stringedPairs}}  without any blank filling space` }]}]}
+        data: {contents:[{parts:[{text: `Please give a "${selectedTypeName}" send to  "${selectedCategoryName}" with these given datas ${keyValuePair}` }]}]}
       })
       dispatch(setAnswer(response["data"]["candidates"][0]["content"]["parts"][0]["text"]))
       dispatch(setIsApiResponseReceived(true))
-    }
+     }
+
+
 
 return (
      <>
-      <IoMdMenu className='menu'   onClick={handleNavShow}/>
-      <Offcanvas show={show} className="" onHide={handleNavClose} >
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title></Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body>
-          <div className='sideNav'>
-          <div>
-            <button className='buttonInsideNav'   onClick={handleNavigateToSettings}>Settings</button>
-          </div>
-          <div>
-            <button className='buttonInsideNav'  onClick={handleNavigateToTemplates}>Template</button>
-          </div>
-          <div>
-            <button className='buttonInsideNav'  onClick={handleLogout}>Logout</button>
-          </div>
-          </div>
-        </Offcanvas.Body>
-      </Offcanvas>
     
     <center>
         <h1>Generate Page</h1>
@@ -180,9 +176,9 @@ return (
           <br/>
           <select value={selectedCategory} onChange={(e) => {dispatch(setSelectedCategory(e.target.value)); dispatch(setIsCategorySelected(true))}}>
             <option value="">Select a Category</option>
-            {categoryList.filter((e)=> e.uid==parsedUid).map((category) => (
-              <option key={category.categoryId} value={category.categoryId}>
-                {category.categoryName}
+            {categoryAndTypes.filter((e)=> e.category.uid === parsedUid).map((category) => (
+              <option key={category.category.categoryId} value={category.category.categoryId}>
+                {category.category.categoryName}
               </option>
             ))}
           </select>
@@ -204,14 +200,14 @@ return (
     
         {isTypeSelected ?
           <form onSubmit={handleGenerate}>
-            {pairs.map((pair, index) => (
+            {pairs.map((pair, i) => (
               <>
-              <div key={index}>
+              <div key={i}>
                 <label> Key:</label>
-                <input type="text" value={pair.key} onChange={(event) => handleKeyChange(index, event)}/>
+                <input type="text" placeholder='eg. Name' value={pair.key} onChange={(event) => handleKeyChange(i, event)}/>
                 <label>Value:</label>
-                <input type="text" value={pair.value} onChange={(event) => handleValueChange(index, event)}/>
-                <Button type='button' >Delete</Button>
+                <input type="text" placeholder="eg. Varshini"  value={pair.value} onChange={(event) => handleValueChange(i, event)}/>
+                <button type='button'  onClick={() => handleRemoveInputBox(i)}>Delete</button>
                 
                 </div>
               <br/>
@@ -240,6 +236,7 @@ return (
               <Button  className='saveButton' onClick={handleSave}>
                 Save
               </Button>
+              
              </Modal.Footer>
           </center>
         </Modal>
