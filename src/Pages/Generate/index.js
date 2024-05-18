@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link} from 'react-router-dom';
 import { auth, db } from '../Firebase/firebase';
-import { addDoc, collection,getDocs} from 'firebase/firestore';
-import { setCategoryList,setTypesList,setSelectedCategory,setIsPopUp,setIsCategorySelected,setSelectedType,setIsTypeSelected,setCategoryAndTypes,setAnswer,setSelectedCategoryName,setSelectedTypeName,setShow,setIsApiResponseReceived} from "../../Routes/Slices/dashBoardSlice"
+import { addDoc, collection,getDocs,query, where } from 'firebase/firestore';
+import { setCategoryList,setTypesList,setSelectedCategory,setIsPopUp,setIsCategorySelected,setSelectedType,setIsTypeSelected,setAnswer,setSelectedCategoryName,setSelectedTypeName,setShow,setIsApiResponseReceived} from "../../Routes/Slices/dashBoardSlice"
 import { useDispatch,useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import "./Dashboard.css"
+import "../Navbar/index.css"
 import axios from "axios";
-import { Modal } from 'react-bootstrap';
+import ListExample from '../Navbar';
+
 
 
 function Dashboard() {
-  const {categoryList,typesList,selectedCategory,isCategorySelected,selectedType,isTypeSelected,isPopUp,categoryAndTypes,answer,selectedCategoryName,selectedTypeName,show,isApiResponseReceived} = useSelector(state => state.dashboardslice)
+  const slice = useSelector(state => state.dashboardslice)
+  
   const dispatch = useDispatch()
   const [pairs,setPairs] = useState([{key:'',value:''}])
   const [generatedData,setGeneratedData] = useState([])
   const navigate = useNavigate()
   let parsedUid = localStorage.getItem("uid")
- 
+  
   
   //Key Value Pairs************************
   let keyValuePair = []
@@ -33,18 +36,13 @@ function Dashboard() {
   // }
   //  console.log("getGenratedDatas",getGeneratedDatas);
   
-   const handleNavClose = () => dispatch(setShow(false));
+  const handleNavClose = () => dispatch(setShow(false));
   const handleNavShow = () => dispatch(setShow(true));
 
-  const handleNavigateToSettings = () => navigate("/user/setting");
-  const handleNavigateToTemplates = () => navigate("/template");
+  
+  
  
-  const handleLogout =  (event) => {
-    event.preventDefault();
-    localStorage.removeItem("uid")
-    navigate("/")
-
-  };
+ 
 
   const handleKeyChange = (i, event) => {
     const newPair = [...pairs];
@@ -77,8 +75,8 @@ function Dashboard() {
 
   
   const handleSave = () =>{
-     {isApiResponseReceived && 
-        addDoc(collection(db,"generatedDatas"),{datas:stringedPairs,category:selectedCategory,typeId:selectedType,templates:answer})
+     {slice.isApiResponseReceived && 
+        addDoc(collection(db,"generatedDatas"),{datas:stringedPairs,category:slice.selectedCategory,typeId:slice.selectedType,templates:slice.answer})
         dispatch(setIsPopUp(false));
      }
     
@@ -96,12 +94,21 @@ function Dashboard() {
         });
         dispatch(setCategoryList(category))
   };
+  console.log("categoryList",slice.categoryList.map((e) => e.categoryId))
+  console.log("typeList",slice.typesList.map((e) => e.categoryId))
+  
+  
   
 
+   
   const getTypes = async () => {
-      const querySnapshot = await getDocs(collection(db, 'type'));
+    const selectedCategoryId = slice.selectedCategory
+    const querySnapshot = await getDocs(query(collection(db, 'type'), where("categoryId", "==" , selectedCategoryId)));
+    console.log("querySnapshot",querySnapshot)
+      // const querySnapshot = await getDocs(collection(db, 'type'));
       const type = [];
       const typeId = querySnapshot.docs.map((doc) => (
+        console.log("doc",doc.data()),
         type.push(doc.data()),
         {
             id : doc.id,
@@ -109,17 +116,10 @@ function Dashboard() {
         }
        ))
       dispatch(setTypesList(typeId))
+      console.log("typesFromQuery",type);
   };
 
-  const fetchCategoryWithType = () => {
-    const categoryTypes = categoryList.map((category) => {
-      const typesForCategory = typesList.filter((type) => type.categoryId === category.categoryId).map((doc) => doc.type);
-      return { category, types: typesForCategory };
-    });
-    dispatch(setCategoryAndTypes(categoryTypes))
-  };
-//console.log("catWithTypesingenerate",categoryAndTypes);
-
+ 
 const getGenerateDatas = async () => {
     const querySnapshot = await getDocs(collection(db, 'generatedDatas'));
     const generatedDatas = [];
@@ -132,32 +132,31 @@ const getGenerateDatas = async () => {
   useEffect(() => {
         getCategory();
         getTypes();
-        fetchCategoryWithType();
         getGenerateDatas();
     }, []);   
 
   useEffect(() => {
-    for (let each of categoryList){
-      if (each.categoryId == selectedCategory){
+    for (let each of slice.categoryList){
+      if (each.categoryId == slice.selectedCategory){
         dispatch(setSelectedCategoryName(each.categoryName))
       }
     }
-  }, [selectedCategory]); 
+  }, [slice.selectedCategory]); 
   
   useEffect(() => {
-    for (let each of typesList){
-      if (each.id == selectedType){
+    for (let each of slice.typesList){
+      if (each.id == slice.selectedType){
         dispatch(setSelectedTypeName(each.type))
       }
     }
-  }, [selectedType]); 
+  }, [slice.selectedType]); 
 
 async function generateAnswer(){
       dispatch(setAnswer("Loading..."))
       const response = await axios({
         url:"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCdGe2K1tWu6hUcBGr5L-RbJ65Rd3L0iS0",
         method: "post",
-        data: {contents:[{parts:[{text: `Please give a "${selectedTypeName}" send to  "${selectedCategoryName}" with these given datas ${keyValuePair}` }]}]}
+        data: {contents:[{parts:[{text: `Please give a "${slice.selectedTypeName}" send to  "${slice.selectedCategoryName}" with these given datas ${keyValuePair}` }]}]}
       })
       dispatch(setAnswer(response["data"]["candidates"][0]["content"]["parts"][0]["text"]))
       dispatch(setIsApiResponseReceived(true))
@@ -167,28 +166,31 @@ async function generateAnswer(){
 
 return (
      <>
-    
-    <center>
-        <h1>Generate Page</h1>
+      <center>
+      <header>
+          <ListExample/>
+      </header>
+      <h1>Generate Page</h1>
         <br/>
         <div>
           <br/>
           <br/>
-          <select value={selectedCategory} onChange={(e) => {dispatch(setSelectedCategory(e.target.value)); dispatch(setIsCategorySelected(true))}}>
+          
+          <select value={slice.selectedCategory} onChange={(e) => {dispatch(setSelectedCategory(e.target.value)); dispatch(setIsCategorySelected(true))}}>
             <option value="">Select a Category</option>
-            {categoryAndTypes.filter((e)=> e.category.uid === parsedUid).map((category) => (
-              <option key={category.category.categoryId} value={category.category.categoryId}>
-                {category.category.categoryName}
+            {(slice.categoryList.filter((e)=> (e.uid) === (parsedUid))).map((categories) => (
+              <option key={categories.categoryId} value={categories.categoryId}>
+                {categories.categoryName}
               </option>
             ))}
           </select>
           <br/>
           <br/>
-          {isCategorySelected ? 
-            <select value={selectedType} onChange={(e) => {dispatch(setSelectedType(e.target.value)); dispatch(setIsTypeSelected(true))}}>
+          {slice.isCategorySelected ? 
+            <select value={slice.selectedType} onChange={(e) => {dispatch(setSelectedType(e.target.value)); dispatch(setIsTypeSelected(true))}}>
               <option value="">Select a Type</option>
-              {typesList.filter((e)=> e.uid==parsedUid).map((types) => (
-                selectedCategory === types.categoryId &&
+              {slice.typesList.filter((e)=> e.uid==parsedUid).map((types) => (
+                slice.selectedCategory === types.categoryId &&
                   <option key={types.id} value={types.id}>
                     {types.type}
                   </option>
@@ -198,7 +200,7 @@ return (
           <br/>
         </div>
     
-        {isTypeSelected ?
+        {slice.isTypeSelected ?
           <form onSubmit={handleGenerate}>
             {pairs.map((pair, i) => (
               <>
@@ -221,13 +223,13 @@ return (
           </form> : null
         }
     
-        <Modal show={isPopUp} onHide={handleClose}>
+        <Modal show={slice.isPopUp} onHide={handleClose}>
           <center>
             <Modal.Header closeButton>
-              <Modal.Title> {selectedTypeName} to {selectedCategoryName}</Modal.Title>
+              <Modal.Title> {slice.selectedTypeName} to {slice.selectedCategoryName}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              {answer}
+              {slice.answer}
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary"  onClick={handleClose}>
@@ -236,8 +238,7 @@ return (
               <Button  className='saveButton' onClick={handleSave}>
                 Save
               </Button>
-              
-             </Modal.Footer>
+              </Modal.Footer>
           </center>
         </Modal>
         </center>
