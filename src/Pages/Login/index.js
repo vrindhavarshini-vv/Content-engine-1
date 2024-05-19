@@ -62,11 +62,10 @@ const Login = () => {
         navigate("/dashboard")
   })}
 
-
   let [registerMode, setRegisterMode] = useState("signin")
 
-  const changesetRegisterMode = () => {
-    setRegisterMode(registerMode === "signin" ? "signup" : "signin")
+  const changeRegisterMode = () => {
+     setRegisterMode(registerMode === "signin" ? "signup" : "signin")
   }
 
   if (registerMode === "signin") {
@@ -74,15 +73,12 @@ const Login = () => {
       <div className="form-container">
         <form className="form">
           <div className="form-content">
-            {/* <h4>{JSON.stringify(regLogin)}</h4> */}
-            <center><h2>SIGN UP</h2></center> 
             <div className="form-group mt-3">
               <label>Email address</label>
               <input
                 type="email"
                 className="form-control mt-1"
                 placeholder="Enter email"
-                
               />
             </div>
             <div className="form-group mt-3">
@@ -91,23 +87,21 @@ const Login = () => {
                 type="password"
                 className="form-control mt-1"
                 placeholder="Enter password"
-               
               />
             </div>
             <div className="d-grid gap-2 mt-3">
-              <button type="submit" className="btn btn-primary"   >
+              <button type="submit" className="btn btn-primary">
                 Submit
               </button>
             </div>
             <div className="text-center">
-              Already registered?{" "}
-              <span className="link-primary" onClick={changesetRegisterMode}>
-                Sign In
+              Not registered yet?{" "}
+              <span className="link-primary" onClick={changeRegisterMode}>
+                Sign Up
               </span>
-            </div>  
+            </div>
           </div>
         </form>
-        
       </div>
     )
   }
@@ -116,16 +110,13 @@ const Login = () => {
     <div className="form-container">
       <form className="form">
         <div className="form-content">
-          {/* <div className="form-group mt-3">
-            <label>Full Name</label>
-            <input
-              type="email"
-              className="form-control mt-1"
-              placeholder="e.g Jane Doe"
-            />
+          <h3 className="form-title">Sign In</h3>
+          {/* <div className="text-center">
+            Already registered?{" "}
+            <span className="link-primary" onClick={changeAuthMode}>
+              Sign In
+            </span>
           </div> */}
-           {/* <h4>{JSON.stringify(regLogin)}</h4> */}
-          <center><h2>SIGN IN</h2></center> 
           <div className="form-group mt-3">
             <label>Email address</label>
             <input
@@ -157,14 +148,15 @@ const Login = () => {
         </div>
         <div className="text-center">
             Not registered yet?{" "}
-            <span className="link-primary" onClick={changesetRegisterMode}>
+            <span className="link-primary" onClick={changeRegisterMode}>
               Sign Up
             </span>
           </div>
         </div>
       </form>
-    </div>
-  )
-};
+  </div>
+
+)}
 
 export default Login;
+
