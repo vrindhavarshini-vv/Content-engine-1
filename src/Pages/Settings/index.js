@@ -19,6 +19,8 @@ import {
   updateDoc,
   doc,
   deleteDoc,
+  query,
+  where
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import ListExample from "../Navbar";
@@ -35,7 +37,6 @@ export default function Categories() {
 
   useEffect(() => {
     fetchCategories();
-    fetchTypes();
   }, []);
 
   const fetchCategories = async () => {
@@ -47,16 +48,21 @@ export default function Categories() {
         uid: doc.data().uid,
       }));
       dispatch(setCategories(categoriesList));
-      console.log("categoryList", categoriesList);
     } catch (error) {
       console.error("Error fetching categories: ", error);
       alert("Failed to fetch categories. Please try again.");
     }
   };
 
-  const fetchTypes = async () => {
-    try {
-      const typesSnapshot = await getDocs(collection(db, "type"));
+  const fetchTypes = async (categoryId) => {
+    if (!categoryId) return;  
+      try {
+        const typesQuery = query(
+          collection(db, "type"),
+          where("uid", "==", adminLoginData.uid), // Filter by uid
+          where("categoryId", "==", categoryId) // Filter by categoryId
+        );
+      const typesSnapshot = await getDocs(typesQuery);
       const typesList = typesSnapshot.docs.map((doc) => ({
         id: doc.id,
         name: doc.data().type,
@@ -64,7 +70,6 @@ export default function Categories() {
         uid: doc.data().uid,
       }));
       dispatch(setTypes(typesList));
-      console.log("typelist", typesList);
     } catch (error) {
       console.error("Error fetching types: ", error);
       alert("Failed to fetch types. Please try again.");
@@ -81,7 +86,10 @@ export default function Categories() {
 
   const openTypeModal = (categoryId) => {
     setCurrentCategoryId(categoryId);
+    dispatch(setSelectedCategory(categoryId));
     setShowTypeModal(true);
+    fetchTypes(categoryId); 
+    // generatePreview(categoryId, settingstate.categoryType);
   };
 
   const closeTypeModal = () => {
@@ -111,7 +119,6 @@ export default function Categories() {
           { id: categoryId, categoryName: settingstate.categoryName, uid: adminLoginData.uid },
         ])
       );
-
       dispatch(setSelectedCategory(categoryId));
       dispatch(setCategoryName(""));
       closeModal();
@@ -125,6 +132,7 @@ export default function Categories() {
 
   const handleCategoryTypeChange = (e) => {
     dispatch(setCategoryType(e.target.value));
+    generatePreview(currentCategoryId, e.target.value);
   };
 
   const handleAddCategoryType = async () => {
@@ -147,22 +155,20 @@ export default function Categories() {
       dispatch(setCategoryType(""));
       closeTypeModal();
       alert("Category Type added successfully!");
-      fetchTypes(); // Refresh types list after adding a new type
+      fetchTypes(currentCategoryId); // Refresh types list after adding a new type
+
     } catch (error) {
       console.error("Error adding category type: ", error);
       alert("Failed to add category type. Please try again.");
     }
   };
 
-  const generatePreview = () => {
-    if (!settingstate.selectedCategory || !settingstate.categoryType) {
-      alert("Please select a category and enter a category type");
+  const generatePreview = (categoryId, categoryType) => {
+    if (!categoryId || !categoryType) {
       return;
     }
 
-    const createEmail = `please give a "${getCategoryNameById(
-      settingstate.selectedCategory
-    )}",related "${settingstate.categoryType}" Email!`;
+    const createEmail = `Please give a "${getCategoryNameById(categoryId)}" related "${categoryType}" email!`;
     dispatch(setPreviewContent(createEmail));
   };
 
@@ -188,60 +194,48 @@ export default function Categories() {
     navigate("/dashboard");
   };
 
-  let uid = localStorage.getItem("uid");
-  console.log(uid);
+  const uid = localStorage.getItem("uid");
 
   return (
     <>
-     <header>
-      <ListExample/>
-     </header>
-      <div className="form">
-        <center>
+      <center>
+        <header>
+          <ListExample />
+        </header>
+        <div className="form" style={{ textAlign: 'center' }}>
           <h1>Create Categories</h1>
           <button type="button" onClick={openModal}>
             Add New Category
           </button>
-          {/* <select
-            value={settingstate.selectedCategory}
-            onChange={(e) => dispatch(setSelectedCategory(e.target.value))}
-          >
-            <option value="">Select a Category</option>
-            {settingstate.categories
-              .filter((e) => e.uid === uid)
-              .map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.categoryName}
-                </option>
-              ))}
-          </select> */}
+        </div>
+      </center>
+
+      <Modal show={settingstate.showModal} onHide={closeModal}>
+        <center>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              <h2>Enter Category Name</h2>
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <input
+              type="text"
+              value={settingstate.categoryName}
+              onChange={(e) => dispatch(setCategoryName(e.target.value))}
+              placeholder="Category Name"
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={handleCategorySubmit}>Submit</Button>
+          </Modal.Footer>
         </center>
-        <Modal show={settingstate.showModal} onHide={closeModal}>
-          <center>
-            <Modal.Header closeButton>
-              <Modal.Title>
-                <h2>Enter Category Name</h2>
-              </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <input
-                type="text"
-                value={settingstate.categoryName}
-                onChange={(e) => dispatch(setCategoryName(e.target.value))}
-                placeholder="Category Name"
-              />
-            </Modal.Body>
-            <Modal.Footer>
-              <Button onClick={handleCategorySubmit}>Submit</Button>
-            </Modal.Footer>
-          </center>
-        </Modal>
-      </div>
+      </Modal>
+
       {settingstate.categories.length > 0 && (
         <div className="table-responsive-sm">
           <div className="container-sm">
             <h2>Categories List:</h2>
-            <Table bordered>
+            <Table striped bordered>
               <thead>
                 <tr>
                   <th>ID</th>
@@ -268,6 +262,7 @@ export default function Categories() {
           </div>
         </div>
       )}
+
       <Modal show={showTypeModal} onHide={closeTypeModal}>
         <center>
           <Modal.Header closeButton>
@@ -279,7 +274,7 @@ export default function Categories() {
             <input
               type="text"
               value={settingstate.categoryType}
-              onChange={(e) => dispatch(setCategoryType(e.target.value))}
+              onChange={handleCategoryTypeChange}
               placeholder="Category Type"
             />
           </Modal.Body>
@@ -288,6 +283,13 @@ export default function Categories() {
           </Modal.Footer>
         </center>
       </Modal>
+      {settingstate.previewContent && (
+        <div className="preview">
+          <h3>Preview:</h3>
+          <p>{settingstate.previewContent}</p>
+        </div>
+      )}
+
       {settingstate.types.length > 0 && (
         <div className="table-responsive-sm">
           <div className="container-sm">
@@ -310,9 +312,7 @@ export default function Categories() {
                       <td>{type.name}</td>
                       <td>{getCategoryNameById(type.categoryId)}</td>
                       <td>
-                        <button onClick={() => handleDeleteType(type.id)}>
-                          Delete
-                        </button>
+                        <button onClick={() => handleDeleteType(type.id)}>Delete</button>
                       </td>
                     </tr>
                   ))}
@@ -321,6 +321,8 @@ export default function Categories() {
           </div>
         </div>
       )}
+
+    
     </>
   );
 }

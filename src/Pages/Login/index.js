@@ -1,20 +1,11 @@
 import React, { useState } from "react";
 import { auth } from "../Firebase/firebase";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import {
-  setAdminLoginData,
-  setAdminLogged,
-  setIsAdmin,
-} from "../../Routes/Slices/adminLogin";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useDispatch } from "react-redux";
-import { GoogleAuthProvider ,signInWithPopup} from "firebase/auth";
-// import GoogleButton from 'react-google-button'
-
-
-
-
-
+import { setAdminLoginData, setAdminLogged, setIsAdmin } from "../../Routes/Slices/adminLogin";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./login.css";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -26,81 +17,96 @@ const Login = () => {
   });
 
   const checkAdmin = async () => {
-    if (regLogin.email === "" || regLogin.password === "") {
-      alert("Please fill all fields");
-    } else {
-      await signInWithEmailAndPassword(auth, regLogin.email, regLogin.password)
-        .then((userCredential) => {
-          // Signed in
-          const user = userCredential.user;
-          localStorage.setItem("token", user.accessToken);
-          localStorage.setItem("uid", user.uid);
-          dispatch(setAdminLoginData(user));
-          dispatch(setAdminLogged(true));
-          dispatch(setIsAdmin(true));
-          alert("Admin login successfull!");
-          navigate("/dashboard");
-        })
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          console.log(errorCode, errorMessage);
-          alert("Admin login unsuccessfull!");
-        });
+    try {
+      if (regLogin.email === "" || regLogin.password === "") {
+        alert("Please fill all fields");
+      } else {
+        const userCredential = await signInWithEmailAndPassword(auth, regLogin.email, regLogin.password);
+        const user = userCredential.user;
+        localStorage.setItem("token", user.accessToken);
+        localStorage.setItem("uid", user.uid);
+        dispatch(setAdminLoginData(user));
+        dispatch(setAdminLogged(true));
+        dispatch(setIsAdmin(true));
+        alert("Admin login successful!");
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error("Admin login unsuccessful:", error.message);
+      alert("Admin login unsuccessful!");
     }
   };
 
-  const handleGoogleAuth = async (e) => {
-    const provider = await new GoogleAuthProvider();
-    return signInWithPopup(auth, provider).then((userCredential) => {
+  const handleGoogleAuth = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
       const user = userCredential.user;
-      console.log("user", user);
       localStorage.setItem("token", user.accessToken);
       localStorage.setItem("uid", user.uid);
       navigate("/dashboard");
-    });
+    } catch (error) {
+      console.error("Google sign-in unsuccessful:", error.message);
+      alert("Google sign-in unsuccessful!");
+    }
+  };
+
+  const [registerMode, setRegisterMode] = useState("signin");
+
+  const changeRegisterMode = () => {
+    setRegisterMode(registerMode === "signin" ? "signup" : "signin");
   };
 
   return (
-    <center>
-      <div>
-        <h4>{JSON.stringify(regLogin)}</h4>
-        <form>
-          <h2>Admin Page</h2>
-          <div>
-            <label>Admin email:</label>
+    <div className="form-container">
+      <form className="form">
+        <div className="form-content">
+          <center>
+            <h2>{registerMode === "signin" ? "SIGN IN" : "SIGN UP"}</h2>
+          </center>
+          <div className="form-group mt-3">
+            <label>Email address</label>
             <input
-              placeholder="Enter email"
               type="email"
-              onKeyUp={(e) =>
-                setRegLogin({ ...regLogin, email: e.target.value })
-              }
+              className="form-control mt-1"
+              placeholder="Enter email"
+              onChange={(e) => setRegLogin({ ...regLogin, email: e.target.value })}
             />
           </div>
-          <div>
-            <label>Password:</label>
+          <div className="form-group mt-3">
+            <label>Password</label>
             <input
-              placeholder="Enter password"
               type="password"
-              onKeyUp={(e) =>
-                setRegLogin({ ...regLogin, password: e.target.value })
-              }
+              className="form-control mt-1"
+              placeholder="Enter password"
+              onChange={(e) => setRegLogin({ ...regLogin, password: e.target.value })}
             />
           </div>
-          <div>
-            <button type="button" onClick={checkAdmin}>
-              Admin Login
+          <div className="d-grid gap-2 mt-3">
+            <button type="button" className="btn btn-primary" onClick={registerMode === "signin" ? checkAdmin : null}>
+              {registerMode === "signin" ? "Sign In" : "Sign Up"}
             </button>
           </div>
-        </form>
-        <br />
-
-        <button onClick={handleGoogleAuth}>
-          <img src="icons8-google.svg" />
-          continue with google
-        </button>
-      </div>
-    </center>
+          {registerMode === "signin" && (
+            <div>
+              <div className="text-center">Or Login With:</div>
+              <div className="d-grid gap-2 mt-3">
+                <button className="google-btn" onClick={handleGoogleAuth}>
+                  <img className="google-img" src="google.svg" alt="Google Logo" />
+                  Sign in with Google
+                </button>
+              </div>
+              <div className="text-center">
+                Not registered yet?{" "}
+                <span className="link-primary" onClick={changeRegisterMode}>
+                  Sign Up
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </form>
+    </div>
   );
 };
 
