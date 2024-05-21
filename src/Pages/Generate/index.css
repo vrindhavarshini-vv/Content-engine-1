@@ -1,11 +1,15 @@
-.buttonInNav{
-    outline: none;
-    border-width: 100%;
-    border: none;
-    font-size: large;
-    color: blue;
-    gap: 20px;
+.saveButton{
+    color: black;
+    background-color: green;
 }
-.buttonInNav:hover{
-    color: gray;
+.saveButton:hover{
+    background-color: yellowgreen;
+}
+.generatePageContainer{
+    background-color: rgb(211, 166, 225);
+    width: 100%;
+    height: 100vh;
+}
+header{
+    width: 100%;
 }
