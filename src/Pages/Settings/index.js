@@ -203,9 +203,9 @@ export default function Categories() {
           <ListExample />
         </header>
         <div className="form" style={{ textAlign: 'center' }}>
-          <h1>Create Categories</h1>
+          <h1>Create Email Recipients</h1>
           <button type="button" onClick={openModal}>
-            Add New Category
+            Add New Recipients
           </button>
         </div>
       </center>
@@ -214,7 +214,7 @@ export default function Categories() {
         <center>
           <Modal.Header closeButton>
             <Modal.Title>
-              <h2>Enter Category Name</h2>
+              <h2>Enter Recipients Name</h2>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -222,7 +222,6 @@ export default function Categories() {
               type="text"
               value={settingstate.categoryName}
               onChange={(e) => dispatch(setCategoryName(e.target.value))}
-              placeholder="Category Name"
             />
           </Modal.Body>
           <Modal.Footer>
@@ -234,12 +233,12 @@ export default function Categories() {
       {settingstate.categories.length > 0 && (
         <div className="table-responsive-sm">
           <div className="container-sm">
-            <h2>Categories List:</h2>
+            <h2>Recipients List:</h2>
             <Table striped bordered>
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Category Name</th>
+                  <th>Email Recipients</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -252,7 +251,7 @@ export default function Categories() {
                       <td>{category.categoryName}</td>
                       <td>
                         <button onClick={() => openTypeModal(category.id)}>
-                          Add Type
+                          Add Email Type
                         </button>
                       </td>
                     </tr>
@@ -267,7 +266,7 @@ export default function Categories() {
         <center>
           <Modal.Header closeButton>
             <Modal.Title>
-              <h2>Enter Category Type</h2>
+              <h2>Enter Recipients Type</h2>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -275,7 +274,6 @@ export default function Categories() {
               type="text"
               value={settingstate.categoryType}
               onChange={handleCategoryTypeChange}
-              placeholder="Category Type"
             />
           </Modal.Body>
           <Modal.Footer>
@@ -293,13 +291,13 @@ export default function Categories() {
       {settingstate.types.length > 0 && (
         <div className="table-responsive-sm">
           <div className="container-sm">
-            <h2>Types List:</h2>
+            <h2>Recipients Email Types List:</h2>
             <Table striped bordered hover variant="dark">
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Type Name</th>
-                  <th>Category Name</th>
+                  <th>Recipients Email Types</th>
+                  <th>Email Recipients</th>
                   <th>Actions</th>
                 </tr>
               </thead>
