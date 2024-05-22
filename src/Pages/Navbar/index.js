@@ -1,5 +1,4 @@
 import Nav from 'react-bootstrap/Nav';
-import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
 function ListExample() {
@@ -10,9 +9,7 @@ function ListExample() {
     const handleLogout =  (event) => {
         event.preventDefault();
         localStorage.removeItem("uid")
-        
         navigate("/")
-    
       };
   return (
     <div >
