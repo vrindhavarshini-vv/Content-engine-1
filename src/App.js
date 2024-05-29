@@ -7,7 +7,9 @@ import { useEffect } from "react";
 import Login from "./Pages/Login";
 import Dashboard from "./Pages/Generate";
 import Categories from './Pages/Settings';
+// import Categories from './Pages/Settings/index'
 import Template from "./Pages/Template/index";
+
 
 
 
@@ -38,7 +40,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-
+      
         <Route path="/" element={<Login/>} />
         {adminLogged ? 
           <>
@@ -48,10 +50,7 @@ function App() {
           </>
           : null
         }
-
-
-        
-      </Routes>
+     </Routes>
     </BrowserRouter>
   );
 }
