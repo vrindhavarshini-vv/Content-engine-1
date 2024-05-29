@@ -4,10 +4,12 @@ import { auth, db } from '../Firebase/firebase';
 import { addDoc, collection,getDocs,query, where } from 'firebase/firestore';
 import { setCategoryList,setTypesList,setSelectedCategory,setIsPopUp,setIsCategorySelected,setSelectedType,setIsTypeSelected,setAnswer,setSelectedCategoryName,setSelectedTypeName,setShow,setIsApiResponseReceived} from "../../Routes/Slices/dashBoardSlice"
 import { useDispatch,useSelector } from 'react-redux';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import "../Navbar/index.css"
 import "./index.css"
 import axios from "axios";
-import { Button, Modal } from 'react-bootstrap';
 import ListExample from '../Navbar';
 
 
@@ -15,7 +17,7 @@ import ListExample from '../Navbar';
 
 function Dashboard() {
   const slice = useSelector(state => state.dashboardslice)
-  
+
   const dispatch = useDispatch()
   const [pairs,setPairs] = useState([{key:'',value:''}])
   const [generatedData,setGeneratedData] = useState([])
@@ -79,8 +81,7 @@ function Dashboard() {
         addDoc(collection(db,"generatedDatas"),{datas:stringedPairs,category:slice.selectedCategory,typeId:slice.selectedType,templates:slice.answer})
         dispatch(setIsPopUp(false));
      }
-    
-  };
+    };
   
   const handleClose = ()=>{
     dispatch(setIsPopUp(false))
@@ -96,31 +97,23 @@ function Dashboard() {
   };
   console.log("categoryList",slice.categoryList.map((e) => e.categoryId))
   console.log("typeList",slice.typesList.map((e) => e.categoryId))
-  
-  
-  
 
-   
-  const getTypes = async () => {
-    const selectedCategoryId = slice.selectedCategory
-    const querySnapshot = await getDocs(query(collection(db, 'type'), where("categoryId", "==" , selectedCategoryId)));
-    console.log("querySnapshot",querySnapshot)
-      // const querySnapshot = await getDocs(collection(db, 'type'));
-      const type = [];
-      const typeId = querySnapshot.docs.map((doc) => (
-        console.log("doc",doc.data()),
-        type.push(doc.data()),
-        {
-            id : doc.id,
-            ...doc.data()
-        }
-       ))
-      dispatch(setTypesList(typeId))
-      console.log("typesFromQuery",type);
-  };
+ const getTypes = async () => {
+    const querySnapshot = await getDocs(query(collection(db, 'type'), where("categoryId", "==", slice.selectedCategory)));
+      const typeId = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      dispatch(setTypesList(typeId));
+    }
+  
+useEffect(() => {
+    if (slice.isCategorySelected) {
+      getTypes();
+    }
+  }, [slice.selectedCategory])
 
- 
-const getGenerateDatas = async () => {
+  const getGenerateDatas = async () => {
     const querySnapshot = await getDocs(collection(db, 'generatedDatas'));
     const generatedDatas = [];
     querySnapshot.forEach((doc) => {
@@ -131,9 +124,9 @@ const getGenerateDatas = async () => {
 
   useEffect(() => {
         getCategory();
-        getTypes();
         getGenerateDatas();
     }, []);   
+
 
   useEffect(() => {
     for (let each of slice.categoryList){
@@ -188,11 +181,12 @@ async function generateAnswer(){
 //           <br/>
 return (
      <>
-    <header>
-      <ListExample/>
-    </header>
-    <center>
-        <h1>Generate Page</h1>
+     <div className='generatePageContainer'>
+      <center>
+      <header>
+          <ListExample/>
+      </header>
+      <h1>Generate Page</h1>
         <br/>
         <div>
           <br/>
@@ -208,6 +202,7 @@ return (
           </select>
           <br/>
           <br/>
+          
           {slice.isCategorySelected ? 
             <select value={slice.selectedType} onChange={(e) => {dispatch(setSelectedType(e.target.value)); dispatch(setIsTypeSelected(true))}}>
               <option value="">Select a Type</option>
@@ -264,9 +259,33 @@ return (
           </center>
         </Modal>
         </center>
+        </div>
       </>
     );
 }
     
 
 export default Dashboard;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -74,38 +74,37 @@ const Template = () => {
     dispatch(setCategoryAndTypes(selectCat));
   };
 
-  const templateInsideTypes = () => {
-    const cat = fbCategory.map((category) => {
-      const typesForCategory = fbType
-        .filter((type) => type.categoryId === category.categoryId)
-        .map((type) => {
-          const templatesForType = fbGeneratedDatas.filter(
-            (data) => data.typeId === type.typeId
-          );
-          return {
-            type: type.type,
-            templates: templatesForType.map((template) => ({
-              id: template.id,
-              template: template.templates,
-            })),
-          };
-        });
-      return { category, types: typesForCategory };
-    });
-    const newCat = cat;
-    dispatch(setCategoryWithTypesWithTemplates(newCat));
-  };
+  // const templateInsideTypes = () => {
+  //   const cat = fbCategory.map((category) => {
+  //     const typesForCategory = fbType
+  //       .filter((type) => type.categoryId === category.categoryId)
+  //       .map((type) => {
+  //         const templatesForType = fbGeneratedDatas.filter(
+  //           (data) => data.typeId === type.typeId
+  //         );
+  //         return {
+  //           type: type.type,
+  //           templates: templatesForType.map((template) => ({
+  //             id: template.id,
+  //             template: template.templates,
+  //           })),
+  //         };
+  //       });
+  //     return { category, types: typesForCategory };
+  //   });
+  //   const newCat = cat;
+  //   dispatch(setCategoryWithTypesWithTemplates(newCat));
+  // };
 
   useEffect(() => {
     fetchCategory();
     fetchTypes();
-    fetchCategoryWithType();
-    fetchTemplate();
-    templateInsideTypes();
+    // templateInsideTypes();
   }, []);
 
   const handleCategoryClick = async (eachCategory) => {
     dispatch(setSelectedCategory(eachCategory));
+    console.log('selectCata',selectedCategory)
   };
 
   const handleTypeClick = (clickType) => {
@@ -122,6 +121,12 @@ const Template = () => {
     setSelectType(selectedTemplates);
     console.log("Selected Template", selectType);
   };
+  useEffect(()=>{
+    if(selectType){
+      fetchCategoryWithType();
+      fetchTemplate();
+    }
+  },[selectType])
 
   const handleTemplateSelected = (temp) => {
     console.log("temp", temp);

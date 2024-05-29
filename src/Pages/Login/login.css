@@ -5,21 +5,29 @@
 
 
 
-.form-container {
+/* .form-container { */
+button {
+  max-width: 320px;
   display: flex;
-  justify-content: center;
+  padding: 0.5rem 1.4rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  vertical-align: middle;
   align-items: center;
-  width: 100vw;
-  height: 100vh;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  gap: 0.75rem;
+  color: rgb(65, 63, 63);
+  background-color: #fff;
+  cursor: pointer;
+  transition: all .6s ease;
 }
 
-.form {
-  width: 420px;
-  box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
-  padding-top: 30px;
-  padding-bottom: 20px;
-  border-radius: 8px;
-  background-color: white;
+.button svg {
+  height: 24px;
 }
 
 .form-content {
@@ -68,3 +76,6 @@ label {
 button:hover {
   transform: scale(1.02);
 } */
+button:hover {
+  transform: scale(1.02);
+}
