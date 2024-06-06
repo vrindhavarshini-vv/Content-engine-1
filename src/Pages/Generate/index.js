@@ -14,8 +14,14 @@ import ListExample from '../Navbar';
 
 
 
+
 function Dashboard() {
   const slice = useSelector(state => state.dashboardslice)
+  const templateSlice = useSelector((state) => state.template);
+
+  console.log("categorySelectedInTemplates",templateSlice.selectedCategory)
+  console.log("isNavigateFromTemplates",templateSlice.isNavigateFromTemplates)
+ 
 
   const dispatch = useDispatch()
   const [pairs,setPairs] = useState([{key:'',value:''}])
@@ -41,10 +47,6 @@ function Dashboard() {
   const handleNavShow = () => dispatch(setShow(true));
 
   
-  
- 
- 
-
   const handleKeyChange = (i, event) => {
     const newPair = [...pairs];
     newPair[i].key = event.target.value;
@@ -74,7 +76,6 @@ function Dashboard() {
     dispatch(setIsPopUp(true))
   };
 
-  
   const handleSave = () =>{
      {slice.isApiResponseReceived && 
         addDoc(collection(db,"generatedDatas"),{datas:stringedPairs,category:slice.selectedCategory,typeId:slice.selectedType,templates:slice.answer})
@@ -84,6 +85,7 @@ function Dashboard() {
   
   const handleClose = ()=>{
     dispatch(setIsPopUp(false))
+    dispatch(setIsApiResponseReceived(false))
   };
        
   const getCategory = async () => {
@@ -94,8 +96,6 @@ function Dashboard() {
         });
         dispatch(setCategoryList(category))
   };
-  console.log("categoryList",slice.categoryList.map((e) => e.categoryId))
-  console.log("typeList",slice.typesList.map((e) => e.categoryId))
 
  const getTypes = async () => {
     const querySnapshot = await getDocs(query(collection(db, 'type'), where("categoryId", "==", slice.selectedCategory)));
@@ -148,7 +148,7 @@ async function generateAnswer(){
       const response = await axios({
         url:"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCdGe2K1tWu6hUcBGr5L-RbJ65Rd3L0iS0",
         method: "post",
-        data: {contents:[{parts:[{text: `Please give a "${slice.selectedTypeName}" send to  "${slice.selectedCategoryName}" with these given datas ${keyValuePair}` }]}]}
+        data: {contents:[{parts:[{text: `Please give a "${slice.selectedTypeName}" send to  "${slice.selectedCategoryName}" with these given datas only ${keyValuePair}and don't give unneccessary spaces or placeholders `  }]}]}
       })
       dispatch(setAnswer(response["data"]["candidates"][0]["content"]["parts"][0]["text"]))
       dispatch(setIsApiResponseReceived(true))
@@ -168,15 +168,26 @@ return (
         <div>
           <br/>
           <br/>
-          
-          <select value={slice.selectedCategory} onChange={(e) => {dispatch(setSelectedCategory(e.target.value)); dispatch(setIsCategorySelected(true))}}>
+         
+          {/* <select 
+          {templateSlice.isNavigateFromTemplates ?
+              value={slice.selectedCategory} : value={templateSlice.selectedCategory}}onChange={(e) => {dispatch(setSelectedCategory(e.target.value)); dispatch(setIsCategorySelected(true))}}>
             <option value="">Select a Category</option>
             {(slice.categoryList.filter((e)=> (e.uid) === (parsedUid))).map((categories) => (
               <option key={categories.categoryId} value={categories.categoryId}>
                 {categories.categoryName}
               </option>
             ))}
-          </select>
+          </select> */}
+          <select onChange={(e) => {dispatch(setSelectedCategory(e.target.value)); dispatch(setIsCategorySelected(true))}}>
+              <option  value={templateSlice.isNavigateFromTemplates ? templateSlice.selectedCategory : slice.selectedCategory}>Select a Category</option>
+              {slice.categoryList.filter((e) => e.uid === parsedUid).map((categories) => (
+                <option key={categories.categoryId} value={categories.categoryId}>
+                  {categories.categoryName}
+                </option>
+                  ))}
+              </select>
+          
           <br/>
           <br/>
           
@@ -200,7 +211,7 @@ return (
               <>
               <div key={i}>
                 <label> Key:</label>
-                <input type="text" placeholder='eg. Name' value={pair.key} onChange={(event) => handleKeyChange(i, event)}/>
+                <input  type="text" placeholder='eg. Name' value={pair.key} onChange={(event) => handleKeyChange(i, event)}/>
                 <label>Value:</label>
                 <input type="text" placeholder="eg. Varshini"  value={pair.value} onChange={(event) => handleValueChange(i, event)}/>
                 <button type='button'  onClick={() => handleRemoveInputBox(i)}>Delete</button>
@@ -229,9 +240,9 @@ return (
               <Button variant="secondary"  onClick={handleClose}>
                 Regenerate
               </Button>
-              <Button  className='saveButton' onClick={handleSave}>
+              {slice.isApiResponseReceived ? <Button  className='saveButton' onClick={handleSave}>
                 Save
-              </Button>
+              </Button> : null}
               </Modal.Footer>
           </center>
         </Modal>
