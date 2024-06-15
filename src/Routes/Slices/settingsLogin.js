@@ -10,6 +10,7 @@ export const SettingSlice = createSlice({
     categoryName: "",
     showModal: false,
     previewContent: "",
+    loggedUserData:{}
   },
   reducers: {
     setCategories: (state, action) => {
@@ -39,6 +40,9 @@ export const SettingSlice = createSlice({
     setPreviewContent: (state, action) => {
       state.previewContent = action.payload;
     },
+    setLoggedUserdata: (state, action) => {
+      state.loggedUserData = action.payload;
+    },
   },
 });
 
@@ -50,6 +54,6 @@ export const {
   setCategoryName,
   setShowModal,
   setPreviewContent,
-  
+  setLoggedUserdata
 } = SettingSlice.actions;
 export default SettingSlice.reducer;

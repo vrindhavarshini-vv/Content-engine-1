@@ -9,6 +9,7 @@ function ListExample() {
     const handleLogout =  (event) => {
         event.preventDefault();
         localStorage.removeItem("uid")
+        localStorage.removeItem("token")
         navigate("/")
       };
   return (
