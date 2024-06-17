@@ -4,6 +4,7 @@ export const AdminLogin = createSlice({
   name: "adminLogin",
   initialState: {
     adminLoginData: {},
+    superAdminLogged:{},
     adminLogged: false,
     isAdmin: false
   },
@@ -17,9 +18,13 @@ export const AdminLogin = createSlice({
     setIsAdmin: (state, action) => {
       state.isAdmin = action.payload;
     },
+    setSuperAdminLogged: (state, action) => {
+      state.superAdminLogged = action.payload;
+    },
+
   },
 });
 
-export const { setAdminLoginData, setAdminLogged, setIsAdmin } =
+export const { setAdminLoginData, setAdminLogged, setIsAdmin,setSuperAdminLogged } =
   AdminLogin.actions;
 export default AdminLogin.reducer;

@@ -20,7 +20,7 @@ import axios from "axios";
 
 const Template = () => {
   const token = localStorage.getItem("token")
-  const currentLoginUserId = localStorage.getItem("uid")
+  const currentLoginUserId = localStorage.getItem("userId")
   const headers = {'Authorization':`Bearer ${token}`}
   const adminSlice = useSelector((state) => state.adminLogin);
   
@@ -43,7 +43,7 @@ const Template = () => {
 
   const fetchCategory = async () => {
     const dbCategory = await axios.get(
-      `https://pavithrakrish95.pythonanywhere.com/setGetList/${currentLoginUserId}`
+      `https://pavithrakrish95.pythonanywhere.com/settingGetList/${currentLoginUserId}`
     );
     dispatch(setFbCategory(dbCategory.data));
     // console.log('data base category',dbCategory.data)
@@ -51,7 +51,7 @@ const Template = () => {
 
   const fetchTypes = async () => {
     const dbType = await axios.get(
-      `https://pavithrakrish95.pythonanywhere.com/setGetAllType/${currentLoginUserId}`
+      `https://pavithrakrish95.pythonanywhere.com/settingGetAllType/${currentLoginUserId}`
     );
     dispatch(setFbType(dbType.data));
     // console.log('data base type',dbType.data)

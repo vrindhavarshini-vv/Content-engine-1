@@ -2,15 +2,16 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import Table from "react-bootstrap/Table";
+import { useNavigate } from "react-router-dom";
 
 
 const SuperAdmin = () => {
   const [registerData, setRegisterData] = useState([]);
   const [isDisabled,setIsDisabled] = useState(false)
-
+const navigate=useNavigate()
   const fetchRegistData = async () => {
     const getData = await axios.get(
-      "https://pavithrakrish95.pythonanywhere.com/getRegisterData"
+      "https://pavithrakrish95.pythonanywhere.com/getRegisteredUser"
     );
     setRegisterData(getData.data);
   };
@@ -19,12 +20,13 @@ const SuperAdmin = () => {
   useEffect(() => {
     fetchRegistData();
   }, []);
-  const changeStatus = async (changeId) => {
+  const changeStatus = async (approvedId) => {
+    console.log("approvedId",approvedId);
     const formData = new FormData();
     const newchange = 'Approved'
-    formData.append("status", newchange);
-    const changeStat = await axios.put(
-      `https://pavithrakrish95.pythonanywhere.com/changeStatus/${changeId}`,
+    formData.append("userStatus", newchange);
+    await axios.put(
+      `https://pavithrakrish95.pythonanywhere.com/editUserStatus/${approvedId}`,
       formData
     ).then((res)=>{
       console.log('res',res.data)
@@ -33,6 +35,7 @@ const SuperAdmin = () => {
     });
     fetchRegistData();
     setIsDisabled(true)
+    navigate('/')
   };
   return (
     <div>
@@ -47,24 +50,26 @@ const SuperAdmin = () => {
             <th>Email</th>
             <th>Password</th>
             <th>Status</th>
-            <th>Approval</th>
+           
           </tr>
         </thead>
         <tbody>
           {registerData.map((datas, index) => (
             <tr key={index}>
-              <td>{datas.id}</td>
-              <td>{datas.username}</td>
-              <td>{datas.email}</td>
-              <td>{datas.password}</td>
-              <td>{datas.status}</td>
+              <td>{datas.userId}</td>
+              <td>{datas.userName}</td>
+              <td>{datas.userEmail}</td>
+              <td>{datas.userPassword}</td>
+              
               <td>
-                <Button
+                <button
+                className={datas.userStatus == 'Requested' ? 'btn btn-danger' : 'btn btn-success'}
                   variant="info"
-                  onClick={() => changeStatus(datas.id)}
-                  disabled={isDisabled}
-                >Approved
-                </Button>
+                  onClick={() => changeStatus(datas.userId)}
+                  disabled={datas.userStatus === 'Approved'}
+                >
+                  Approved
+                </button>
               </td>
             </tr>
           ))}

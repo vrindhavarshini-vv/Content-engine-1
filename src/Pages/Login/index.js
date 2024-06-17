@@ -1,126 +1,118 @@
 import React, { useState } from "react";
 import { auth } from "../Firebase/firebase";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import axios from "axios";
 import {
   setAdminLoginData,
   setAdminLogged,
   setIsAdmin,
-  
-
 } from "../../Routes/Slices/adminLogin";
-import { setLoggedUserdata } from "../../Routes/Slices/settingsLogin";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setIsPopUp } from "../../Routes/Slices/dashBoardSlice";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import "./login.css";
+import { Button } from "react-bootstrap";
+import axios from "axios";
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const loggedUser=useSelector((state)=>state.settings)
-  console.log("loggedUser",loggedUser.loggedUserData)
+
   const [regLogin, setRegLogin] = useState({
-    email: "",
-    password: "",
+    
   });
 
-const checkAdmin = async () => {
-      const formData=new FormData();
-      formData.append("loginEmail",regLogin.email);
-      formData.append("loginPassword",regLogin.password);
-      let getData= await axios.post("https://pavithrakrish95.pythonanywhere.com/loginData",formData)
-      localStorage.setItem("token",getData.data[0].token)
-      localStorage.setItem("uid",getData.data[0].uid)
-      console.log(getData,"getData")
 
-      dispatch(setLoggedUserdata({
-                                uid:getData.data[0].uid,
-                                username:getData.data[0].username,
-                                email:getData.data[0].email,
-                                }))
-                    
+  const checkAdmin = async ()=> {
+    const data = new FormData();
+ 
+    data.append("userEmail",regLogin.userEmail);
+    data.append("userPassword",regLogin.userPassword)
+    await axios.post('https://pavithrakrish95.pythonanywhere.com/login',data).then((res)=>{
+      if(res.data.userStatus === 'Approved'){
+        dispatch(setAdminLoginData(res.data));
+        console.log('res',res.data.userStatus)
+        dispatch(setAdminLogged(true));
+        dispatch(setIsAdmin(true)); 
+        alert("Admin login successfull!");
+        localStorage.setItem('token',res.data.token)
+        localStorage.setItem('userId',res.data.userId)
+        localStorage.setItem('user',res.data.userEmail)
+        
+        navigate("/dashboard");
+      }
+      else{
+        alert('Enter valid email or password')
+      }
+
+    }).catch((err)=>{
+      console.log('error',err)
+      alert(err)
       
-      // // .then((res)=>{  
-      // //    console.log("res",res.data)
-      //    localStorage.setItem("token",res.data.token)
-      //   //  alert(res.data)
-      // })
+    })
 
-    //       if (regLogin.email == user.email) {
-            //dispatch(setAdminLoginData(user));
-            console.log("getData",getData)
-            dispatch(setAdminLogged(true));
-            dispatch(setIsAdmin(true)); 
-            alert("Admin login successfull!");
-            navigate("/dashboard");
-          // } else {
-          //   alert("Admin purpose only");
-          // }
-        // })
-    //     .catch((error) => {
-    //       const errorCode = error.code;
-    //       const errorMessage = error.message;
-    //       console.log(errorCode, errorMessage);
-    //       alert("Admin login unsuccessfull!");
-    //     });
-    // }
-  };
-
-  const handleGoogleAuth = async (e) => {
-    const provider = await new GoogleAuthProvider();
-    return signInWithPopup(auth, provider).then((userCredential) => {
-      const user = userCredential.user;
-      console.log("user", user);
-      localStorage.setItem("token", user.accessToken);
-      localStorage.setItem("uid", user.uid);
-      navigate("/dashboard");
-      dispatch(setIsPopUp(false));
-    });
-  };
+  }
 
   return (
-    <center>
-      <div>
-        <h4>{JSON.stringify(regLogin)}</h4>
-        <form>
-          <h2>Admin Page</h2>
+    <>
+    
 
-          <div>
-            <label>Admin email:</label>
-            <input
-              placeholder="Enter email"
-              type="email"
-              onKeyUp={(e) =>
-                setRegLogin({ ...regLogin, email: e.target.value })
-              }
-            />
+
+          <div class="d-flex justify-content-center align-items-center vh-100">
+          <div className="container my-auto ">
+          <div className="row">
+            <div className="col-lg-4 col-md-8 col-12 mx-auto">
+              <div className="card z-index-0 fadeIn3 fadeInBottom">
+                <div className="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                  <div className="bg-gradient-primary shadow-primary border-radius-lg py-3 pe-1">
+                    <h4 className="text-white font-weight-bolder text-center mt-2 mb-0">Sign in</h4>
+                    <div className="row mt-3">
+                      <div className="col-2 text-center ms-auto">
+                        <a className="btn btn-link px-3" href="javascript:;">
+                          <i className="fa fa-facebook text-white text-lg"></i>
+                        </a>
+                      </div>
+                      <div className="col-2 text-center px-1">
+                        <a className="btn btn-link px-3" href="javascript:;">
+                          <i className="fa fa-github text-white text-lg"></i>
+                        </a>
+                      </div>
+                      <div className="col-2 text-center me-auto">
+                        <a className="btn btn-link px-3" href="javascript:;">
+                          <i className="fa fa-google text-white text-lg"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-body">
+                  <form role="form" className="text-start">
+                    <div className="input-group input-group-outline my-3">
+                    <input type="email" placeholder="Email" className="form-control" onKeyUp={(e) =>
+                          setRegLogin({ ...regLogin, userEmail: e.target.value })
+                        } />
+                    </div>
+                    <div className="input-group input-group-outline mb-3">
+                      
+                      <input type="password" placeholder="Password" className="form-control"  onKeyUp={(e) =>
+                          setRegLogin({ ...regLogin, userPassword: e.target.value })
+                        } />
+                    </div>
+                  
+                    <div className="text-center">
+                      <button type="button" className="btn bg-gradient-primary w-100 my-4 mb-2"  onClick={()=>checkAdmin()}>Sign in</button>
+                    </div>
+                    <p className="mt-4 text-sm text-center">
+                      Don't have an account?
+                      <Link to="/register" className="text-primary text-gradient font-weight-bold">Sign up</Link>
+                    </p>
+                  </form>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <label>Password:</label>
-            <input
-              placeholder="Enter password"
-              type="password"
-              onKeyUp={(e) =>
-                setRegLogin({ ...regLogin, password: e.target.value })
-              }
-            />
           </div>
-          <div>
-            <button type="button" onClick={checkAdmin}>
-              Admin Login
-            </button>
-            
           </div>
-        </form>
-        <br />
-        <button onClick={handleGoogleAuth}>
-          <img src="google.svg" />
-          continue with google
-        </button>
-      </div>
-    </center>
+</>
   );
 };
 

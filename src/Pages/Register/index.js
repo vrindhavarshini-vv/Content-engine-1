@@ -5,8 +5,10 @@ import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Register =  () => {
+  const navigate = useNavigate()
     const [validated, setValidated] = useState(false);
     const [registerData,setRegisterData] = useState({
       userStatus:'Requested'
@@ -19,148 +21,109 @@ const Register =  () => {
         event.stopPropagation();
       }
       setValidated(true);
+      if (!registerData.userName || !registerData.userEmail || !registerData.userPassword){
+        alert('Please Fill All Fields');
+        return;
+      }
       const formData = new FormData()
-      formData.append('username',registerData.username)
-      formData.append('email',registerData.email)
-      formData.append('password',registerData.password)
-      formData.append('status',registerData.userStatus)
+      formData.append('userName',registerData.userName)
+      formData.append('userEmail',registerData.userEmail)
+      formData.append('userPassword',registerData.userPassword)
+      formData.append('userStatus',registerData.userStatus)
 
-      const newRegister = await axios.post('https://pavithrakrish95.pythonanywhere.com/register',formData).then((res)=>{
-        console.log('res',res.data.status)
-        if(res.data.status === 'Requested'){
+      await axios.post('https://pavithrakrish95.pythonanywhere.com/postRegisteredUser',formData).then((res)=>{
+        console.log('res',res.data.userStatus)
+        if(res.data.userStatus === 'Requested'){
           alert('Wait for the registration entry')
         }
       })
-
+    navigate('/')
     };
   return (
-    <div> 
-        <h2>Register Here!</h2>
-      <Form style={{width: "100%"}} noValidate validated={validated}>
-          <Form.Group as={Col} md="4" controlId="validationCustom01">
-            <Form.Label>User Name</Form.Label>
-            <Form.Control
-              required
-              type="text"
-              placeholder="Enter user name"
-              onChange={(e)=>setRegisterData({...registerData,username:e.target.value})}
-            />
-            <Form.Control.Feedback type="invalid">
-                User name Need
-            </Form.Control.Feedback>
-          </Form.Group>
-          <Form.Group as={Col} md="4" controlId="validationCustom02">
-            <Form.Label>Email</Form.Label>
-            <Form.Control
-              required
-              type="email"
-              placeholder="Enter email"
-              onChange={(e)=>setRegisterData({...registerData,email:e.target.value})}
-            />
-            <Form.Control.Feedback type="invalid">
-                Email Need
-            </Form.Control.Feedback>
-          </Form.Group>
-          <Form.Group as={Col} md="4" controlId="validationCustomUsername">
-            <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Enter password"
-                aria-describedby="inputGroupPrepend"
-                required
-              onChange={(e)=>setRegisterData({...registerData,password:e.target.value})}
+    <>
+   
 
-              />
-              <Form.Control.Feedback type="invalid">
-                Password Need
-              </Form.Control.Feedback>
-          </Form.Group>
-        <Button type="button" onClick={handleSubmit}>Register</Button>
-        <Link to="/login">Login</Link>
-      </Form>
+
+
+<main className="main-content main-content-bg mt-0 vh-100 d-flex align-items-center">
+  <div className="container  justify-content-between">
+    <div className="row justify-content-between">
+      <div className="col-lg-10 col-md-12 mx-auto">
+        <div className="row">
+         
+          <div className="col-lg-6 col-md-6 d-none d-md-flex align-items-center justify-content-center">
+            <img src="Header-image-1-Content-writing.png" className="img-fluid w-70" alt="Description of the image"/>
+          </div>
+         
+          <div className="col-lg-6 col-md-6">
+            <div className="card mt-8">
+              <div className="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div className="bg-gradient-primary shadow-primary border-radius-lg py-3 pe-1 text-center py-4">
+                  <h4 className="font-weight-bolder text-white mt-1">Join us today</h4>
+                  <p className="mb-1 text-white text-sm">Enter your email and password to register</p>
+                </div>
+              </div>
+              <div className="card-body pb-3">
+                <form role="form">
+                  <div className="input-group input-group-outline mb-3">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter user name"
+                      onChange={(e) =>
+                        setRegisterData({ ...registerData, userName: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="input-group input-group-outline mb-3">
+                    <input
+                      type="email"
+                      className="form-control"
+                      placeholder="Enter email"
+                      onChange={(e) =>
+                        setRegisterData({ ...registerData, userEmail: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="input-group input-group-outline mb-3">
+                    <input
+                      type="password"
+                      className="form-control"
+                      required
+                      placeholder="Enter password"
+                      onChange={(e) =>
+                        setRegisterData({ ...registerData, userPassword: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      className="btn bg-gradient-primary w-100 mt-4 mb-0"
+                      onClick={handleSubmit}
+                    >
+                      Sign up
+                    </button>
+                  </div>
+                </form>
+              </div>
+              <div className="card-footer text-center pt-0 px-sm-4 px-1">
+                <p className="mb-4 mx-auto">
+                  Already have an account?
+                  <Link to="/" className="text-primary text-gradient font-weight-bold">
+                    Sign in
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+</main>
+</>
   );
 };
 
 export default Register;
-
-// import { auth } from "../Firebase/firebase";
-// import { createUserWithEmailAndPassword } from "firebase/auth";
-// import { useNavigate } from "react-router-dom";
-// import axios from "axios";
-// const Register = () => {
-//     const navigate = useNavigate();
-//     const [regData, setRegData] = useState({
-//       username: "",
-//       email: "",
-//       password: "",
-//     });
-//     const handleRegister = async (e) => {
-//         e.preventDefault();
-//     try{
-//         const userCredential = await createUserWithEmailAndPassword(
-//             auth,
-//             regData.username,
-//             regData.email,
-//             regData.password
-//         )
-//         const user = userCredential.user;
-//         console.log("user", user);
-//         const formData = new FormData();
-//       formData.append("email", regData.email);
-//       formData.append("uid", user.uid);
-//       await axios.post("https://pavithrakrish95.pythonanywhere.com/registerUser", formData);
-//       alert("Registration successful!");
-//       navigate("/login");
-//     } catch (error) {
-//       console.error("Error during registration", error);
-//       alert("Registration failed! Please try again.");
-//     }
-//   };
-
-//   return (
-//     <center>
-//       <div>
-//         <h2>Register Page</h2>
-//         <form onSubmit={handleRegister}>
-//           <div>
-//             <label>username:</label>
-//             <input
-//               type="username"
-//               placeholder="Enter username"
-//               value={regData.username}
-//               onChange={(e) => setRegData({ ...regData, username: e.target.value })}
-//               required
-//             />
-//           </div>
-//           <div>
-//             <label>email:</label>
-//             <input
-//               type="email"
-//               placeholder="Enter email"
-//               value={regData.email}
-//               onChange={(e) => setRegData({ ...regData, email: e.target.value })}
-//               required
-//             />
-//           </div>
-//           <div>
-//             <label>Password:</label>
-//             <input
-//               type="password"
-//               placeholder="Enter password"
-//               value={regData.password}
-//               onChange={(e) => setRegData({ ...regData, password: e.target.value })}
-//               required
-//             />
-//           </div>
-//           <div>
-//             <button type="submit">Register</button>
-//           </div>
-//         </form>
-//       </div>
-//     </center>
-//   );
-// };
-
-
-    

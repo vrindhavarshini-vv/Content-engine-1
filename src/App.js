@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { auth } from "./Pages/Firebase/firebase";
-import { setAdminLoginData, setAdminLogged } from "./Routes/Slices/adminLogin";
+import AdminLogin, { setAdminLoginData, setAdminLogged, setSuperAdminLogged } from "./Routes/Slices/adminLogin";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
 
@@ -12,12 +12,14 @@ import Register from "./Pages/Register";
 import Template from "./Pages/Template";
 import FinalPage from "./Pages/FormPage";
 import SuperAdmin from "./Pages/SuperAdmin";
+import AdminLoginUser from "./Pages/AdminLoginUser";
+
 
 
 function App() {
   const dispatch = useDispatch();
   // const navigate = useNavigate()
-  const { adminLoginData, adminLogged, isAdmin } = useSelector(
+  const { adminLoginData, adminLogged, isAdmin ,superAdminLogged} = useSelector(
     (state) => state.adminLogin
   );
 
@@ -44,13 +46,17 @@ function App() {
 
         <Route path="/" element={<Login/>} />
         <Route path="/register" element={<Register/>} />
+        <Route path="/adminLogin" element={<AdminLoginUser/>} />
         
+        {
+          superAdminLogged &&  <Route path="/admin" element ={<SuperAdmin/>}/>
+        }
         {adminLogged && (
           <>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/template" element={<Template />} />
             <Route path="/finalPage/:id/:currentLoginUserId" element={<FinalPage />} />
-            <Route path="/admin" element ={<SuperAdmin/>}/>
+         
             <Route path="/user/setting" element ={<Categories/>}/>
           </>
         )}

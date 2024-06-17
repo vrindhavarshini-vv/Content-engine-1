@@ -477,7 +477,7 @@ def addtype():
 @app.route("/deleteList/<int:typeId>",methods=["DELETE"])
 def deleteList(typeId):
     deleteData=SettingType.query.filter_by(typeId=typeId).first()
-    db.session.delete(deleteData)
+    db.session  .delete(deleteData)
     db.session.commit()
     return jsonify({"message":"Todo Delete successfully"})
 

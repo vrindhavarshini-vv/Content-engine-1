@@ -1,8 +1,6 @@
-
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Modal, Button, Table } from "react-bootstrap";
-
 import {
   setCategories,
   setTypes,
@@ -24,16 +22,18 @@ export default function Categories() {
   const [showTypeModal, setShowTypeModal] = useState(false);
   const [currentCategoryId, setCurrentCategoryId] = useState(null);
   const parsedData = localStorage.getItem("token");
-  const currentLoginUserId = localStorage.getItem("uid")
-  const headers = { 'Authorization': `Bearer ${parsedData}` };
+  const currentLoginUserId = localStorage.getItem("userId");
+  const headers = { Authorization: `Bearer ${parsedData}` };
 
   const fetchCategories = async () => {
     try {
-      const categoriesSnapshot = await axios.get(`https://pavithrakrish95.pythonanywhere.com/settingGetList/${currentLoginUserId}`);
-      dispatch(setCategories(categoriesSnapshot.data));
-      console.log("categoriesSnapshot", categoriesSnapshot.data);
+      const response = await axios.get(
+        `https://pavithrakrish95.pythonanywhere.com/settingGetList/${currentLoginUserId}`
+      );
+      dispatch(setCategories(response.data));
+      console.log("Fetched categories:", response.data);
     } catch (error) {
-      console.error("Error fetching categories: ", error);
+      console.error("Error fetching categories:", error);
     }
   };
 
@@ -44,16 +44,17 @@ export default function Categories() {
   const fetchTypes = async (categoryId) => {
     if (!categoryId) return;
     try {
-      const typesSnapshot = await axios.get(`https://pavithrakrish95.pythonanywhere.com/settingGetType/${categoryId}`);
-      dispatch(setTypes(typesSnapshot.data));
-      console.log("typesSnapshot", typesSnapshot.data);
+      const response = await axios.get(
+        `https://pavithrakrish95.pythonanywhere.com/settingGetType/${categoryId}`
+      );
+      dispatch(setTypes(response.data));
+      console.log("Fetched types:", response.data);
     } catch (error) {
-      console.error("Error fetching types: ", error);
+      console.error("Error fetching types:", error);
       alert("Failed to fetch types. Please try again.");
     }
   };
 
-  
   const openModal = () => {
     dispatch(setShowModal(true));
   };
@@ -83,10 +84,14 @@ export default function Categories() {
     try {
       const formData = new FormData();
       formData.append("categoryName", settingstate.categoryName);
-      formData.append("uid", settingstate.loggedUserData.uid);
-      const categoryRef = await axios.post("https://pavithrakrish95.pythonanywhere.com/categoryList", formData);
+      formData.append("userId", currentLoginUserId);
+
+      const response = await axios.post(
+        "https://pavithrakrish95.pythonanywhere.com/categoryList",
+        formData
+      );
       const newCategory = {
-        categoryId: categoryRef.data.categoryId,
+        categoryId: response.data.categoryId,
         categoryName: settingstate.categoryName,
       };
       dispatch(setCategories([...settingstate.categories, newCategory]));
@@ -102,37 +107,45 @@ export default function Categories() {
   const handleCategoryTypeChange = (e) => {
     dispatch(setCategoryType(e.target.value));
   };
+
   const handleAddCategoryType = async () => {
     if (!currentCategoryId || !settingstate.categoryType) {
       alert("Please select a category and enter a category type");
       return;
     }
-  
+
     try {
       const formData = new FormData();
       formData.append("typeName", settingstate.categoryType);
       formData.append("categoryId", currentCategoryId);
-      formData.append("uid", currentLoginUserId);
-  
-      const response = await axios.post("https://pavithrakrish95.pythonanywhere.com/typeList", formData);
-      console.log("Response:", response.data);
-  
-      const typeNewData = await axios.get("https://pavithrakrish95.pythonanywhere.com/settingGetAllType");
-      const latestType = typeNewData.data.find(
-        (type) => type.typeName === settingstate.categoryType && type.categoryId === currentCategoryId
+      formData.append("userId", currentLoginUserId);
+
+      const response = await axios.post(
+        "https://pavithrakrish95.pythonanywhere.com/typeList",
+        formData
       );
-  
+      console.log("Response:", response.data);
+
+      const typeDataResponse = await axios.get(
+        `https://pavithrakrish95.pythonanywhere.com/settingGetAllType/${currentLoginUserId}`
+      );
+      const latestType = typeDataResponse.data.find(
+        (type) =>
+          type.typeName === settingstate.categoryType &&
+          type.categoryId === currentCategoryId
+      );
+
       if (!latestType) {
         alert("New type not found in response");
         return;
       }
-  
+
       const newType = {
         typeId: latestType.typeId,
         typeName: latestType.typeName,
         categoryId: latestType.categoryId,
       };
-      console.log("newType",newType)
+      console.log("New Type:", newType);
       dispatch(setTypes([...settingstate.types, newType]));
       dispatch(setCategoryType(""));
       closeTypeModal();
@@ -142,29 +155,35 @@ export default function Categories() {
       alert("Failed to add category type. Please try again.");
     }
   };
+
   const generatePreview = (categoryId, categoryType) => {
     if (!categoryId || !categoryType) {
       return;
     }
-
-    const createEmail = `Please give a "${getCategoryNameById(categoryId)}" related "${categoryType}" email!`;
+    const createEmail = `Please give a "${getCategoryNameById(
+      categoryId
+    )}" related "${categoryType}" email!`;
     dispatch(setPreviewContent(createEmail));
   };
 
-  
-
   const getCategoryNameById = (categoryId) => {
-    const selectedCategory = settingstate.categories.find((category) => category.categoryId === categoryId);
+    const selectedCategory = settingstate.categories.find(
+      (category) => category.categoryId === categoryId
+    );
     return selectedCategory ? selectedCategory.categoryName : "";
   };
 
   const handleDeleteType = async (typeId) => {
     try {
-      await axios.delete(`https://pavithrakrish95.pythonanywhere.com/deleteList/${typeId}`);
-      dispatch(setTypes(settingstate.types.filter((type) => type.typeId !== typeId)));
+      await axios.delete(
+        `https://pavithrakrish95.pythonanywhere.com/deleteList/${typeId}`
+      );
+      dispatch(
+        setTypes(settingstate.types.filter((type) => type.typeId !== typeId))
+      );
       alert("Type deleted successfully!");
     } catch (error) {
-      console.error("Error deleting type: ", error);
+      console.error("Error deleting type:", error);
       alert("Failed to delete type. Please try again.");
     }
   };
@@ -225,7 +244,11 @@ export default function Categories() {
                     <td>{i + 1}</td>
                     <td>{category.categoryName}</td>
                     <td>
-                      <button onClick={() => openTypeModal(category.categoryId)}>Add Email Type</button>
+                      <button
+                        onClick={() => openTypeModal(category.categoryId)}
+                      >
+                        Add Email Type
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -243,7 +266,11 @@ export default function Categories() {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <input type="text" value={settingstate.categoryType} onChange={handleCategoryTypeChange} />
+            <input
+              type="text"
+              value={settingstate.categoryType}
+              onChange={handleCategoryTypeChange}
+            />
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={handleAddCategoryType}>Submit</Button>
@@ -262,7 +289,7 @@ export default function Categories() {
         <div className="table-responsive-sm">
           <div className="container-sm">
             <h2>Recipients Email Types List:</h2>
-            <Table striped bordered hover variant="dark">
+            <Table striped bordered>
               <thead>
                 <tr>
                   <th>ID</th>
@@ -272,21 +299,25 @@ export default function Categories() {
                 </tr>
               </thead>
               <tbody>
-                {settingstate.types.filter((type) => type.categoryId === currentCategoryId).map((type, i) => {
-                  const categoryName = getCategoryNameById(type.categoryId);
-                  console.log('Category ID:', type.categoryId); // Log the categoryId
-                  console.log('Category Name:', categoryName); // Log the result of the function
-                  return (
-                    <tr key={type.typeId}>
-                      <td>{i + 1}</td>
-                      <td>{type.typeName}</td>
-                      <td>{categoryName}</td>
-                      <td>
-                        <button onClick={() => handleDeleteType(type.typeId)}>Delete</button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {settingstate.types
+                  .filter((type) => type.categoryId === currentCategoryId)
+                  .map((type, i) => {
+                    const categoryName = getCategoryNameById(type.categoryId);
+                    console.log("Category ID:", type.categoryId); // Log the categoryId
+                    console.log("Category Name:", categoryName); // Log the result of the function
+                    return (
+                      <tr key={type.typeId}>
+                        <td>{i + 1}</td>
+                        <td>{type.typeName}</td>
+                        <td>{categoryName}</td>
+                        <td>
+                          <button onClick={() => handleDeleteType(type.typeId)}>
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </Table>
           </div>
