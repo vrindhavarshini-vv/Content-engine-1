@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Modal, Button, Table } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import {
   setCategories,
   setTypes,
@@ -25,13 +25,14 @@ export default function Categories() {
   const currentLoginUserId = localStorage.getItem("userId");
   const headers = { Authorization: `Bearer ${parsedData}` };
 
+  // Function to fetch categories from the backend
   const fetchCategories = async () => {
     try {
       const response = await axios.get(
-        `https://pavithrakrish95.pythonanywhere.com/settingGetList/${currentLoginUserId}`
+        `https://pavithrakrish95.pythonanywhere.com/settingGetList/${currentLoginUserId}`,
+        { headers }
       );
       dispatch(setCategories(response.data));
-      console.log("Fetched categories:", response.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -41,28 +42,32 @@ export default function Categories() {
     fetchCategories();
   }, []);
 
+  // Function to fetch types based on category ID
   const fetchTypes = async (categoryId) => {
     if (!categoryId) return;
     try {
       const response = await axios.get(
-        `https://pavithrakrish95.pythonanywhere.com/settingGetType/${categoryId}`
+        `https://pavithrakrish95.pythonanywhere.com/settingGetType/${categoryId}`,
+        { headers }
       );
       dispatch(setTypes(response.data));
-      console.log("Fetched types:", response.data);
     } catch (error) {
       console.error("Error fetching types:", error);
       alert("Failed to fetch types. Please try again.");
     }
   };
 
+  // Opens the modal for adding a new recipient
   const openModal = () => {
     dispatch(setShowModal(true));
   };
 
+  // Closes the modal for adding a new recipient
   const closeModal = () => {
     dispatch(setShowModal(false));
   };
 
+  // Opens the modal for adding a new email type
   const openTypeModal = (categoryId) => {
     setCurrentCategoryId(categoryId);
     dispatch(setSelectedCategory(categoryId));
@@ -71,10 +76,12 @@ export default function Categories() {
     generatePreview(categoryId, settingstate.categoryType);
   };
 
+  // Closes the modal for adding a new email type
   const closeTypeModal = () => {
     setShowTypeModal(false);
   };
 
+  // Handles the submission of a new recipient category
   const handleCategorySubmit = async () => {
     if (!settingstate.categoryName) {
       alert("Please enter a category name");
@@ -88,7 +95,8 @@ export default function Categories() {
 
       const response = await axios.post(
         "https://pavithrakrish95.pythonanywhere.com/categoryList",
-        formData
+        formData,
+        { headers }
       );
       const newCategory = {
         categoryId: response.data.categoryId,
@@ -104,10 +112,12 @@ export default function Categories() {
     }
   };
 
+  // Handles the change in category type input
   const handleCategoryTypeChange = (e) => {
     dispatch(setCategoryType(e.target.value));
   };
 
+  // Handles the submission of a new category type
   const handleAddCategoryType = async () => {
     if (!currentCategoryId || !settingstate.categoryType) {
       alert("Please select a category and enter a category type");
@@ -122,12 +132,13 @@ export default function Categories() {
 
       const response = await axios.post(
         "https://pavithrakrish95.pythonanywhere.com/typeList",
-        formData
+        formData,
+        { headers }
       );
-      console.log("Response:", response.data);
 
       const typeDataResponse = await axios.get(
-        `https://pavithrakrish95.pythonanywhere.com/settingGetAllType/${currentLoginUserId}`
+        `https://pavithrakrish95.pythonanywhere.com/settingGetAllType/${currentLoginUserId}`,
+        { headers }
       );
       const latestType = typeDataResponse.data.find(
         (type) =>
@@ -145,7 +156,6 @@ export default function Categories() {
         typeName: latestType.typeName,
         categoryId: latestType.categoryId,
       };
-      console.log("New Type:", newType);
       dispatch(setTypes([...settingstate.types, newType]));
       dispatch(setCategoryType(""));
       closeTypeModal();
@@ -156,6 +166,7 @@ export default function Categories() {
     }
   };
 
+  // Generates the preview content based on category and type
   const generatePreview = (categoryId, categoryType) => {
     if (!categoryId || !categoryType) {
       return;
@@ -166,6 +177,7 @@ export default function Categories() {
     dispatch(setPreviewContent(createEmail));
   };
 
+  // Retrieves the category name by its ID
   const getCategoryNameById = (categoryId) => {
     const selectedCategory = settingstate.categories.find(
       (category) => category.categoryId === categoryId
@@ -173,10 +185,12 @@ export default function Categories() {
     return selectedCategory ? selectedCategory.categoryName : "";
   };
 
+  // Handles the deletion of a category type
   const handleDeleteType = async (typeId) => {
     try {
       await axios.delete(
-        `https://pavithrakrish95.pythonanywhere.com/deleteList/${typeId}`
+        `https://pavithrakrish95.pythonanywhere.com/deleteList/${typeId}`,
+        { headers }
       );
       dispatch(
         setTypes(settingstate.types.filter((type) => type.typeId !== typeId))
@@ -188,29 +202,73 @@ export default function Categories() {
     }
   };
 
+  // Navigates to the dashboard page
   const handleNavigateGeneratePage = () => {
     navigate("/dashboard");
   };
 
   return (
     <>
-      <center>
-        <header>
-          <ListExample />
-        </header>
-        <div className="form" style={{ textAlign: "center" }}>
-          <h1>Create Email Recipients</h1>
-          <button type="button" onClick={openModal}>
-            Add New Recipients
-          </button>
+      <ListExample />
+
+      <div className="container mt-5">
+        <div className="row justify-content-center align-items-center">
+          <div className="col-lg-8 col-12 text-center">
+            <h1 className="mt-3 mb-4" style={{ fontSize: "2rem", fontWeight: "bold" }}>
+              Manage Email Recipients
+            </h1>
+          </div>
+          <div className="col-lg-4 col-12 text-end">
+            <button className="btn btn-dark" type="button" onClick={openModal}>
+              Add Recipient
+            </button>
+          </div>
         </div>
-      </center>
+      </div>
+
+      <div className="row mt-4">
+        <div className="col-lg-12">
+          <div className="card mb-4">
+            <div className="card-body p-3">
+              <div className="table-responsive">
+                <table className="table table-striped align-items-center mb-0">
+                  <caption className="text-center fs-5">Existing Email Recipients</caption>
+                  <thead>
+                    <tr>
+                      <th className="text-uppercase text-xs font-weight-bold opacity-7 text-center fs-6">ID</th>
+                      <th className="text-uppercase text-xs font-weight-bold opacity-7 ps-2 text-center fs-6">Recipient Name</th>
+                      <th className="text-uppercase text-xs font-weight-bold opacity-7 ps-2 text-center fs-6">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {settingstate.categories.map((category, index) => (
+                      <tr key={category.categoryId}>
+                        <td className="text-sm text-center">
+                          <p className="mb-0 font-weight-normal text-sm">{index + 1}</p>
+                        </td>
+                        <td className="text-sm text-center">
+                          <p className="mb-0 font-weight-normal text-sm">{category.categoryName}</p>
+                        </td>
+                        <td className="text-sm text-center">
+                          <button className="btn btn-secondary btn-sm" onClick={() => openTypeModal(category.categoryId)}>
+                            Add Email Type
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <Modal show={settingstate.showModal} onHide={closeModal}>
         <center>
           <Modal.Header closeButton>
             <Modal.Title>
-              <h2>Enter Recipients Name</h2>
+              <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>Enter Recipient's Name</h2>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -218,51 +276,26 @@ export default function Categories() {
               type="text"
               value={settingstate.categoryName}
               onChange={(e) => dispatch(setCategoryName(e.target.value))}
-            />
+              className="form-control"
+              placeholder="Enter recipient's name"
+                    />
           </Modal.Body>
           <Modal.Footer>
-            <Button onClick={handleCategorySubmit}>Submit</Button>
+            {/* <Button variant="secondary" onClick={closeModal}>
+              Close
+            </Button> */}
+            <Button variant="primary" onClick={handleCategorySubmit}>
+              Save
+            </Button>
           </Modal.Footer>
         </center>
       </Modal>
-
-      {settingstate.categories.length > 0 && (
-        <div className="table-responsive-sm">
-          <div className="container-sm">
-            <h2>Recipients List:</h2>
-            <Table striped bordered>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Email Recipients</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {settingstate.categories.map((category, i) => (
-                  <tr key={category.categoryId}>
-                    <td>{i + 1}</td>
-                    <td>{category.categoryName}</td>
-                    <td>
-                      <button
-                        onClick={() => openTypeModal(category.categoryId)}
-                      >
-                        Add Email Type
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        </div>
-      )}
 
       <Modal show={showTypeModal} onHide={closeTypeModal}>
         <center>
           <Modal.Header closeButton>
             <Modal.Title>
-              <h2>Enter Recipients Type</h2>
+              <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>Enter Email Type</h2>
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -270,59 +303,66 @@ export default function Categories() {
               type="text"
               value={settingstate.categoryType}
               onChange={handleCategoryTypeChange}
+              className="form-control"
+              placeholder="Enter email type"
             />
           </Modal.Body>
           <Modal.Footer>
-            <Button onClick={handleAddCategoryType}>Submit</Button>
+            <Button variant="secondary" onClick={closeTypeModal}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={handleAddCategoryType}>
+              Save
+            </Button>
           </Modal.Footer>
         </center>
       </Modal>
 
       {settingstate.previewContent && (
-        <div className="preview">
+        <div className="preview mt-3">
           <h3>Preview:</h3>
           <p>{settingstate.previewContent}</p>
         </div>
       )}
 
-      {settingstate.types.length > 0 && (
-        <div className="table-responsive-sm">
-          <div className="container-sm">
-            <h2>Recipients Email Types List:</h2>
-            <Table striped bordered>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Recipients Email Types</th>
-                  <th>Email Recipients</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {settingstate.types
-                  .filter((type) => type.categoryId === currentCategoryId)
-                  .map((type, i) => {
-                    const categoryName = getCategoryNameById(type.categoryId);
-                    console.log("Category ID:", type.categoryId); // Log the categoryId
-                    console.log("Category Name:", categoryName); // Log the result of the function
-                    return (
-                      <tr key={type.typeId}>
-                        <td>{i + 1}</td>
-                        <td>{type.typeName}</td>
-                        <td>{categoryName}</td>
-                        <td>
-                          <button onClick={() => handleDeleteType(type.typeId)}>
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </Table>
+      <div className="card-body p-3">
+        <div className="row">
+          <div className="col-lg-12 col-md-12">
+            <div className="table-responsive">
+              <table className="table align-items-center mb-0">
+                <thead>
+                  <tr>
+                    <th className="text-uppercase text-xs font-weight-bold opacity-7 text-center fs-6">ID</th>
+                    <th className="text-uppercase text-xs font-weight-bold opacity-7 ps-2 text-center fs-6">Email Type</th>
+                    <th className="text-uppercase text-xs font-weight-bold opacity-7 ps-2 text-center fs-6">Recipient</th>
+                    <th className="text-uppercase text-xs font-weight-bold opacity-7 ps-2 text-center fs-6">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {settingstate.types.map((type, i) => (
+                    <tr key={type.typeId}>
+                      <td className="text-sm text-center">
+                        <p className="mb-0 font-weight-normal text-sm">{i + 1}</p>
+                      </td>
+                      <td className="text-sm text-center">
+                        <p className="mb-0 font-weight-normal text-sm">{type.typeName}</p>
+                      </td>
+                      <td className="text-sm text-center">
+                        <p className="mb-0 font-weight-normal text-sm">{getCategoryNameById(type.categoryId)}</p>
+                      </td>
+                      <td className="text-sm text-center">
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteType(type.typeId)}>
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 }

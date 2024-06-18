@@ -75,7 +75,8 @@ function Dashboard() {
 
       try {
         const res = await axios.post('https://pavithrakrish95.pythonanywhere.com/dataBasePostGeneratedDatas', formData);
-        console.log("res", res);
+        console.log("res", res.data);
+
         dispatch(setIsPopUp(false));
       } catch (error) {
         console.error("Error saving template:", error);
@@ -194,77 +195,130 @@ function Dashboard() {
 
   return (
     <>
-      <div className='generatePageContainer'>
-        <center>
+     <div className='generatePageContainer'>
+      <center>
           <header>
-            <ListExample />
+              <ListExample/>
           </header>
-          <h1>Generate Page</h1>
-          <br />
-          <div>
-            <br />
-            <br />
-            <select onChange={(e) => { dispatch(setSelectedCategory(e.target.value)); dispatch(setIsCategorySelected(true)) }}>
-              <option value={templateSlice.isNavigateFromTemplates ? templateSlice.selectedCategory : slice.selectedCategory}>Select a Category</option>
-              {slice.categoryList.map((categories) => (
-                <option key={categories.categoryId} value={categories.categoryId}>
-                  {categories.categoryName}
-                </option>
-              ))}
-            </select>
-            <br />
-            <br />
-            {/* {JSON.stringify(slice.typesList)} */}
-            {slice.isCategorySelected ? (
-              <select value={slice.selectedType} onChange={(e) => { dispatch(setSelectedType(e.target.value)); dispatch(setIsTypeSelected(true)) }}>
-                <option value="">Select a Type</option>
+          
+        <br/>
+        <div>
+          <br/>
+         
+          
+               
+        <div className="container" >
+            <div className="row justify-content-center">
+              <div className="col-md-6 align-self-center text-center">
+               
+                <select className="form-control" name="choices-language" id="choices-language" onChange={(e) => {dispatch(setSelectedCategory(e.target.value)); dispatch(setIsCategorySelected(true))}}>
+                  <option value={templateSlice.isNavigateFromTemplates ? templateSlice.selectedCategory : slice.selectedCategory}>Select a Category</option>
+                  {slice.categoryList
+                   
+                    .map((categories) => (
+                      <option key={categories.categoryId} value={categories.categoryId}>
+                        {categories.categoryName}
+                      </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+        </div>
+        <br/>
 
-                {slice.typesList.map((types) => (
-                  slice.selectedCategory == types.categoryId &&
-                  <option key={types.typeId} value={types.typeId}>
-                    {types.typeName}
-                  </option>
-                ))}
-              </select>
-            ):null}
-            <br />
-            <br />
-          </div>
-
-          {slice.isTypeSelected &&
-            <form onSubmit={handleGenerate}>
-              {pairs.map((pair, i) => (
-                <div key={i}>
-                  <label>Key:</label>
-                  <input type="text" placeholder='eg. Name' value={pair.key} onChange={(event) => handleKeyChange(i, event)} />
-                  <label>Value:</label>
-                  <input type="text" placeholder="eg. Varshini" value={pair.value} onChange={(event) => handleValueChange(i, event)} />
-                  <button type='button' onClick={() => handleRemoveInputBox(i)}>Delete</button>
+       {slice.isCategorySelected ? 
+            <div className="container">
+              <div className="row justify-content-center">
+                <div className="col-md-6 align-self-center text-center">
+                
+                  <select className="form-control" name="choices-language" id="choices-language" value={slice.selectedType} onChange={(e) => {dispatch(setSelectedType(e.target.value)); dispatch(setIsTypeSelected(true))}}>
+                    <option value="">Select a Type</option>
+                    {slice.typesList
+                     
+                      .map((types) => (
+                        slice.selectedCategory == types.categoryId &&
+                          <option key={types.typeId} value={types.typeId}>
+                            {types.typeName}
+                          </option>
+                      ))}
+                  </select>
                 </div>
-              ))}
-              <button type="button" className='btn btn-primary' onClick={handleAddPair}>Add Another Data</button>
-              <br />
-              <br />
-              <button type="submit" className='btn btn-success'>Generate Template</button>
-            </form>
-          }
+              </div>
+            </div> 
+          : null}
+           <br/>
+</div>
 
-          <Modal show={slice.isPopUp} onHide={handleClose} size='lg'>
-            <center>
+
+
+            
+  
+  {slice.isTypeSelected &&
+  <>
+  <h2>Add Your Email Datas</h2>
+  <div className="container mt-4">
+    <form onSubmit={handleGenerate}>
+      {pairs.map((pair, i) => (
+        <div key={i} className="mb-3">
+          <div className="row g-3 align-items-center justify-content-center">
+            <div className="col-md-3">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="e.g., Name"
+                value={pair.key}
+                onChange={(event) => handleKeyChange(i, event)}
+              />
+            </div>
+            <div className="col-md-3">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="e.g., Varshini"
+                value={pair.value}
+                onChange={(event) => handleValueChange(i, event)}
+              />
+            </div>
+            <div className="col-md-1 text-center">
+              <button
+                type="button"
+                className="btn btn-danger mt-3"
+                onClick={() => handleRemoveInputBox(i)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+       <div className="mb-3 text-center mt-4">
+          <button type="button" className="col-md-2 btn btn-primary" onClick={handleAddPair}>Add Data</button>
+          <button type="submit" className="col-md-2 btn btn-success ms-2" onClick={generateAnswer}>Generate </button>
+        </div>
+    </form>
+  </div>
+  </>
+
+}
+
+        <Modal show={slice.isPopUp} onHide={handleClose} size='lg' centered   style={{ backgroundColor:"white"}}>
               <Modal.Header closeButton>
-                <Modal.Title>{slice.selectedTypeName} to {slice.selectedCategoryName}</Modal.Title>
+                  <Modal.Title className="text-center w-100">{slice.selectedTypeName} to {slice.selectedCategoryName}</Modal.Title>
               </Modal.Header>
+         {slice.isApiResponseReceived ?
               <Modal.Body>
-                <FloatingLabel label='Enter Recipients email' className="mb-3">
+                <FloatingLabel label="Enter Recipient's Email" className="mb-3" >
                   <Form.Control
-                    placeholder='Enter Recipients email'
+                    placeholder="Enter Recipient's Email"
+                    name="to_email"
                     value={toEmail}
                     onChange={(e) => setToEmail(e.target.value)}
                   />
                 </FloatingLabel>
-                <FloatingLabel label='Enter Subject' className="mb-3">
+                <FloatingLabel label='Enter Subject' className="mb-3" >
                   <Form.Control
                     placeholder='Enter Subject'
+                    name="subject"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                   />
@@ -272,10 +326,9 @@ function Dashboard() {
                 <textarea
                   value={slice.answer}
                   onChange={handleContentEdit}
+                  className="form-control"
                   style={{
-                    width: "100%",
                     height: "60vh",
-                    border: "none",
                     padding: "10px",
                     fontFamily: "Arial, sans-serif",
                     fontSize: "16px",
@@ -286,28 +339,58 @@ function Dashboard() {
                     boxSizing: "border-box",
                   }}
                 />
-              </Modal.Body>
-              <Modal.Footer>
+              </Modal.Body>  :
+              <center>
+               <div class="three-body">
+                <div class="three-body__dot"></div>
+                <div class="three-body__dot"></div>
+                <div class="three-body__dot"></div>
+                </div>
+              </center>
+          }
+              <Modal.Footer className="justify-content-center">
                 <Button variant="secondary" onClick={handleClose}>
                   Regenerate
                 </Button>
-                {slice.isApiResponseReceived && (
+                {slice.isApiResponseReceived ? (
                   <>
-                    <Button className='saveButton' onClick={handleSave}>
+                    <Button className='btn btn-success' onClick={handleSave}>
                       Save Template
                     </Button>
                     <Button type="button" variant="primary" onClick={handleSendEmail}>
                       Send E-Mail
                     </Button>
                   </>
-                )}
+                ) :  null}
               </Modal.Footer>
-            </center>
-          </Modal>
-        </center>
-      </div>
-    </>
-  );
+            </Modal>
+          </center>
+        </div>
+      </>
+    );
+    
 }
-
 export default Dashboard;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

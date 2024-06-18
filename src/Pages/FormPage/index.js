@@ -13,7 +13,8 @@ import emailjs from '@emailjs/browser'
 const FinalPage = () => {
   const form = useRef()
   const dispatch = useDispatch();
-  const { id } = useParams();
+  const { id ,currentLoginUserId} = useParams();
+
   const { generateDatas, datas } = useSelector((state) => state.template);
   console.log("id", id);
   const [formData, setFormData] = useState([]);
@@ -22,9 +23,9 @@ const FinalPage = () => {
   const [toEmail,setToEmail] = useState('');
   const [subject, setSubject] = useState('');
 
-  const getData = async () => {
+  const getData = async (i,c) => {
     const dbTemplate = await axios
-      .get(`https://pavithrakrish95.pythonanywhere.com/getSelectedTemplate/${id}`)
+      .get(`https://pavithrakrish95.pythonanywhere.com/getSelectedTemplate/${i}/${c}`)
       .then((res) => {
         // dispatch(setGenerateDatas(res.data));
         const parsedData = JSON.parse(res.data.datas);
@@ -44,10 +45,10 @@ const FinalPage = () => {
     setShow(false);
   };
 
-  const handleFormSave = async (i) => {
+  const handleFormSave = async () => {
     setShow(true);
     const dbTemplate = await axios
-      .get(`https://pavithrakrish95.pythonanywhere.com/getSelectedTemplate/${i}`)
+      .get(`https://pavithrakrish95.pythonanywhere.com/getSelectedTemplate/${id}/${currentLoginUserId}`)
       .then((res) => {
         const dbTemplates = res.data.templates;
         const dbDatas = JSON.parse(res.data.datas);
@@ -75,7 +76,7 @@ const FinalPage = () => {
   };
 
   useEffect(() => {
-    getData(id);
+    getData(id,currentLoginUserId);
   }, []);
   // console.log("new gen", generateDatas);
     const sendEmil = ()=>{
@@ -85,7 +86,7 @@ const FinalPage = () => {
       subject:subject
     } 
       emailjs
-      .send('service_nfhpy6b', 'template_qtyoyvw',data, 'Z7BAUgnHnm_Ez8KjM')
+      .send('service_k5uovth', 'template_peaed7n',data, 'zWRbPEy2MWvmTMoHr')
       .then(
         (result) => {
           console.log('SUCCESS!',result.text);
