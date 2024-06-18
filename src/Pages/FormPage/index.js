@@ -3,17 +3,19 @@ import { setDatas, setGenerateDatas } from "../../Routes/Slices/templateSlice";
 import { useDispatch, useSelector } from "react-redux";
 import FloatingLabel from "react-bootstrap/FloatingLabel";
 import Form from "react-bootstrap/Form";
-import { json, useParams } from "react-router-dom";
+import { json, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { setIsPopUp } from "../../Routes/Slices/dashBoardSlice";
 import emailjs from '@emailjs/browser'
 
+
 const FinalPage = () => {
   const form = useRef()
   const dispatch = useDispatch();
   const { id ,currentLoginUserId} = useParams();
+  const navigate=useNavigate()
 
   const { generateDatas, datas } = useSelector((state) => state.template);
   console.log("id", id);
@@ -44,6 +46,10 @@ const FinalPage = () => {
   const handleClose = () => {
     setShow(false);
   };
+  const handleBack = () => {
+    navigate('/template')
+  };
+
 
   const handleFormSave = async () => {
     setShow(true);
@@ -79,7 +85,7 @@ const FinalPage = () => {
     getData(id,currentLoginUserId);
   }, []);
   // console.log("new gen", generateDatas);
-    const sendEmil = ()=>{
+    const sendEmail = ()=>{
     const data = {
       to_email:toEmail,
       message:template,
@@ -132,6 +138,8 @@ const FinalPage = () => {
         <Button type="button" variant="primary" onClick={handleFormSave}>
           Proceed
         </Button>
+          <Button variant="dark" onClick={()=>handleBack()}>
+            Back</Button>
       </div>
 
       <Modal  size="lg" show={show} onHide={handleClose} >
@@ -188,8 +196,11 @@ const FinalPage = () => {
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="primary" onClick={()=>sendEmil()}>
+          <Button variant="primary" onClick={()=>sendEmail()}>
             Send Email
+          </Button>
+          <Button variant="dark" onClick={()=>handleBack()}>
+            Back
           </Button>
         </Modal.Footer>
       </Modal>

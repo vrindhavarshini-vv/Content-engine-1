@@ -69,11 +69,13 @@ export default function Categories() {
 
   // Opens the modal for adding a new email type
   const openTypeModal = (categoryId) => {
+    fetchCategories()
     setCurrentCategoryId(categoryId);
     dispatch(setSelectedCategory(categoryId));
     setShowTypeModal(true);
     fetchTypes(categoryId);
     generatePreview(categoryId, settingstate.categoryType);
+    
   };
 
   // Closes the modal for adding a new email type
@@ -106,6 +108,7 @@ export default function Categories() {
       dispatch(setCategoryName(""));
       closeModal();
       alert("Category added successfully!");
+      // navigate('/user/setting')
     } catch (error) {
       console.error("Error adding category:", error);
       alert("Failed to add category. Please try again.");
@@ -119,10 +122,10 @@ export default function Categories() {
 
   // Handles the submission of a new category type
   const handleAddCategoryType = async () => {
-    if (!currentCategoryId || !settingstate.categoryType) {
-      alert("Please select a category and enter a category type");
-      return;
-    }
+    // if (!currentCategoryId || !settingstate.categoryType) {
+    //   alert("Please select a category and enter a category type");
+    //   return;
+    // }
 
     try {
       const formData = new FormData();
@@ -142,14 +145,14 @@ export default function Categories() {
       );
       const latestType = typeDataResponse.data.find(
         (type) =>
-          type.typeName === settingstate.categoryType &&
-          type.categoryId === currentCategoryId
+          type.typeName == settingstate.categoryType &&
+          type.categoryId == currentCategoryId
       );
 
-      if (!latestType) {
-        alert("New type not found in response");
-        return;
-      }
+      // if (!latestType) {
+      //   alert("New type not found in response");
+      //   return;
+      // }
 
       const newType = {
         typeId: latestType.typeId,
