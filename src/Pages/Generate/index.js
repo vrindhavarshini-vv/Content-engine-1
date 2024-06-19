@@ -1,267 +1,517 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link} from 'react-router-dom';
-import { auth, db } from '../Firebase/firebase';
-import { addDoc, collection,getDocs,query, where } from 'firebase/firestore';
-import { setCategoryList,setTypesList,setSelectedCategory,setIsPopUp,setIsCategorySelected,setSelectedType,setIsTypeSelected,setAnswer,setSelectedCategoryName,setSelectedTypeName,setShow,setIsApiResponseReceived} from "../../Routes/Slices/dashBoardSlice"
-import { useDispatch,useSelector } from 'react-redux';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import "../Navbar/index.css"
-import "./index.css"
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  setCategoryList,
+  setTypesList,
+  setSelectedCategory,
+  setIsPopUp,
+  setIsCategorySelected,
+  setSelectedType,
+  setIsTypeSelected,
+  setAnswer,
+  setSelectedCategoryName,
+  setSelectedTypeName,
+  setShow,
+  setIsApiResponseReceived,
+} from "../../Routes/Slices/dashBoardSlice";
+import { useDispatch, useSelector } from "react-redux";
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "../Navbar/index.css";
+import "./index.css";
 import axios from "axios";
-import ListExample from '../Navbar';
-
-
+import ListExample from "../Navbar/nav";
+import emailjs from "@emailjs/browser";
+import FloatingLabel from "react-bootstrap/FloatingLabel";
+import Form from "react-bootstrap/Form";
 
 function Dashboard() {
-  const slice = useSelector(state => state.dashboardslice)
+  const localToken = localStorage.getItem("__token");
+  let registerID = localStorage.getItem("__registerID");
 
-  const dispatch = useDispatch()
-  const [pairs,setPairs] = useState([{key:'',value:''}])
-  const [generatedData,setGeneratedData] = useState([])
-  const navigate = useNavigate()
-  let parsedUid = localStorage.getItem("uid")
-  
-  
+  const adminSlice = useSelector((state) => state.adminLogin);
+  const slice = useSelector((state) => state.dashboardslice);
+  const templateSlice = useSelector((state) => state.template);
+  const dispatch = useDispatch();
+
+  const headers = { Authorization: `Bearer ${localToken}` };
+
+  const [toEmail, setToEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [pairs, setPairs] = useState([{ key: "", value: "" }]);
+  const [updatedContent, setUpdatedContent] = useState("");
+
   //Key Value Pairs************************
-  let keyValuePair = []
-  for (let each of pairs){
-    keyValuePair.push(each.key +":"+ each.value)
+  let keyValuePair = [];
+  for (let each of pairs) {
+    keyValuePair.push(each.key + ":" + each.value);
   }
-  let stringedPairs = JSON.stringify(keyValuePair)
-  // const GeneratedDatas = generatedData.map((e) => e.datas)
-  // let getGeneratedDatas = []
-  // for (let each of GeneratedDatas){
-  //   getGeneratedDatas.push(JSON.parse(each))
-  // }
-  //  console.log("getGenratedDatas",getGeneratedDatas);
-  
-  const handleNavClose = () => dispatch(setShow(false));
-  const handleNavShow = () => dispatch(setShow(true));
 
-  
-  
- 
- 
+  let stringedPairs = JSON.stringify(keyValuePair);
 
   const handleKeyChange = (i, event) => {
     const newPair = [...pairs];
-    newPair[i].key = event.target.value;
-    setPairs(newPair)
+    newPair[i].key =
+      event.target.value.charAt(0).toUpperCase() + event.target.value.slice(1);
+    setPairs(newPair);
   };
 
   const handleRemoveInputBox = (i) => {
-      const newArray = [...pairs];
-      newArray.splice(i, 1);
-      setPairs(newArray);
-    };
-  
+    const newArray = [...pairs];
+    newArray.splice(i, 1);
+    setPairs(newArray);
+  };
 
   const handleValueChange = (i, event) => {
     const newPair = [...pairs];
-    newPair[i].value = event.target.value;
-    setPairs(newPair)
+    newPair[i].value =
+      event.target.value.charAt(0).toUpperCase() + event.target.value.slice(1);
+    setPairs(newPair);
   };
 
   const handleAddPair = () => {
-   setPairs([...pairs, { key: '', value: '' }])
-    
+    setPairs([...pairs, { key: "", value: "" }]);
   };
+  console.log("pairs", pairs);
 
-  const handleGenerate =  (event) => {
+  const handleGenerate = (event) => {
     event.preventDefault();
-    dispatch(setIsPopUp(true))
+    dispatch(setIsPopUp(true));
   };
 
-  
-  const handleSave = () =>{
-     {slice.isApiResponseReceived && 
-        addDoc(collection(db,"generatedDatas"),{datas:stringedPairs,category:slice.selectedCategory,typeId:slice.selectedType,templates:slice.answer})
-        dispatch(setIsPopUp(false));
-     }
-    };
-  
-  const handleClose = ()=>{
-    dispatch(setIsPopUp(false))
-  };
-       
-  const getCategory = async () => {
-      const querySnapshot = await getDocs(collection(db, 'category'));
-      const category = [];
-      querySnapshot.forEach((doc) => {
-          category.push(doc.data());
+  const formData = new FormData();
+  const handleSave = async () => {
+    {
+      slice.isApiResponseReceived &&
+        formData.append("categoryId", slice.selectedCategory);
+      formData.append("typeId", slice.selectedType);
+      formData.append("datas", JSON.stringify(pairs));
+      formData.append("templates", updatedContent);
+      formData.append("registerID", registerID);
+
+      await axios
+        .post(
+          "https://anishkrishnan.pythonanywhere.com/dataBasePostGeneratedDatas",
+          formData,
+          { headers }
+        )
+        .then((res) => {
+          console.log("res", res);
         });
-        dispatch(setCategoryList(category))
-  };
-  console.log("categoryList",slice.categoryList.map((e) => e.categoryId))
-  console.log("typeList",slice.typesList.map((e) => e.categoryId))
-
- const getTypes = async () => {
-    const querySnapshot = await getDocs(query(collection(db, 'type'), where("categoryId", "==", slice.selectedCategory)));
-      const typeId = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      dispatch(setTypesList(typeId));
     }
-  
-useEffect(() => {
+  };
+
+  const handleClose = () => {
+    dispatch(setIsPopUp(false));
+    dispatch(setIsApiResponseReceived(false));
+    dispatch(setIsTypeSelected(false));
+    dispatch(setIsCategorySelected(false));
+  };
+
+  const getCategory = async () => {
+    await axios
+      .get(
+        `https://anishkrishnan.pythonanywhere.com/getCategory/${registerID}`,
+        { headers }
+      )
+      .then((res) => {
+        console.log("res", res.data);
+        dispatch(setCategoryList(res.data));
+      });
+  };
+  console.log("dbCategoryList", slice.categoryList);
+
+  useEffect(() => {
+    getCategory();
+  }, []);
+
+  const getTypes = async () => {
+    await axios
+      .get(
+        `https://anishkrishnan.pythonanywhere.com/getParticularType/${registerID}`,
+        { headers }
+      )
+      .then((res) => {
+        dispatch(setTypesList(res.data));
+      });
+  };
+  console.log("dbTypeList", slice.typesList);
+
+  useEffect(() => {
     if (slice.isCategorySelected) {
       getTypes();
     }
-  }, [slice.selectedCategory])
-
-  const getGenerateDatas = async () => {
-    const querySnapshot = await getDocs(collection(db, 'generatedDatas'));
-    const generatedDatas = [];
-    querySnapshot.forEach((doc) => {
-        generatedDatas.push(doc.data());
-      });
-      setGeneratedData(generatedDatas)
-};
+  }, [slice.selectedCategory]);
 
   useEffect(() => {
-        getCategory();
-        getGenerateDatas();
-    }, []);   
-
-
-  useEffect(() => {
-    for (let each of slice.categoryList){
-      if (each.categoryId == slice.selectedCategory){
-        dispatch(setSelectedCategoryName(each.categoryName))
+    for (let each of slice.categoryList) {
+      if (each.categoryId == slice.selectedCategory) {
+        dispatch(setSelectedCategoryName(each.categoryName));
       }
     }
-  }, [slice.selectedCategory]); 
-  
+  }, [slice.selectedCategory]);
+
   useEffect(() => {
-    for (let each of slice.typesList){
-      if (each.id == slice.selectedType){
-        dispatch(setSelectedTypeName(each.type))
+    for (let each of slice.typesList) {
+      if (each.typeId == slice.selectedType) {
+        dispatch(setSelectedTypeName(each.typeName));
       }
     }
-  }, [slice.selectedType]); 
+  }, [slice.selectedType]);
 
-async function generateAnswer(){
-      dispatch(setAnswer("Loading..."))
-      const response = await axios({
-        url:"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCdGe2K1tWu6hUcBGr5L-RbJ65Rd3L0iS0",
-        method: "post",
-        data: {contents:[{parts:[{text: `Please give a "${slice.selectedTypeName}" send to  "${slice.selectedCategoryName}" with these given datas ${keyValuePair}` }]}]}
-      })
-      dispatch(setAnswer(response["data"]["candidates"][0]["content"]["parts"][0]["text"]))
-      dispatch(setIsApiResponseReceived(true))
-     }
+  async function generateAnswer() {
+    dispatch(setAnswer("Loading..."));
+    const response = await axios({
+      url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCdGe2K1tWu6hUcBGr5L-RbJ65Rd3L0iS0",
+      method: "post",
+      data: {
+        contents: [
+          {
+            parts: [
+              {
+                text: `Please give a "${slice.selectedTypeName}" to  "${slice.selectedCategoryName}" with these given datas only "${stringedPairs}" in a email format without subject and don't give empty placeholders`,
+              },
+            ],
+          },
+        ],
+      },
+    });
+    dispatch(
+      setAnswer(
+        response["data"]["candidates"][0]["content"]["parts"][0]["text"]
+      )
+    );
+    dispatch(setIsApiResponseReceived(true));
 
+    const paragraph =
+      response["data"]["candidates"][0]["content"]["parts"][0]["text"];
+    console.log("paragraph", paragraph);
 
+    const valueArray = pairs.map((pair) => pair.value);
+    const keyArray = pairs.map((pair) => pair.key);
 
-return (
-     <>
-     <div className='generatePageContainer'>
-      <center>
-      <header>
-          <ListExample/>
-      </header>
-      <h1>Generate Page</h1>
-        <br/>
-        <div>
-          <br/>
-          <br/>
-          
-          <select value={slice.selectedCategory} onChange={(e) => {dispatch(setSelectedCategory(e.target.value)); dispatch(setIsCategorySelected(true))}}>
-            <option value="">Select a Category</option>
-            {(slice.categoryList.filter((e)=> (e.uid) === (parsedUid))).map((categories) => (
-              <option key={categories.categoryId} value={categories.categoryId}>
-                {categories.categoryName}
-              </option>
-            ))}
-          </select>
-          <br/>
-          <br/>
-          
-          {slice.isCategorySelected ? 
-            <select value={slice.selectedType} onChange={(e) => {dispatch(setSelectedType(e.target.value)); dispatch(setIsTypeSelected(true))}}>
-              <option value="">Select a Type</option>
-              {slice.typesList.filter((e)=> e.uid==parsedUid).map((types) => (
-                slice.selectedCategory === types.categoryId &&
-                  <option key={types.id} value={types.id}>
-                    {types.type}
-                  </option>
-              ))}
-            </select> : null}
-          <br/>
-          <br/>
-        </div>
-    
-        {slice.isTypeSelected ?
-          <form onSubmit={handleGenerate}>
-            {pairs.map((pair, i) => (
-              <>
-              <div key={i}>
-                <label> Key:</label>
-                <input type="text" placeholder='eg. Name' value={pair.key} onChange={(event) => handleKeyChange(i, event)}/>
-                <label>Value:</label>
-                <input type="text" placeholder="eg. Varshini"  value={pair.value} onChange={(event) => handleValueChange(i, event)}/>
-                <button type='button'  onClick={() => handleRemoveInputBox(i)}>Delete</button>
-                
-                </div>
-              <br/>
-             
-              </>
-            ))}
-             <button type="button" className='btn btn-primary' onClick={handleAddPair}>Add Another Data</button>
-            <br/>
-            <br/>
-            <button type="submit" className='btn btn-success' onClick={generateAnswer}>Generate Template</button>
-          </form> : null
+    let newParagraph = paragraph;
+
+    valueArray.forEach((value, index) => {
+      if (newParagraph.includes(value)) {
+        newParagraph = newParagraph.replace(
+          new RegExp(value, "g"),
+          `[Enter ${keyArray[index]}]`
+        );
+        setUpdatedContent(newParagraph);
+      }
+    });
+  }
+
+  const handleContentEdit = (e) => {
+    dispatch(setAnswer(e.target.value));
+  };
+
+  const handleSendEmail = (e) => {
+    const data = {
+      to_email: toEmail,
+      message: slice.answer,
+      subject: subject,
+    };
+    emailjs
+      .send("service_lz71gf3", "template_nu02of7", data, "GEPKT28Xn5AU0p2vl")
+      .then(
+        (result) => {
+          console.log("SUCCESS!", result.text);
+          alert("Email send successfull✔️");
+        },
+        (error) => {
+          console.log("FAILED...", error.text);
+          console.log("error", error);
+          alert("Email send failed❌");
         }
-    
-        <Modal show={slice.isPopUp} onHide={handleClose}>
-          <center>
+      );
+  };
+
+  return (
+    <>
+      <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+        integrity="sha384-DyZ88mC6Up2uqS1DVho8X8v50C6H3l8Nj+lsIX4rtZ3q/k1bsRjhR2KxAxhgjjvL"
+        crossorigin="anonymous"
+      />
+      <div className="generatePageContainer">
+        <center>
+          <header>
+            <ListExample />
+          </header>
+          <br /> <br />
+          <div>
+            <br />
+
+            <div className="container">
+              <div className="row justify-content-center border-dark rounded p-3">
+                <div
+                  className="col-md-6 align-self-center text-center"
+                  style={{ position: "relative" }}
+                >
+                  <select
+                    className="form-control"
+                    name="choices-language"
+                    id="choices"
+                    onChange={(e) => {
+                      dispatch(setSelectedCategory(e.target.value));
+                      dispatch(setIsCategorySelected(true));
+                    }}
+                    style={{
+                      appearance: "none",
+                      WebkitAppearance: "none",
+                      MozAppearance: "none",
+                      paddingRight: "2rem",
+                      background: "gainsboro",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                      padding: "10px",
+                      width: "100%",
+                    }}
+                  >
+                    <option selected disabled>
+                      Select a Category
+                    </option>
+                    {slice.categoryList.map((categories, i) => (
+                      <option key={i} value={categories.categoryId}>
+                        {categories.categoryName}
+                      </option>
+                    ))}
+                  </select>
+                  <i
+                    className="fa fa-chevron-down"
+                    style={{
+                      position: "absolute",
+                      right: "20px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      pointerEvents: "none",
+                      color: "#333",
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+            <br />
+
+            {slice.isCategorySelected && (
+              <div className="container">
+                <div className="row justify-content-center">
+                  <div
+                    className="col-md-6 align-self-center text-center"
+                    style={{ position: "relative" }}
+                  >
+                    <select
+                      className="form-control"
+                      name="choices-language"
+                      id="choices"
+                      onChange={(e) => {
+                        dispatch(setSelectedType(e.target.value));
+                        dispatch(setIsTypeSelected(true));
+                      }}
+                      style={{
+                        appearance: "none",
+                        WebkitAppearance: "none",
+                        MozAppearance: "none",
+                        paddingRight: "2rem",
+                        background: "gainsboro",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        padding: "10px",
+                        width: "100%",
+                      }}
+                    >
+                      <option selected disabled>
+                        Select Email Type
+                      </option>
+                      {slice.typesList.map(
+                        (types) =>
+                          slice.selectedCategory == types.categoryId && (
+                            <option key={types.typeId} value={types.typeId}>
+                              {types.typeName}
+                            </option>
+                          )
+                      )}
+                    </select>
+                    <i
+                      className="fa fa-chevron-down"
+                      style={{
+                        position: "absolute",
+                        right: "20px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        pointerEvents: "none",
+                        color: "#333",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+            <br />
+          </div>
+          {slice.isTypeSelected && (
+            <>
+              <h2 style={{ color: "black", fontFamily: "Arial, sans-serif" }}>
+                Add Your Email Datas
+              </h2>
+              <div className="container mt-4">
+                <form onSubmit={handleGenerate}>
+                  {pairs.map((pair, i) => (
+                    <div key={i} className="mb-3">
+                      <div className="row g-3 align-items-center justify-content-center">
+                        <div className="col-md-3">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="e.g., Name"
+                            value={pair.key}
+                            onChange={(event) => handleKeyChange(i, event)}
+                          />
+                        </div>
+                        <div className="col-md-3">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="e.g., Varshini"
+                            value={pair.value}
+                            onChange={(event) => handleValueChange(i, event)}
+                          />
+                        </div>
+                        <div className="col-md-1 text-center">
+                          <button
+                            type="button"
+                            className="btn btn-danger mt-3"
+                            onClick={() => handleRemoveInputBox(i)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="mb-3 text-center mt-4">
+                    <button
+                      type="button"
+                      className="col-md-2 btn btn-primary"
+                      onClick={handleAddPair}
+                    >
+                      Add Data
+                    </button>
+                    <button
+                      type="submit"
+                      className="col-md-2 btn btn-success ms-2"
+                      onClick={generateAnswer}
+                    >
+                      Generate{" "}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </>
+          )}
+          <Modal
+            show={slice.isPopUp}
+            onHide={handleClose}
+            size="lg"
+            centered
+            style={{ backgroundColor: "white" }}
+          >
             <Modal.Header closeButton>
-              <Modal.Title> {slice.selectedTypeName} to {slice.selectedCategoryName}</Modal.Title>
+              <Modal.Title className="text-center w-100">
+                {slice.selectedTypeName} to {slice.selectedCategoryName}
+              </Modal.Title>
             </Modal.Header>
-            <Modal.Body>
-              {slice.answer}
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary"  onClick={handleClose}>
+            {slice.isApiResponseReceived ? (
+              <Modal.Body>
+                <div>
+                  <style>
+                    {`
+                    .form-control {
+                      border: 1px solid black;
+                      transition: border 0.3s, outline 0.3s;
+                    }
+                    .form-control:hover {
+                      border: 1px solid #007bff;
+                      outline: 2px solid #007bff;
+                      outline-offset: 2px;
+                    }
+                  `}
+                  </style>
+                  <FloatingLabel
+                    label="Enter Recipient's Email"
+                    className="mb-3"
+                  >
+                    <Form.Control
+                      placeholder="Enter Recipient's Email"
+                      name="to_email"
+                      value={toEmail}
+                      onChange={(e) => setToEmail(e.target.value)}
+                      className="form-control"
+                    />
+                  </FloatingLabel>
+                  <FloatingLabel label="Enter Subject" className="mb-3">
+                    <Form.Control
+                      placeholder="Enter Subject"
+                      name="subject"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      className="form-control"
+                    />
+                  </FloatingLabel>
+                </div>
+                <textarea
+                  value={slice.answer}
+                  onChange={handleContentEdit}
+                  className="form-control"
+                  style={{
+                    height: "60vh",
+                    padding: "10px",
+                    fontFamily: "Arial, sans-serif",
+                    fontSize: "16px",
+                    backgroundColor: "#f9f9f9",
+                    resize: "none",
+                    whiteSpace: "pre-wrap",
+                    wordWrap: "break-word",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </Modal.Body>
+            ) : (
+              <center>
+                <div class="three-body">
+                  <div class="three-body__dot"></div>
+                  <div class="three-body__dot"></div>
+                  <div class="three-body__dot"></div>
+                </div>
+              </center>
+            )}
+            <Modal.Footer className="justify-content-center">
+              <Button variant="secondary" onClick={handleClose}>
                 Regenerate
               </Button>
-              <Button  className='saveButton' onClick={handleSave}>
-                Save
-              </Button>
-              </Modal.Footer>
-          </center>
-        </Modal>
+              {slice.isApiResponseReceived ? (
+                <>
+                  <Button className="btn btn-success" onClick={handleSave}>
+                    Save Template
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={handleSendEmail}
+                  >
+                    Send E-Mail
+                  </Button>
+                </>
+              ) : null}
+            </Modal.Footer>
+          </Modal>
         </center>
-        </div>
-      </>
-    );
-    
+      </div>
+    </>
+  );
 }
 export default Dashboard;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
