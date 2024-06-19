@@ -1,22 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, Modal } from "react-bootstrap";
-import { db } from "../Firebase/firebase";
+import { Button, Modal } from "react-bootstrap";
 import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
-import { collection, getDocs } from "firebase/firestore";
 import { useSelector, useDispatch } from "react-redux";
 import {
   setFbCategory,
   setFbType,
   setSelectedCategory,
-  setCategoryAndTypes,
   setFbGeneratedDatas,
-  setCategoryWithTypesWithTemplates,
   setSelectTemplate,
 } from "../../Routes/Slices/templateSlice";
 import "./index.css";
 import { useNavigate } from "react-router-dom";
-import ListExample from '../Navbar/index'
-
+import axios from "axios";
+import ListExample from "../Navbar/nav";
 
 const Template = () => {
   const navigate = useNavigate();
@@ -25,253 +21,306 @@ const Template = () => {
     fbCategory,
     fbType,
     selectedCategory,
-    categoryAndTypes,
     fbGeneratedDatas,
-    categoryWithTypesWithTemplates,
     selectTemplate,
   } = useSelector((state) => state.template);
   const [selectType, setSelectType] = useState([]);
-  // const [newData, setNewData] = useState([]);
-  // const [content, setContent] = useState("");
-  // const [selectTemplate, setSelectTemplate] = useState("");
   const [regen, setRegen] = useState(false);
-  let parsedUid = localStorage.getItem("uid");
+
+  const localToken = localStorage.getItem("__token");
+  const registerID = localStorage.getItem("__registerID");
+  const headers = { Authorization: `Bearer ${localToken}` };
 
   const fetchCategory = async () => {
-    const querySnapshot = await getDocs(collection(db, "category"));
-    const categories = querySnapshot.docs.map((doc) => ({
-      ...doc.data(),
-    }));
-    dispatch(setFbCategory(categories));
+    const dbCategory = await axios.get(
+      `https://anishkrishnan.pythonanywhere.com/getCategory/${registerID}`,
+      { headers }
+    );
+    dispatch(setFbCategory(dbCategory.data));
+    console.log("data base category", dbCategory.data);
   };
 
   const fetchTypes = async () => {
-    const querySnapShot = await getDocs(collection(db, "type"));
-    const types = querySnapShot.docs.map((doc) => ({
-      typeId: doc.id,
-      ...doc.data(),
-    }));
-    dispatch(setFbType(types));
+    const dbType = await axios.get(
+      `https://anishkrishnan.pythonanywhere.com/getParticularType/${registerID}`,
+      { headers }
+    );
+    dispatch(setFbType(dbType.data));
+    console.log("data base type", dbType.data);
   };
 
   const fetchTemplate = async () => {
-    const querySnapShot = await getDocs(collection(db, "generatedDatas"));
-    const template = querySnapShot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    dispatch(setFbGeneratedDatas(template));
+    const dbTemplate = await axios.get(
+      `https://anishkrishnan.pythonanywhere.com/getParticulartUsetTemplate/${registerID}`,
+      { headers }
+    );
+    dispatch(setFbGeneratedDatas(dbTemplate.data));
+    console.log("templates", dbTemplate.data);
   };
-
-  const fetchCategoryWithType = () => {
-    const categoryTypes = fbCategory.map((category) => {
-      const typesForCategory = fbType
-        .filter((type) => type.categoryId === category.categoryId)
-        .map((doc) => doc.type);
-      return { category, types: typesForCategory };
-    });
-    const selectCat = categoryTypes;
-    dispatch(setCategoryAndTypes(selectCat));
-  };
-
-  // const templateInsideTypes = () => {
-  //   const cat = fbCategory.map((category) => {
-  //     const typesForCategory = fbType
-  //       .filter((type) => type.categoryId === category.categoryId)
-  //       .map((type) => {
-  //         const templatesForType = fbGeneratedDatas.filter(
-  //           (data) => data.typeId === type.typeId
-  //         );
-  //         return {
-  //           type: type.type,
-  //           templates: templatesForType.map((template) => ({
-  //             id: template.id,
-  //             template: template.templates,
-  //           })),
-  //         };
-  //       });
-  //     return { category, types: typesForCategory };
-  //   });
-  //   const newCat = cat;
-  //   dispatch(setCategoryWithTypesWithTemplates(newCat));
-  // };
 
   useEffect(() => {
     fetchCategory();
     fetchTypes();
-    // templateInsideTypes();
+    fetchTemplate();
   }, []);
 
-  const handleCategoryClick = async (eachCategory) => {
-    dispatch(setSelectedCategory(eachCategory));
-    console.log('selectCata',selectedCategory)
+  const handleCategoryClick = async (id, cat) => {
+    const filteredTypes = fbType
+      .filter((type) => type.categoryId === id)
+      .map((type) => ({
+        ...type,
+        categoryName: cat,
+      }));
+    return dispatch(setSelectedCategory(filteredTypes));
   };
 
-  const handleTypeClick = (clickType) => {
-    const selectedTemplates = [];
+  console.log("set cat", selectedCategory);
 
-    categoryWithTypesWithTemplates.forEach((user) => {
-      user.types.forEach((type) => {
-        if (type.type === clickType) {
-          selectedTemplates.push({ type });
-        }
-      });
-    });
-
+  const handleTypeClick = (id) => {
+    const selectedTemplates = fbGeneratedDatas.filter(
+      (temp) => temp.typeId === id
+    );
     setSelectType(selectedTemplates);
-    console.log("Selected Template", selectType);
+    console.log("selected temp", selectedTemplates);
   };
-  useEffect(()=>{
-    if(selectType){
-      fetchCategoryWithType();
-      fetchTemplate();
-    }
-  },[selectType])
 
-  const handleTemplateSelected = (temp) => {
-    console.log("temp", temp);
-    // temp.preventDefault()
-    dispatch(setSelectTemplate(temp));
+  const handleTemplateSelected = (temp, datas, id) => {
+    dispatch(setSelectTemplate({ temp, datas, id }));
     setRegen(true);
   };
-
+  console.log("gnid", selectTemplate);
 
   const handleRegenerateToDashboard = () => navigate("/dashboard");
-  const handleContentEdit = (e) => {
-    dispatch(setSelectTemplate(e.target.value));
-  };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    setRegen(false)
-    const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=''&body=${encodeURIComponent(
-      selectTemplate
-    )}`;
-    window.open(gmailLink, "_blank");
-    navigate('/dashboard')
+    navigate(`/finalPage/${selectTemplate.id}/${registerID}`);
   };
-  console.log("ss", selectTemplate);
   return (
     <>
-    
-    <header>
-          <ListExample/>
-      </header>
-    <div>
-      <h2>Welcome to the template page</h2>
-      <h5>Select Category</h5>
-      {/* categoryAndTypes.length */}
-      <div>
-        {categoryAndTypes
-          .filter((e) => e.category.uid === parsedUid)
-          .map((category, i) => (
-            <Card
-              className="cards"
-              onClick={() => handleCategoryClick(category)}
-              key={i}
-              style={{ width: "10rem", cursor: "pointer" }}
-            >
-              <Card.Body>
-                <Card.Subtitle className="mb-2 text-muted">
-                  Category
-                </Card.Subtitle>
-                <Card.Title>{category.category.categoryName}</Card.Title>
-              </Card.Body>
-            </Card>
-          ))}
-      </div>
-      {selectedCategory && (
+      <center>
         <div>
-          <h5>Types for {selectedCategory.category.categoryName}</h5>
-          {selectedCategory.types.map((type, i) => (
-            <Card
-              className="cardss"
-              key={i}
-              onClick={() => handleTypeClick(type)}
-              data-index={i}
-              style={{ width: "20.8rem" }}
+          <header>
+            <ListExample />
+          </header>
+          {/* <h2 style={{ color: "white" }} className="fs-2 text-center mt-8">
+          Welcome to the template page
+        </h2> */}
+
+          <h5
+            style={{ color: "black", fontFamily: "Arial, sans-serif" }}
+            className="fs-3 mt-4"
+          >
+            Select Email Recipient
+          </h5>
+          <div className="row mt-5">
+            {fbCategory.map((cat, i) => (
+              <div className="col-xl-2 col-lg-3 col-md-4 mb-4">
+                <div className="card">
+                  <div className="card-body text-center">
+                    <p className="card-text cat">
+                      <i className="fas fa-user me-1"></i>
+                      {cat.categoryName}
+                    </p>
+                    <button
+                      className="btn-class-name"
+                      onClick={() =>
+                        handleCategoryClick(cat.categoryId, cat.categoryName)
+                      }
+                      key={i}
+                      style={{ width: "50%", cursor: "pointer" }}
+                    >
+                      <span className="back"></span>
+                      <span className="front">click</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {selectedCategory && (
+            <div
+              className="row mt-5"
+              style={{
+                position: "sticky",
+                top: "0",
+                background:
+                  "linear-gradient(89.5deg, rgba(131,204,255,1) 0.4%, rgba(66,144,251,1) 100.3%)",
+              }}
             >
-              <Card.Body>
-                <Card.Subtitle className="mb-2 text-muted">
-                  <h6>Type for {selectedCategory.category.categoryName}</h6>
-                </Card.Subtitle>
-                <Card.Title>{type}</Card.Title>
-              </Card.Body>
-            </Card>
-          ))}
-        </div>
-      )}
-      {selectType.length > 0 && (
-        <div>
-          {categoryWithTypesWithTemplates.length}
-          {selectType.map((doc, i) => (
-            <div key={i}>
-              <h5>Select Template for {doc.type.type}</h5>
-              {doc.type.templates.map((temp, j) => (
-                <Card
-                  key={j}
-                  className="cardss"
-                  style={{ width: "30rem", marginBottom: "10px" }}
-                  onClick={() => handleTemplateSelected(temp.template)}
-                >
-                  <Card.Body>
-                    <div>{temp.template}</div>
-                  </Card.Body>
-                </Card>
+              <h5
+                style={{ color: "white", fontFamily: "Arial, sans-serif" }}
+                className="fs-3"
+              >
+                Select Email Type
+              </h5>
+              {selectedCategory.map((typ, i) => (
+                <div className="col-xl-3 col-lg-4 col-md-6 mb-4">
+                  <div className="card">
+                    <div className="card-body text-center">
+                      {" "}
+                      <p className="card-text cat">
+                        <i className="fas fa-envelope"></i> {typ.typeName}
+                      </p>
+                      <button
+                        className="btn bg-gradient-success mb-0 mx-auto"
+                        onClick={() => handleTypeClick(typ.typeId)}
+                        key={i}
+                        style={{ width: "8rem", cursor: "pointer" }}
+                      >
+                        Choose
+                      </button>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
-          ))}
+          )}
+
+          {selectType.length > 0 && (
+            <div className="row mt-5 justify-content-center">
+              <h5
+                style={{ color: "black", fontFamily: "Arial, sans-serif" }}
+                className="fs-3"
+              >
+                Select Template
+              </h5>
+              <div className="col-md-6">
+                <div
+                  id="templateCarousel"
+                  className="carousel slide"
+                  data-bs-ride="carousel"
+                >
+                  {selectType.map((_, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      data-bs-target="#templateCarousel"
+                      data-bs-slide-to={index}
+                      className={index === 0 ? "active" : ""}
+                      aria-current={index === 0 ? "true" : "false"}
+                      aria-label={`Slide ${index + 1}`}
+                    ></button>
+                  ))}
+
+                  <div className="carousel-inner">
+                    {selectType.map((temp, index) => (
+                      <div
+                        className={`carousel-item ${
+                          index === 0 ? "active" : ""
+                        }`}
+                        key={index}
+                      >
+                        <div className="card">
+                          <div
+                            className="card-body text-start"
+                            style={{
+                              padding: "20px",
+                              borderRadius: "10px",
+                              background:
+                                "linear-gradient(89.5deg, rgba(131,204,255,1) 0.4%, rgba(66,144,251,1) 100.3%)",
+                            }}
+                          >
+                            <p className="card-text">{temp.templates}</p>
+                            <br />
+                            <center>
+                              <button
+                                className="btn bg-gradient-primary mb-0 mx-auto text-center"
+                                onClick={() =>
+                                  handleTemplateSelected(
+                                    temp.templates,
+                                    temp.datas,
+                                    temp.generatedDataId
+                                  )
+                                }
+                                style={{ width: "10rem", cursor: "pointer" }}
+                              >
+                                Choose
+                              </button>
+                            </center>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    className="carousel-control-prev"
+                    type="button"
+                    data-bs-target="#templateCarousel"
+                    data-bs-slide="prev"
+                  >
+                    <span
+                      className="carousel-control-prev-icon"
+                      aria-hidden="true"
+                    ></span>
+                    <span className="visually-hidden">Previous</span>
+                  </button>
+                  <button
+                    className="carousel-control-next"
+                    type="button"
+                    data-bs-target="#templateCarousel"
+                    data-bs-slide="next"
+                  >
+                    <span
+                      className="carousel-control-next-icon"
+                      aria-hidden="true"
+                    ></span>
+                    <span className="visually-hidden">Next</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <Modal
+            show={regen}
+            onHide={() => setRegen(false)}
+            size="lg"
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+            dialogClassName="modal-90w"
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Email Preview! You can edit your email!</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <textarea
+                value={selectTemplate.temp}
+                style={{
+                  width: "100%",
+                  height: "60vh",
+                  border: "none",
+                  padding: "10px",
+                  fontFamily: "Arial, sans-serif",
+                  fontSize: "16px",
+                  backgroundColor: "#f9f9f9",
+                  resize: "none",
+                  whiteSpace: "pre-wrap",
+                  wordWrap: "break-word",
+                  boxSizing: "border-box",
+                }}
+              />
+            </Modal.Body>
+            <Modal.Footer>
+              <Button type="button" variant="primary" onClick={handleSubmit}>
+                Choose Template
+              </Button>
+
+              <Button variant="info" onClick={handleRegenerateToDashboard}>
+                Re-Generate
+              </Button>
+              <Button variant="danger" onClick={() => setRegen(false)}>
+                Close
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </div>
-      )}
 
-      <Modal
-        show={regen}
-        onHide={() => setRegen(false)}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-        dialogClassName="modal-90w"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Email Preview! You can edit your email!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <textarea
-            value={selectTemplate}
-            onChange={handleContentEdit}
-            style={{
-              width: "100%",
-              height: "100vh",
-              border: "none",
-              padding: "10px",
-              fontFamily: "Arial, sans-serif",
-              fontSize: "16px",
-              backgroundColor: "#f9f9f9",
-              resize: "none",
-              whiteSpace: "pre-wrap",
-              wordWrap: "break-word",
-              boxSizing: "border-box",
-            }}
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="danger" onClick={() => setRegen(false)}>
-            Close
-          </Button>
-          <Button variant="info" onClick={handleRegenerateToDashboard}>
-            Re-Generate
-          </Button>
-          <Button type="button" variant="primary" onClick={handleSubmit}>
-            Send
-          </Button>
-        </Modal.Footer>
-
-        {/* </center> */}
-      </Modal>
-    </div>
+        <br />
+        <br />
+        <br />
+      </center>
     </>
   );
-  
 };
 
 export default Template;
