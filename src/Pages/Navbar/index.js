@@ -29,8 +29,8 @@ function ListExample() {
     <Container>
       <Navbar.Brand href="#">
       <img 
-        src="AI-Writer.png" 
-        alt="Brand Logo" 
+        src="logoHeader.jpg" 
+        alt="BlogoHeader.jpg" 
         className="d-inline-block align-top" 
         style={{ width: '200px', height: 'auto' }} // Adjust the width and height as needed
       />

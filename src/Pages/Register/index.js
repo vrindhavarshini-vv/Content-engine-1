@@ -6,6 +6,8 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import emailjs from '@emailjs/browser'
+
 
 const Register =  () => {
   const navigate = useNavigate()
@@ -34,7 +36,26 @@ const Register =  () => {
       await axios.post('https://pavithrakrish95.pythonanywhere.com/postRegisteredUser',formData).then((res)=>{
         console.log('res',res.data.userStatus)
         if(res.data.userStatus === 'Requested'){
-          alert('Wait for the registration entry')
+          
+      const data = {
+        to_name:registerData.userName,
+        message:"provide access to this email",
+        subject:"Content Engine user Approval notification"
+      } 
+        emailjs
+        .send('service_k5uovth','template_1gvuhk8',data, 'zWRbPEy2MWvmTMoHr')
+        .then(
+          (result) => {
+            console.log('SUCCESS!',result.text);
+            alert('Email send successfull✔️')
+            
+          },
+          (error) => {
+            console.log('FAILED...', error.text);
+            console.log('error',error)
+            alert('Email send failed❌')
+          },)
+          setRegisterData({userName:"",userEmail:"",userPassword:""})
         }
       })
     navigate('/')

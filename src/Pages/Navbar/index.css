@@ -6,11 +6,7 @@
 .mainContainer {
   background-color: #4CAF50; 
 }
- 
-  
-
-
-  @media (max-width: 991.98px) {
+ @media (max-width: 991.98px) {
     .navbar-collapse {
       background-color: white; /* Change the background color to white */
     }

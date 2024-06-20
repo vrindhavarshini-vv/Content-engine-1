@@ -37,13 +37,14 @@ function Dashboard() {
     console.log("isApiResponseReceived",slice.isApiResponseReceived);
     
     
-    //Key Value Pairs************************
+    // Key Value Pairs************************
     let keyValuePair = []
     for (let each of pairs){
       keyValuePair.push(each.key +":"+ each.value)
     }
-    let stringedPairs = JSON.stringify(keyValuePair)
- 
+    // const keyValuePair=pairs.map(pair=>`${pair.key}":"${pair.value}`)
+    const stringedPairs = JSON.stringify(keyValuePair)
+    // console.log(keyValuePair,"keyValuePair")
   
     const handleKeyChange = (i, event) => {
       const newPair = [...pairs];
@@ -86,7 +87,7 @@ function Dashboard() {
         formData.append("templates",updatedContent);
         formData.append("userId", currentLoginUserId);
        
-        const postedGenerateData = await axios.post('https://pavithrakrish95.pythonanywhere.com/dataBasePostGeneratedDatas',formData)
+        const postedGenerateData = await axios.post('https://pavithrakrish95.pythonanywhere.com/dataBasePostGeneratedDatas',formData,{headers})
                                     .then((res)=>{
                   console.log("res",res)
                 
@@ -111,7 +112,7 @@ function Dashboard() {
    
     
     const getCategory = async () => {
-      await axios.get(`https://pavithrakrish95.pythonanywhere.com/settingGetList/${currentLoginUserId}` ).then((res)=>{
+      await axios.get(`https://pavithrakrish95.pythonanywhere.com/settingGetList/${currentLoginUserId}`,{headers} ).then((res)=>{
         console.log("res",res.data)
         dispatch(setCategoryList(res.data))
         }) 
@@ -127,7 +128,7 @@ function Dashboard() {
 
     const getTypes = async () => {
       
-      await axios.get(`https://pavithrakrish95.pythonanywhere.com/settingGetAllType/${currentLoginUserId}`).then((res)=>{
+      await axios.get(`https://pavithrakrish95.pythonanywhere.com/settingGetAllType/${currentLoginUserId}`,{headers}).then((res)=>{
         console.log("dataBaseType",currentLoginUserId);
           dispatch(setTypesList(res.data));
           }) 
@@ -217,27 +218,38 @@ function Dashboard() {
 
     
 return (
-
- 
-     <>
+<>
+     <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    integrity="sha384-DyZ88mC6Up2uqS1DVho8X8v50C6H3l8Nj+lsIX4rtZ3q/k1bsRjhR2KxAxhgjjvL"
+    crossorigin="anonymous"
+  />
       <div className='generatePageContainer'>
       <center>
           <header>
               <ListExample/>
           </header>
-          
-        <br/>
+          <br/>
         <div>
           <br/>
-         
-          
-               
-        <div className="container" >
-            <div className="row justify-content-center">
-              <div className="col-md-6 align-self-center text-center">
-               
-                <select className="form-control" name="choices-language" id="choices-language" onChange={(e) => {dispatch(setSelectedCategory(e.target.value)); dispatch(setIsCategorySelected(true))}}>
-                  <option disabled selected>Select a Category</option>
+         <div className="container" >
+            <div className="row justify-content-center border-dark rounded p-3">
+              <div className="col-md-6 align-self-center text-center" style={{position: 'relative'}}>
+               <select className="form-control" name="choices-language" id="choices-language" onChange={(e) => {dispatch(setSelectedCategory(e.target.value)); dispatch(setIsCategorySelected(true))}}
+                style={{
+                  appearance: 'none',
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'none',
+                  paddingRight: '2rem',
+                  background: 'gainsboro',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  padding: '10px',
+                  width: '100%',
+                }}
+              >
+                  <option disabled selected>Select Email Recipient</option>
                   {slice.categoryList
                    
                     .map((categories,i) => (
@@ -246,39 +258,68 @@ return (
                       </option>
                   ))}
                 </select>
+                <i
+                className="fa fa-chevron-down"
+                style={{
+                  position: 'absolute',
+                  right: '20px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  pointerEvents: 'none',
+                  color: '#333',
+                }}
+              />
               </div>
             </div>
         </div>
         <br/>
 
-       {slice.isCategorySelected ? 
+       {slice.isCategorySelected &&
             <div className="container">
               <div className="row justify-content-center">
-                <div className="col-md-6 align-self-center text-center">
+                <div className="col-md-6 align-self-center text-center" style={{position:'relative'}}>
                 
-                  <select className="form-control" name="choices-language" id="choices-language" value={slice.selectedType} onChange={(e) => {dispatch(setSelectedType(e.target.value)); dispatch(setIsTypeSelected(true))}}>
-                    <option  disabled selected >Select a Type</option>
+                  <select className="form-control" name="choices-language" id="choices-language" value={slice.selectedType} onChange={(e) => {dispatch(setSelectedType(e.target.value)); dispatch(setIsTypeSelected(true))}}
+                  style={{
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                    paddingRight: '2rem',
+                    background: 'gainsboro',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    padding: '10px',
+                    width: '100%',
+                  }}
+                >
+                    <option  disabled selected >Select Email Type</option>
                     {slice.typesList
-                     
-                      .map((types) => (
+                     .map((types) => (
                         slice.selectedCategory == types.categoryId &&
                           <option key={types.typeId} value={types.typeId}>
                             {types.typeName}
                           </option>
-                      ))}
+                     ) 
+                     )}
                   </select>
+                  <i
+                  className="fa fa-chevron-down"
+                  style={{
+                    position: 'absolute',
+                    right: '20px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    pointerEvents: 'none',
+                    color: '#333',
+                  }}
+                />
                 </div>
               </div>
             </div> 
-          : null}
+          }
            <br/>
 </div>
-
-
-
-            
-  
-  {slice.isTypeSelected &&
+{slice.isTypeSelected &&
   <>
   <h2>Add Your Email Datas</h2>
   <div className="container mt-4">
@@ -324,9 +365,7 @@ return (
   </div>
   </>
 
-}
-
-        <Modal show={slice.isPopUp} onHide={handleClose} size='lg' centered   style={{ backgroundColor:"white"}}>
+} <Modal show={slice.isPopUp} onHide={handleClose} size='lg' centered   style={{ backgroundColor:"white"}}>
               <Modal.Header closeButton>
                   <Modal.Title className="text-center w-100">{slice.selectedTypeName} to {slice.selectedCategoryName}</Modal.Title>
               </Modal.Header>

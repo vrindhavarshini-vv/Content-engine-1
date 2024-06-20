@@ -16,6 +16,9 @@ const FinalPage = () => {
   const dispatch = useDispatch();
   const { id ,currentLoginUserId} = useParams();
   const navigate=useNavigate()
+  const token = localStorage.getItem("token")
+  const headers = {'Authorization':`Bearer ${token}`}
+  
 
   const { generateDatas, datas } = useSelector((state) => state.template);
   console.log("id", id);
@@ -27,7 +30,7 @@ const FinalPage = () => {
 
   const getData = async (i,c) => {
     const dbTemplate = await axios
-      .get(`https://pavithrakrish95.pythonanywhere.com/getSelectedTemplate/${i}/${c}`)
+      .get(`https://pavithrakrish95.pythonanywhere.com/getSelectedTemplate/${i}/${c}`,{headers})
       .then((res) => {
         // dispatch(setGenerateDatas(res.data));
         const parsedData = JSON.parse(res.data.datas);
@@ -54,7 +57,7 @@ const FinalPage = () => {
   const handleFormSave = async () => {
     setShow(true);
     const dbTemplate = await axios
-      .get(`https://pavithrakrish95.pythonanywhere.com/getSelectedTemplate/${id}/${currentLoginUserId}`)
+      .get(`https://pavithrakrish95.pythonanywhere.com/getSelectedTemplate/${id}/${currentLoginUserId}`,{headers})
       .then((res) => {
         const dbTemplates = res.data.templates;
         const dbDatas = JSON.parse(res.data.datas);

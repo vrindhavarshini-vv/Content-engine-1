@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Modal, Button } from "react-bootstrap";
 import {
@@ -13,6 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import ListExample from "../Navbar";
 import axios from "axios";
+import "./index.css";
 
 export default function Categories() {
   const dispatch = useDispatch();
@@ -25,7 +26,6 @@ export default function Categories() {
   const currentLoginUserId = localStorage.getItem("userId");
   const headers = { Authorization: `Bearer ${parsedData}` };
 
-  // Function to fetch categories from the backend
   const fetchCategories = async () => {
     try {
       const response = await axios.get(
@@ -42,7 +42,6 @@ export default function Categories() {
     fetchCategories();
   }, []);
 
-  // Function to fetch types based on category ID
   const fetchTypes = async (categoryId) => {
     if (!categoryId) return;
     try {
@@ -57,33 +56,27 @@ export default function Categories() {
     }
   };
 
-  // Opens the modal for adding a new recipient
   const openModal = () => {
     dispatch(setShowModal(true));
   };
 
-  // Closes the modal for adding a new recipient
   const closeModal = () => {
     dispatch(setShowModal(false));
   };
 
-  // Opens the modal for adding a new email type
   const openTypeModal = (categoryId) => {
-    fetchCategories()
+    fetchCategories();
     setCurrentCategoryId(categoryId);
     dispatch(setSelectedCategory(categoryId));
     setShowTypeModal(true);
     fetchTypes(categoryId);
     generatePreview(categoryId, settingstate.categoryType);
-    
   };
 
-  // Closes the modal for adding a new email type
   const closeTypeModal = () => {
     setShowTypeModal(false);
   };
 
-  // Handles the submission of a new recipient category
   const handleCategorySubmit = async () => {
     if (!settingstate.categoryName) {
       alert("Please enter a category name");
@@ -108,24 +101,21 @@ export default function Categories() {
       dispatch(setCategoryName(""));
       closeModal();
       alert("Category added successfully!");
-      // navigate('/user/setting')
     } catch (error) {
       console.error("Error adding category:", error);
       alert("Failed to add category. Please try again.");
     }
   };
 
-  // Handles the change in category type input
   const handleCategoryTypeChange = (e) => {
     dispatch(setCategoryType(e.target.value));
   };
 
-  // Handles the submission of a new category type
   const handleAddCategoryType = async () => {
-    // if (!currentCategoryId || !settingstate.categoryType) {
-    //   alert("Please select a category and enter a category type");
-    //   return;
-    // }
+    if (!currentCategoryId || !settingstate.categoryType) {
+      alert("Please select a category and enter a category type");
+      return;
+    }
 
     try {
       const formData = new FormData();
@@ -142,17 +132,16 @@ export default function Categories() {
       const typeDataResponse = await axios.get(
         `https://pavithrakrish95.pythonanywhere.com/settingGetAllType/${currentLoginUserId}`,
         { headers }
+        
       );
+      fetchCategories();
+
+     
       const latestType = typeDataResponse.data.find(
         (type) =>
           type.typeName == settingstate.categoryType &&
           type.categoryId == currentCategoryId
       );
-
-      // if (!latestType) {
-      //   alert("New type not found in response");
-      //   return;
-      // }
 
       const newType = {
         typeId: latestType.typeId,
@@ -169,7 +158,6 @@ export default function Categories() {
     }
   };
 
-  // Generates the preview content based on category and type
   const generatePreview = (categoryId, categoryType) => {
     if (!categoryId || !categoryType) {
       return;
@@ -180,7 +168,6 @@ export default function Categories() {
     dispatch(setPreviewContent(createEmail));
   };
 
-  // Retrieves the category name by its ID
   const getCategoryNameById = (categoryId) => {
     const selectedCategory = settingstate.categories.find(
       (category) => category.categoryId === categoryId
@@ -188,7 +175,6 @@ export default function Categories() {
     return selectedCategory ? selectedCategory.categoryName : "";
   };
 
-  // Handles the deletion of a category type
   const handleDeleteType = async (typeId) => {
     try {
       await axios.delete(
@@ -205,7 +191,6 @@ export default function Categories() {
     }
   };
 
-  // Navigates to the dashboard page
   const handleNavigateGeneratePage = () => {
     navigate("/dashboard");
   };
@@ -213,7 +198,6 @@ export default function Categories() {
   return (
     <>
       <ListExample />
-
       <div className="container mt-5">
         <div className="row justify-content-center align-items-center">
           <div className="col-lg-8 col-12 text-center">
@@ -281,12 +265,9 @@ export default function Categories() {
               onChange={(e) => dispatch(setCategoryName(e.target.value))}
               className="form-control"
               placeholder="Enter recipient's name"
-                    />
+            />
           </Modal.Body>
           <Modal.Footer>
-            {/* <Button variant="secondary" onClick={closeModal}>
-              Close
-            </Button> */}
             <Button variant="primary" onClick={handleCategorySubmit}>
               Save
             </Button>
