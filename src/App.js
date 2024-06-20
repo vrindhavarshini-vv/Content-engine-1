@@ -29,10 +29,27 @@ function App() {
 
 
   return (
-    <BrowserRouter>
+<BrowserRouter>
       <Routes>
 
         <Route path="/" element={<Login/>} />
+        <Route path="/register" element={<Register/>} />
+        <Route path="/adminLogin" element={<AdminLogin/>} />
+       
+       
+        {
+          superAdminLogged &&  <Route path="/admin" element ={<SuperAdmin/>}/>
+        }
+        
+        {adminLogged && (
+          <>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/template" element={<Template />} />
+            <Route path="/finalPage/:id/:currentLoginUserId" element={<FinalPage />} />
+           
+            <Route path="/user/setting" element ={<Categories/>}/>
+          </>
+        )}
         <Route path="/register" element={<Register/>} />
         <Route path="/adminLogin" element={<AdminLogin/>} />
        

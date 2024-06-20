@@ -12,11 +12,18 @@ export const TemplateSlice = createSlice({
     selectTemplate:'',
     generateDatas:[],
     datas:[]
+    fbGeneratedDatas: [],
+    categoryAndTypes: [],
+    categoryWithTypesWithTemplates:[],
+    selectTemplate:'',
+    generateDatas:[],
+    datas:[]
   },
   reducers: {
     setFbCategory: (state, action) => {
       state.fbCategory = action.payload;
     },
+    setSelectedCategory: (state, action) => { 
     setSelectedCategory: (state, action) => { 
       state.selectedCategory = action.payload;
     },
@@ -72,6 +79,17 @@ export const TemplateSlice = createSlice({
       }
   },
 });
+export const {
+  setFbCategory,
+  setSelectedCategory,
+  setFbType,
+  setCategoryAndTypes,
+  setFbGeneratedDatas,
+  setCategoryWithTypesWithTemplates,
+  setSelectTemplate,
+  setGenerateDatas,
+  setDatas
+} = TemplateSlice.actions;
 export const {
   setFbCategory,
   setSelectedCategory,

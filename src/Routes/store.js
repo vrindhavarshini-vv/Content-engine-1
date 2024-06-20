@@ -11,6 +11,5 @@ export default configureStore({
     settings:SettingSlice,
     template: templateSlice,
     dashboardslice:DashBoardSlice
-
   },
 });
