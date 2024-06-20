@@ -1,48 +1,55 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { auth } from "./Pages/Firebase/firebase";
 import { setAdminLoginData, setAdminLogged } from "./Routes/Slices/adminLogin";
-import { onAuthStateChanged } from "firebase/auth";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
-import Login from "./Pages/Login/Login";
-import Dashboard from "./Pages/Generate/Dashboard";
-import Categories from "./Pages/Settings/setting";
-
-
-import Template from "./Pages/Templates/index";
+import Dashboard from "./Pages/Generate";
+import Categories from "./Pages/Settings";
+import Login from "./Pages/Login";
+import Template from "./Pages/Templates";
+import FinalPage from "./Pages/FormPage";
+import SuperAdmin from "./Pages/Admin";
+import Register from "./Register";
+import AdminLogin from "./Pages/AdminLogin";
 
 function App() {
   const dispatch = useDispatch();
   // const navigate = useNavigate()
-  const { adminLoginData, adminLogged, isAdmin } = useSelector(
+  const { adminLoginData, adminLogged, isAdmin , superAdminLogged} = useSelector(
     (state) => state.adminLogin
   );
 
   useEffect(() => {
     if (!adminLogged) {
       if (localStorage.getItem("token")) {
-        checkLoginAuth();
+        dispatch(setAdminLogged(true));
+        // checkLoginAuth();
       }
     }
   }, []);
 
-  const checkLoginAuth = async () => {
-    await onAuthStateChanged(auth, (currentUser) => {
-      localStorage.setItem("token", currentUser.accessToken);
-      dispatch(setAdminLoginData(currentUser));
-      dispatch(setAdminLogged(true));
-    });
-  };
 
   return (
     <BrowserRouter>
       <Routes>
 
         <Route path="/" element={<Login/>} />
-        <Route path="/user/setting" element ={<Categories/>}/>
+        <Route path="/register" element={<Register/>} />
+        <Route path="/adminLogin" element={<AdminLogin/>} />
        
-        {adminLogged ? <Route path="/dashboard" element={<Dashboard />} />:null}
-        {adminLogged ? <Route path="/template" element={<Template />} />:null}
+       
+        {
+          superAdminLogged &&  <Route path="/admin" element ={<SuperAdmin/>}/>
+        }
+        
+        {adminLogged && (
+          <>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/template" element={<Template />} />
+            <Route path="/finalPage/:id/:currentLoginUserId" element={<FinalPage />} />
+           
+            <Route path="/user/setting" element ={<Categories/>}/>
+          </>
+        )}
 
       </Routes>
     </BrowserRouter>
