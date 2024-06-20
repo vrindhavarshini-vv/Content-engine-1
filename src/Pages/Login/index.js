@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import { auth,db } from "../Firebase/firebase";
 import { Link, useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword,createUserWithEmailAndPassword} from "firebase/auth";
 import {
   setAdminLoginData,
   setAdminLogged,
@@ -9,198 +7,119 @@ import {
 } from "../../Routes/Slices/adminLogin";
 import { useDispatch } from "react-redux";
 import { setIsPopUp } from "../../Routes/Slices/dashBoardSlice";
-import { GoogleAuthProvider ,signInWithPopup} from "firebase/auth";
-import { addDoc,collection } from 'firebase/firestore';
-import Form from 'react-bootstrap/Form';
 import { Button } from "react-bootstrap";
-
-// import "bootstrap/dist/css/bootstrap.min.css";
-import "./login.css";
+import axios from "axios";
 
 
-
- const Login = () => {
-
+const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   
-  //register
-  const [register, setRegister] = useState({
-    reEmail:"",
-    reName: "",
-    rePassword: "",
-  });
+  const [loginData, setLoginData] = useState({
+    Email: "",
+    Password: "",
+});
 
 
-   const checkRegister = async () => {             
-        await addDoc(collection(db,'Users Registers'),{
-        Email :register.reEmail,
-        Password : register.rePassword,
-        Name : register.reName
-       })
-    //    console.log(register)
-            await createUserWithEmailAndPassword(auth, register.reEmail, register.rePassword)
-            .then((userCredential) => {
-            // Signed in
-            const user = userCredential.user;
-            // console.log(user);
-            alert("register success")            
-            dispatch(setRegister(user))
-            navigate("/") 
-            }).catch((error) => {
-           const errorCode = error.code;
-           const errorMessage = error.message;
-           console.log(errorCode, errorMessage);
-           alert("register failed  ")
-       });
-           }
+const handleLogin = async ()=> {
+  if (loginData.Email === "" || loginData.Password === "") {
+    alert("Please fill all Details");
+  } 
+  else {
+  const data = new FormData();
+  data.append("Emaildata",loginData.Email)
+  data.append("Passworddata",loginData.Password)
+  console.log('data',loginData)
 
-
-
-
-  // login
-  const [regLogin, setRegLogin] = useState({
-    email: "",
-    password: "",
-  });
-
-
-
-  const [isLogin,setIsLogin] = useState("signin")
-  const changeLoginMode = () => {
-    setIsLogin(isLogin ==="signin" ? "signup" : "signin")
-  }
-
-
-  const checkAdmin = async () => {
-    if (regLogin.email === "" || regLogin.password === "") {
-      alert("Please fill all Details");
-    } else {
-      await signInWithEmailAndPassword(auth, regLogin.email, regLogin.password)
-        .then((userCredential) => {
-          const user = userCredential.user;
-          localStorage.setItem("token", user.accessToken);
-          localStorage.setItem("uid", user.uid);
-            dispatch(setAdminLoginData(user));
-            dispatch(setAdminLogged(true));
-            dispatch(setIsAdmin(true));
-            alert("Admin login successfull!");
-            navigate("/dashboard");
-        })
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          console.log(errorCode, errorMessage);
-          alert("Admin login unsuccessfull!");
-        });
+  await axios.post("https://balaramesh8265.pythonanywhere.com/loginUserData",data).then((res)=>{
+    console.log('res',res.data.status)
+    if(res.data.status === 'Approved'){
+      dispatch(setAdminLoginData(res.data));
+      console.log('res',res.data.status)
+      dispatch(setAdminLogged(true));
+      dispatch(setIsAdmin(true)); 
+      alert("Admin login successfull!");
+      localStorage.setItem('__token',res.data.token)
+      localStorage.setItem('user_Id', res.data.user_id)
+      navigate("/dashboard");
     }
-  }
+    else{
+      alert('Enter valid email or password')
+    }
+  }).catch((err)=>{
+    console.log('error',err)
+    alert(err)
+    
+  })
+  }}
 
-
- 
- 
-
-  const handleGoogleAuth = async (e) =>{
-    const provider = await new GoogleAuthProvider();
-    return signInWithPopup(auth, provider).then((userCredential) => {
-      const user = userCredential.user;
-      console.log("user",user)
-      localStorage.setItem("token", user.accessToken);
-      localStorage.setItem("uid", user.uid);
-        navigate("/dashboard")
-        dispatch(setIsPopUp(false))
-  })}
-  
   return (
-    <div  >
-     {isLogin === "signin" ? (
-    <div >
-      <Form>
-        <h3 className="text-center">SIGN IN</h3>
-        <div >
-          <label>Email address:</label>
-          <input
-            type="email"
-            placeholder="Enter email"
-            onChange={(e) => setRegLogin({ ...regLogin, email: e.target.value })}
-          />
-        </div>
-        <div className="form-group mt-3">
-          <label>Password:</label>
-          <input
-            type="password"
-            placeholder="Enter password"
-            onChange={(e) => setRegLogin({ ...regLogin, password: e.target.value })}
-          />
-        </div>
-        <div >
-          <button type="button" className="btn btn-primary" onClick={checkAdmin}>
-            Sign In
-          </button>
-        </div>
-      </Form>
-      <div className="text-center">
-        Not registered yet?{" "}
-        <span className="link-primary" onClick={changeLoginMode}>
-          Sign Up
-        </span>
-      </div>
-      <div >
-      sign in with ?
-      </div>
-      <div>
-        <button className="google-btn"onClick={handleGoogleAuth}><img src="google.svg" alt="Google Icon"/> Continue with Google</button>
-      </div>
+    <>
+    
 
-    </div> )
-    :
-    ( <div>
-      <Form>
-      <h3 className="text-center">SIGN UP</h3>
-      <div>
-        <label>Full Name</label>
-        <input
-          type="text"
-          
-          placeholder="Enter name"
-          onChange={(e) => setRegister({ ...register, reName: e.target.value })}
-        />
-      </div>
-      <div >
-        <label>Email address</label>
-        <input
-          type="email"
-          
-          placeholder="Enter email"
-          onChange={(e) => setRegister({ ...register, reEmail: e.target.value })}
-        />
-      </div>
-      <div >
-        <label>Password</label>
-        <input
-          type="password"
-          
-          placeholder="Enter password"
-          onChange={(e) => setRegister({ ...register, rePassword: e.target.value })}
-        />
-      </div>
-      <div >
-        <button type="button" className="btn btn-primary" onClick={checkRegister}>
-          Submit
-        </button>
-      </div>
-      </Form>
-       <div className="text-center">
-        Already registered?{" "}
-          <span className="link-primary" onClick={changeLoginMode}>
-          Sign In
-          </span>
-      </div>
-    </div>)
-    }
-    </div>
-  )}
-       
 
-export default Login;
+          <div className="d-flex justify-content-center align-items-center vh-100" 
+          style={{backgroundImage: "url('https://media.licdn.com/dms/image/D5612AQFc5Lh46qb8jA/article-cover_image-shrink_720_1280/0/1697855438149?e=2147483647&v=beta&t=v2yTtvgwxzPBWWFyQGgEGYWEURr7akMDAQpdokXSgBc')",
+                                                                                          backgroundSize: "cover",
+                                                                                          backgroundPosition: "center",
+                                                                                          backgroundRepeat: "no-repeat"
+          }} >
+          <div className="container my-auto ">
+          <div className="row">
+            <div className="col-lg-4 col-md-8 col-12 mx-auto">
+              <div className="card z-index-0 fadeIn3 fadeInBottom">
+                <div className="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                  <div className="bg-gradient-primary shadow-primary border-radius-lg py-3 pe-1">
+                    <h4 className="text-white font-weight-bolder text-center mt-2 mb-0">Sign in</h4>
+                    <div className="row mt-3">
+                      <div className="col-2 text-center ms-auto">
+                        <a className="btn btn-link px-3" href="javascript:;">
+                          <i className="fa fa-facebook text-white text-lg"></i>
+                        </a>
+                      </div>
+                      <div className="col-2 text-center px-1">
+                        <a className="btn btn-link px-3" href="javascript:;">
+                          <i className="fa fa-github text-white text-lg"></i>
+                        </a>
+                      </div>
+                      <div className="col-2 text-center me-auto">
+                        <a className="btn btn-link px-3" href="javascript:;">
+                          <i className="fa fa-google text-white text-lg"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-body">
+                  <form role="form" className="text-start">
+                    <div className="input-group input-group-outline my-3">
+                    <input type="email" placeholder="Enter Company Email" className="form-control" onChange={(e) =>
+                          setLoginData({ ...loginData, Email: e.target.value })
+                        } />
+                    </div>
+                    <div className="input-group input-group-outline mb-3">
+                      
+                      <input type="password" placeholder="Enter Company Password" className="form-control"  onChange={(e) =>
+                          setLoginData({ ...loginData,Password: e.target.value })
+                        } />
+                    </div>
+                  
+                    <div className="text-center">
+                      <button type="button" className="btn bg-gradient-primary w-100 my-4 mb-2"  onClick={()=>handleLogin()}>Sign in</button>
+                    </div>
+                    <p className="mt-4 text-sm text-center">
+                      Don't have an account?
+                      <Link to="/register" className="text-primary text-gradient font-weight-bold">Sign up</Link>
+                    </p>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+          </div>
+</>
+  );
+};
+
+export default Login
