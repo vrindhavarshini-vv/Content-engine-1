@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Modal, Button, Table } from "react-bootstrap";
+import { Modal, Button, Table, Navbar } from "react-bootstrap";
 import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import {
   setCategories,
@@ -14,7 +14,9 @@ import {
 import "./index.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import NavBar from "../Navbar/index";
+import "../Navbar/index.css";
+import NavComponent from "../Navbar";
+
 
 
 export default function Categories() {
@@ -184,7 +186,7 @@ export default function Categories() {
     <center>
       <div className="settingsPageContianer">
      <header>
-              <NavBar/>
+              <NavComponent/>
       </header>
        <div className="row mt-5">
         <div className="col-lg-6 col-12 d-flex ms-auto">

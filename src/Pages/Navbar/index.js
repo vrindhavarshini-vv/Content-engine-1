@@ -11,7 +11,7 @@ import { Button } from "react-bootstrap";
 
 
 
-function NavBar() {
+function NavComponent() {
   const dispatch = useDispatch()
     const navigate = useNavigate()
     const user = localStorage.getItem("user")
@@ -25,11 +25,11 @@ function NavBar() {
   return (
     <>
   
-<Navbar expand="lg" className="navContainer bg-primary" >
+<Navbar className="navContainer bg-primary" id="navContainer" >
     <Container>
       <Navbar.Brand href="#">
       <img 
-        src="AI-Writer (1).png" 
+        src="AI-Writer.png" 
         alt="Brand Logo" 
         className="d-inline-block align-top" 
         style={{ width: '200px', height: 'auto' }} // Adjust the width and height as needed
@@ -62,4 +62,4 @@ function NavBar() {
   );
 }
 
-export default NavBar;
+export default NavComponent;

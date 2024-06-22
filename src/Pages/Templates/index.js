@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Button, Modal } from "react-bootstrap";
+import { Button, Modal, Navbar } from "react-bootstrap";
 import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import {
   setFbCategory,
@@ -12,7 +12,9 @@ import {
 import "./index.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import NavBar from "../Navbar/index";
+import "../Navbar/index.css";
+import NavComponent from "../Navbar";
+
 
 const Template = () => {
   const navigate = useNavigate();
@@ -106,14 +108,15 @@ const Template = () => {
  
   return (
     <>
-  <center>
+    <div style={{  backgroundColor: "pink" }}>
+  <center >
   <header>
-    <NavBar />
+    <NavComponent/>
   </header>
 
-  <div>
+  <div >
     {/* <h2 style={{color:'white'}} className="fs-2 text-center">Welcome to the template page</h2> */}
-    <h5 style={{ color: 'black', fontFamily: 'Arial, sans-serif' }} className="fs-3 mt-4">Select Email Recipient</h5>
+    <h5 style={{ color: 'black', fontFamily: 'Arial, sans-serif'}} className="fs-3 mt-4">Select Email Recipient</h5>
 
     <div className="row mt-5">
       {fbCategory.map((cat, i) => (
@@ -279,6 +282,7 @@ const Template = () => {
   <br />
   <br />
 </center>
+</div>
 </>
   );
 };

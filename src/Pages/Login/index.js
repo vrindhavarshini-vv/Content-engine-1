@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { auth } from "../Firebase/firebase";
+
 import { Link, useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
+
 import {
   setAdminLoginData,
   setAdminLogged,
@@ -57,11 +57,13 @@ const Login = () => {
     
 
 
-          <div className="d-flex justify-content-center align-items-center vh-100" 
+          <div className="d-flex justify-content-center align-items-center vh-100 " 
           style={{backgroundImage: "url('videoblocks-robot_laptop_closeup_sugfpfvvp_thumbnail-1080_01.jpg')",
                                                                                           backgroundSize: "cover",
                                                                                           backgroundPosition: "center",
-                                                                                          backgroundRepeat: "no-repeat"
+                                                                                          backgroundRepeat: "no-repeat",
+                                                                                          width:"100%",
+                                                                                          overflow:"hidden"
           }} >
           <div className="container my-auto ">
           <div className="row">

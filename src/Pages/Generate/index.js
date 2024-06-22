@@ -11,6 +11,8 @@ import emailjs from '@emailjs/browser'
 import FloatingLabel from "react-bootstrap/FloatingLabel";
 import Form from "react-bootstrap/Form";
 import NavBar from '../Navbar';
+import "../Navbar/index.css";
+import NavComponent from '../Navbar';
 
 
 function Dashboard() {
@@ -232,7 +234,7 @@ return (
   <div className='generatePageContainer'>
     <center>
       <header>
-        <NavBar />
+        <NavComponent />
       </header>
       <br />
       <div>

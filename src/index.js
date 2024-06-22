@@ -5,23 +5,17 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
 import store from './Routes/store';
-import Nav from './Pages/Navbar/nav'
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <Provider store={store}>
     <React.StrictMode>
    
-    <main className="main-content  mt-0">
-    {/* <Nav /> */}
-    <div className="page-header align-items-start min-vh-100">
-      <span className="mask bg-gradient-dark opacity-6"></span>
-      <div className="container my-auto">
+  
+      <div className="container">
          <App />
       </div>
-      
-    </div>
-  </main>
-     
+    
     </React.StrictMode>
   </Provider>
   

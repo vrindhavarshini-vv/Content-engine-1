@@ -10,10 +10,10 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { setIsPopUp } from "../../Routes/Slices/dashBoardSlice";
 import emailjs from '@emailjs/browser'
-import ListExample from "../Navbar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "../Navbar/index.css";
-import NavBar from "../Navbar";
+import NavComponent from "../Navbar";
+
 
 const FinalPage = () => {
   const token = localStorage.getItem("token")
@@ -116,7 +116,7 @@ const FinalPage = () => {
   return (
     <>
      <header>
-              <NavBar/>
+              <NavComponent/>
           </header>
     
          

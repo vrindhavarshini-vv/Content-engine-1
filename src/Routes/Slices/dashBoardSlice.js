@@ -11,12 +11,9 @@ export const DashBoardSlice = createSlice({
    isTypeSelected:false,
    isPopUp:false,
    categoryAndTypes:([]),
-   answer:"",
+   answer:[],
    selectedCategoryName:"",
    selectedTypeName:"",
-   show:false,
-   isApiResponseReceived: false,
-   
    show:false,
    isApiResponseReceived: false,
    
@@ -30,7 +27,7 @@ export const DashBoardSlice = createSlice({
     },
     setTypesList: (state, action) => {
         state.typesList = action.payload;
-    },
+      },
       setSelectedCategory: (state, action) => {
         state.selectedCategory = action.payload;
       },
@@ -43,7 +40,6 @@ export const DashBoardSlice = createSlice({
       setIsTypeSelected: (state, action) => {
         state.isTypeSelected = action.payload;
       },
-     
      
       setIsPopUp: (state, action) => {
         state.isPopUp = action.payload;
@@ -65,17 +61,11 @@ export const DashBoardSlice = createSlice({
       },
       setIsApiResponseReceived:  (state, action) => {
         state.isApiResponseReceived = action.payload;
-      setShow:  (state, action) => {
-        state.show = action.payload;
-      },
-      setIsApiResponseReceived:  (state, action) => {
-        state.isApiResponseReceived = action.payload;
       },
     
   },
 });
 
-export const { setCategoryList,setTypesList,setSelectedCategory,setIsCategorySelected,setSelectedType,setIsTypeSelected,setIsPopUp,setCategoryAndTypes,setAnswer,setSelectedCategoryName,setSelectedTypeName,setShow,setIsApiResponseReceived} = DashBoardSlice.actions;
 export const { setCategoryList,setTypesList,setSelectedCategory,setIsCategorySelected,setSelectedType,setIsTypeSelected,setIsPopUp,setCategoryAndTypes,setAnswer,setSelectedCategoryName,setSelectedTypeName,setShow,setIsApiResponseReceived} = DashBoardSlice.actions;
 export default DashBoardSlice.reducer;
  

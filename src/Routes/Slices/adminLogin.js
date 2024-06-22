@@ -1,14 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-
 export const AdminLogin = createSlice({
   name: "adminLogin",
   initialState: {
     adminLoginData: {},
     adminLogged: false,
     isAdmin: false,
-    userStatus:"Requested",
-    userDetails:([]),
     superAdminLogged:false
   },
   reducers: {
@@ -21,18 +18,12 @@ export const AdminLogin = createSlice({
     setIsAdmin: (state, action) => {
       state.isAdmin = action.payload;
     },
-    setUserStatus: (state, action) => {
-      state.userStatus = action.payload;
-    },
-    setUserDetails: (state, action) => {
-      state.userDetails = action.payload;
-    },
-    setSuperAdminLogged: (state, action) => {
+    setSuperAdminLogged:(state,action)=>{
       state.superAdminLogged = action.payload;
     }
   },
 });
 
-export const { setAdminLoginData, setAdminLogged, setIsAdmin , setUserStatus,setUserDetails,setSuperAdminLogged} =
+export const { setAdminLoginData, setAdminLogged, setIsAdmin,setSuperAdminLogged } =
   AdminLogin.actions;
 export default AdminLogin.reducer;
